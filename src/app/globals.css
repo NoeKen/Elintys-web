@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors — Primary */
+  --primary: #0D1E35;
+  --primary-foreground: #FFFFFF;
+
+  /* Colors — Accent */
+  --accent: #1A7A5E;
+  --accent-light: #E6F5F0;
+  --on-primary-container: #3C9477;
+
+  /* Colors — Surface */
+  --background: #F8F9FB;
+  --surface: #FFFFFF;
+  --surface-low: #F2F4F6;
+  --surface-lowest: #FFFFFF;
+
+  /* Colors — Text */
+  --on-surface: #1A2332;
+  --on-surface-variant: #4F5F79;
+  --outline-variant: rgba(79, 95, 121, 0.2);
+
+  /* Colors — Semantic */
+  --amber: #C8862A;
+  --destructive: #DC2626;
+  --success: #16A34A;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-ambient: 0px 12px 32px rgba(13, 30, 53, 0.06);
+  --shadow-card: 0px 4px 16px rgba(13, 30, 53, 0.04);
 }
 
 @theme inline {
+  /* Colors */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-on-primary-container: var(--on-primary-container);
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface: var(--surface);
+  --color-surface-low: var(--surface-low);
+  --color-surface-lowest: var(--surface-lowest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline-variant: var(--outline-variant);
+  --color-amber: var(--amber);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Border radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* Shadows */
+  --shadow-ambient: var(--shadow-ambient);
+  --shadow-card: var(--shadow-card);
+
+  /* Fonts */
+  --font-serif: var(--font-dm-serif), "DM Serif Display", Georgia, serif;
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--on-surface);
+  font-family: var(--font-sans);
 }
