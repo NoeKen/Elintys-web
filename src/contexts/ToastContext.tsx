@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import * as RadixToast from "@radix-ui/react-toast";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 type ToastVariant = "default" | "success" | "destructive";
 

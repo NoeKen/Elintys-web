@@ -2,9 +2,9 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { ROUTES } from "@/constants/routes";
-import { authService } from "../services/auth.service";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { ROUTES } from "@/shared/constants/routes";
+import { authService } from "../client/auth.service";
 import type { LoginInput } from "../types";
 
 export function useLogin() {

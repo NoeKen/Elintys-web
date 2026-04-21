@@ -1,5 +1,5 @@
-import api from "@/lib/api";
-import type { PaginatedResponse } from "@/types";
+import api from "@/shared/lib/api";
+import type { PaginatedResponse } from "@/shared/types";
 import type { Event, CreateEventInput, UpdateEventInput } from "../types";
 
 export const eventsService = {

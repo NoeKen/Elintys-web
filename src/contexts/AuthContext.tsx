@@ -7,8 +7,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { AuthSession, User } from "@/types";
-import { setAuthToken, setRefreshTokenFn } from "@/lib/api";
+import type { AuthSession, User } from "@/shared/types";
+import { setAuthToken, setRefreshTokenFn } from "@/shared/lib/api";
 
 interface AuthContextValue {
   user: User | null;
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRefreshTokenFn(async () => {
       if (!session?.tokens.refreshToken) return null;
       try {
-        const { default: api } = await import("@/lib/api");
+        const { default: api } = await import("@/shared/lib/api");
         const response = await api.post<{ accessToken: string; expiresAt: number }>(
           "/auth/refresh",
           { refreshToken: session.tokens.refreshToken }

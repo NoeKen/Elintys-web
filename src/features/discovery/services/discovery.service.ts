@@ -1,5 +1,5 @@
-import api from "@/lib/api";
-import type { PaginatedResponse } from "@/types";
+import api from "@/shared/lib/api";
+import type { PaginatedResponse } from "@/shared/types";
 import type { PublicEvent, DiscoveryFilters } from "../types";
 
 export const discoveryService = {

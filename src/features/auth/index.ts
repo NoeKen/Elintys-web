@@ -1,3 +1,11 @@
-export { authService } from "./services/auth.service";
+export { authService } from "./client/auth.service";
+export type { LoginData, RegisterData } from "./client/auth.service";
 export { useLogin } from "./hooks/useLogin";
 export type { AuthResponse } from "./types";
+export { AuthSplitLayout } from "./components/AuthSplitLayout";
+export { LoginForm } from "./components/LoginForm";
+export { RegisterStep1Form } from "./components/RegisterStep1Form";
+export type { Step1Data } from "./components/RegisterStep1Form";
+export { RegisterStep2RoleSelector } from "./components/RegisterStep2RoleSelector";
+export { StepIndicator } from "./components/StepIndicator";
+export { RoleCard } from "./components/RoleCard";

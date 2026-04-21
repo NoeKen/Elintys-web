@@ -1,6 +1,6 @@
-export type { LoginInput, RegisterInput, ForgotPasswordInput, ResetPasswordInput } from "@/lib/validators/auth";
+export type { LoginInput, RegisterInput, ForgotPasswordInput, ResetPasswordInput } from "@/features/auth/schemas";
 
 export interface AuthResponse {
-  user: import("@/types").User;
-  tokens: import("@/types").AuthTokens;
+  user: import("@/shared/types").User;
+  tokens: import("@/shared/types").AuthTokens;
 }

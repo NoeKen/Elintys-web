@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/common/Providers";
+import { Providers } from "@/shared/guards/Providers";
 
 const dmSerifDisplay = DM_Serif_Display({
   variable: "--font-dm-serif",
