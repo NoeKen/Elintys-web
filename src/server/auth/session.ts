@@ -1,36 +1,49 @@
 import { cookies } from 'next/headers'
+import { COOKIE_NAMES } from './cookies'
 
 export interface AuthSession {
   id: string
   email: string
   role: string
+  roles: string[]
 }
 
-export async function getSession(): Promise<AuthSession | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('elintys_access_token')?.value
-  if (!token) return null
+function decodeJwtPayload(token: string): { sub?: string; email?: string; role?: string; roles?: string[] } | null {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return { id: payload.sub, email: payload.email, role: payload.role }
+    const [, payload] = token.split('.')
+    if (!payload) return null
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(Buffer.from(normalizedPayload, 'base64').toString('utf8')) as {
+      sub?: string
+      email?: string
+      role?: string
+      roles?: string[]
+    }
   } catch {
     return null
   }
 }
 
-export async function setSession(accessToken: string, refreshToken: string) {
+export async function getSession(): Promise<AuthSession | null> {
   const cookieStore = await cookies()
-  cookieStore.set('elintys_access_token', accessToken, {
+  const token = cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
+  if (!token) return null
+
+  const payload = decodeJwtPayload(token)
+  if (!payload?.sub || !payload.email) return null
+
+  const roles = payload.roles ?? (payload.role ? [payload.role] : [])
+  return { id: payload.sub, email: payload.email, role: roles[0] ?? '', roles }
+}
+
+export async function setSession(accessToken: string, refreshToken: string) {
+  void accessToken
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 60 * 15,
-    path: '/',
-  })
-  cookieStore.set('elintys_refresh_token', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   })
@@ -38,6 +51,5 @@ export async function setSession(accessToken: string, refreshToken: string) {
 
 export async function clearSession() {
   const cookieStore = await cookies()
-  cookieStore.delete('elintys_access_token')
-  cookieStore.delete('elintys_refresh_token')
+  cookieStore.delete(COOKIE_NAMES.REFRESH_TOKEN)
 }

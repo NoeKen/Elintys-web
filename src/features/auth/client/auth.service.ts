@@ -1,24 +1,86 @@
-import type { AuthSession, User, AuthTokens } from "@/shared/types";
+import type { AxiosError } from "axios";
+import api, { setAuthToken } from "@/shared/lib/api";
+import type { AuthSession, User, UserRole } from "@/shared/types";
 
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const USER_ROLES: UserRole[] = [
+  "organisateur",
+  "prestataire",
+  "gestionnaire",
+  "participant",
+];
 
-function mockSession(email: string, fullName?: string): AuthSession {
-  const parts = (fullName ?? "Jean Dupont").split(" ");
-  const user: User = {
-    id: "mock-user-" + Math.random().toString(36).slice(2),
-    email,
-    firstName: parts[0] ?? "Jean",
-    lastName: parts.slice(1).join(" ") || "Dupont",
-    role: "organizer",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+function toUserRole(role?: string): UserRole {
+  return USER_ROLES.find((userRole) => userRole === role) ?? "organisateur";
+}
+
+interface ApiUser {
+  _id?: string;
+  id?: string;
+  fullName?: string;
+  email: string;
+  roles?: string[];
+  avatarUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface AuthApiResponse {
+  accessToken: string;
+  user: ApiUser;
+}
+
+interface RefreshApiResponse {
+  accessToken: string;
+}
+
+function decodeAccessTokenExpiresAt(accessToken: string): number {
+  try {
+    const [, payload] = accessToken.split(".");
+    if (!payload) return Date.now() + 15 * 60 * 1000;
+
+    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(normalizedPayload)) as { exp?: number };
+    return decoded.exp ? decoded.exp * 1000 : Date.now() + 15 * 60 * 1000;
+  } catch {
+    return Date.now() + 15 * 60 * 1000;
+  }
+}
+
+function normalizeUser(apiUser: ApiUser): User {
+  const [firstName = "", ...lastNameParts] = (apiUser.fullName ?? "").trim().split(/\s+/);
+  const roles = (apiUser.roles ?? [])
+    .map((role) => USER_ROLES.find((userRole) => userRole === role))
+    .filter((role): role is UserRole => Boolean(role));
+
+  return {
+    id: apiUser.id ?? apiUser._id ?? "",
+    email: apiUser.email,
+    firstName,
+    lastName: lastNameParts.join(" "),
+    role: roles[0],
+    roles,
+    avatarUrl: apiUser.avatarUrl,
+    createdAt: apiUser.createdAt ?? "",
+    updatedAt: apiUser.updatedAt ?? "",
   };
-  const tokens: AuthTokens = {
-    accessToken: "mock-access-token",
-    refreshToken: "mock-refresh-token",
-    expiresAt: Date.now() + 3600 * 1000,
+}
+
+function buildSession({ accessToken, user }: AuthApiResponse): AuthSession {
+  return {
+    user: normalizeUser(user),
+    tokens: {
+      accessToken,
+      expiresAt: decodeAccessTokenExpiresAt(accessToken),
+    },
   };
-  return { user, tokens };
+}
+
+function toAuthError(error: unknown): { code: string } {
+  const status = (error as AxiosError).response?.status;
+  if (status === 401) return { code: "INVALID_CREDENTIALS" };
+  if (status === 409) return { code: "EMAIL_TAKEN" };
+  if (status === 400) return { code: "BAD_REQUEST" };
+  return { code: "UNKNOWN_ERROR" };
 }
 
 export interface LoginData {
@@ -35,41 +97,82 @@ export interface RegisterData {
 
 export const authService = {
   async login(data: LoginData): Promise<AuthSession> {
-    await delay(1200);
-    if (data.email === "error@test.com") {
-      throw { code: "INVALID_CREDENTIALS" };
+    try {
+      const response = await api.post<AuthApiResponse>("/auth/login", data);
+      const session = buildSession(response.data);
+      setAuthToken(session.tokens.accessToken);
+      return session;
+    } catch (error) {
+      throw toAuthError(error);
     }
-    return mockSession(data.email);
   },
 
   async register(data: RegisterData): Promise<AuthSession> {
-    await delay(1200);
-    if (data.email === "taken@test.com") {
-      throw { code: "EMAIL_TAKEN" };
-    }
-    return mockSession(data.email, data.fullName);
-  },
-
-  async forgotPassword(_email: string): Promise<void> {
-    await delay(1200);
-  },
-
-  async resetPassword(token: string, _newPassword: string): Promise<void> {
-    await delay(1200);
-    if (token === "invalid-token") {
-      throw { code: "TOKEN_EXPIRED" };
+    try {
+      const response = await api.post<AuthApiResponse>("/auth/register", {
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+        roles: [toUserRole(data.role)],
+      });
+      const session = buildSession(response.data);
+      setAuthToken(session.tokens.accessToken);
+      return session;
+    } catch (error) {
+      throw toAuthError(error);
     }
   },
 
-  async verifyEmailCheck(_email: string): Promise<void> {
-    await delay(1200);
+  async refreshAccessToken(): Promise<string | null> {
+    try {
+      const response = await api.post<RefreshApiResponse>("/auth/refresh");
+      setAuthToken(response.data.accessToken);
+      return response.data.accessToken;
+    } catch {
+      setAuthToken(null);
+      return null;
+    }
   },
 
-  async resendVerification(_email: string): Promise<void> {
-    await delay(1200);
+  async refreshSession(): Promise<AuthSession | null> {
+    const accessToken = await this.refreshAccessToken();
+    if (!accessToken) return null;
+
+    try {
+      const response = await api.get<ApiUser>("/auth/me");
+      return buildSession({ accessToken, user: response.data });
+    } catch {
+      setAuthToken(null);
+      return null;
+    }
+  },
+
+  async forgotPassword(email: string): Promise<void> {
+    await api.post("/auth/forgot-password", { email });
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      await api.post("/auth/reset-password", { token, password: newPassword });
+    } catch (error) {
+      const status = (error as AxiosError).response?.status;
+      throw { code: status === 400 ? "TOKEN_EXPIRED" : "UNKNOWN_ERROR" };
+    }
+  },
+
+  async verifyEmailCheck(token: string): Promise<void> {
+    await api.post("/auth/verify-email", { token });
+  },
+
+  async resendVerification(email: string): Promise<void> {
+    await api.post("/auth/resend-verification", { email });
   },
 
   async logout(): Promise<void> {
-    await delay(200);
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      setAuthToken(null);
+    }
   },
 };

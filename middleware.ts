@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { COOKIE_NAMES } from "./src/server/auth/cookies";
 
 // Routes qui nécessitent une session active
 // ⚠️ Ne pas inclure /evenements, /prestataires, /lieux — zone publique accessible sans compte
@@ -22,7 +23,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Source de vérité : cookie refresh_token posé par NestJS (httpOnly)
-  const hasSession = request.cookies.has("refresh_token");
+  const hasSession = request.cookies.has(COOKIE_NAMES.REFRESH_TOKEN);
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuthOnly  = AUTH_ONLY_PREFIXES.some((p) => pathname.startsWith(p));

@@ -15,6 +15,7 @@ const api: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "/api",
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -29,7 +30,15 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status === 401 && !originalRequest._retry && refreshTokenFn) {
+    const requestUrl = originalRequest.url ?? "";
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      refreshTokenFn &&
+      !requestUrl.includes("/auth/refresh") &&
+      !requestUrl.includes("/auth/login")
+    ) {
       originalRequest._retry = true;
       const newToken = await refreshTokenFn();
       if (newToken) {
