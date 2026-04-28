@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendarDays, MapPin } from "lucide-react";
 import { formatCurrency, formatDate } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/utils";
+import { FavoriteButton } from "@/components/favorites/FavoriteButton";
 
 export interface EventCardData {
   _id: string;
@@ -71,10 +72,13 @@ export function EventCard({
         </span>
 
         {showFavorite && (
-          <div
-            className="absolute right-3 top-3"
-            data-testid="favorite-placeholder"
-          />
+          <div className="absolute right-3 top-3">
+            <FavoriteButton
+              targetId={event._id}
+              targetType="event"
+              size="sm"
+            />
+          </div>
         )}
       </div>
 
