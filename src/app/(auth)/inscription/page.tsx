@@ -8,7 +8,6 @@ import { RegisterStep1Form, type Step1Data } from "@/features/auth/components/Re
 import { RegisterStep2RoleSelector } from "@/features/auth/components/RegisterStep2RoleSelector";
 import { authService } from "@/features/auth/client/auth.service";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { ROUTES } from "@/shared/constants/routes";
 
 const stepOut = { x: 0, opacity: 0, transition: { duration: 0.2, ease: "easeIn" as const } };
 const step2Enter = { x: 40, opacity: 0 };

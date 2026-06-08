@@ -1,19 +1,25 @@
-export type UserRole = "admin" | "organizer" | "vendor" | "guest";
+export type UserRole =
+  | "organisateur"
+  | "prestataire"
+  | "gestionnaire"
+  | "participant";
 
 export interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  roles: UserRole[];
+  role?: UserRole;
   avatarUrl?: string;
+  subscriptions: Record<string, unknown>[];
+  referralBalance: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
   expiresAt: number;
 }
 

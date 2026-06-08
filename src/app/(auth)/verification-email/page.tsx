@@ -12,8 +12,10 @@ import { cn } from "@/shared/lib/utils";
 function VerificationEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
+  const token = searchParams.get("token");
 
   const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -33,6 +35,21 @@ function VerificationEmailContent() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!token) return;
+
+    setIsVerifying(true);
+    authService
+      .verifyEmailCheck(token)
+      .then(() => {
+        window.location.href = ROUTES.DASHBOARD.HOME;
+      })
+      .catch(() => {
+        setVerificationError(true);
+        setIsVerifying(false);
+      });
+  }, [token]);
+
   const startCountdown = () => {
     setCountdown(60);
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -48,11 +65,17 @@ function VerificationEmailContent() {
   };
 
   const handleVerify = async () => {
+    if (!token) {
+      window.location.href = ROUTES.DASHBOARD.HOME;
+      return;
+    }
+
     setIsVerifying(true);
     try {
-      await authService.verifyEmailCheck(email);
+      await authService.verifyEmailCheck(token);
       window.location.href = ROUTES.DASHBOARD.HOME;
     } catch {
+      setVerificationError(true);
       setIsVerifying(false);
     }
   };
@@ -103,6 +126,20 @@ function VerificationEmailContent() {
 
           {/* Bandeau succès renvoi */}
           <AnimatePresence>
+            {verificationError && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-2 bg-destructive/8 border border-destructive/20 rounded-lg px-4 py-3 mb-6 text-left"
+              >
+                <p className="text-sm text-destructive">
+                  Ce lien de vérification est invalide ou expiré.
+                </p>
+              </motion.div>
+            )}
+
             {resendSuccess && (
               <motion.div
                 initial={{ opacity: 0 }}
