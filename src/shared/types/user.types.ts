@@ -9,9 +9,11 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role?: UserRole;
   roles: UserRole[];
+  role?: UserRole;
   avatarUrl?: string;
+  subscriptions: Record<string, unknown>[];
+  referralBalance: number;
   createdAt: string;
   updatedAt: string;
 }

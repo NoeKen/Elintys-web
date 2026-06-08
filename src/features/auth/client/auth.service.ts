@@ -20,6 +20,8 @@ interface ApiUser {
   email: string;
   roles?: string[];
   avatarUrl?: string;
+  subscriptions?: Record<string, unknown>[];
+  referralBalance?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -57,9 +59,11 @@ function normalizeUser(apiUser: ApiUser): User {
     email: apiUser.email,
     firstName,
     lastName: lastNameParts.join(" "),
-    role: roles[0],
     roles,
+    role: roles[0],
     avatarUrl: apiUser.avatarUrl,
+    subscriptions: apiUser.subscriptions ?? [],
+    referralBalance: apiUser.referralBalance ?? 0,
     createdAt: apiUser.createdAt ?? "",
     updatedAt: apiUser.updatedAt ?? "",
   };
