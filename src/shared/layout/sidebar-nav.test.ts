@@ -44,7 +44,7 @@ describe("buildNavSections", () => {
     const sections = buildNavSections([
       "organisateur",
       "prestataire",
-      "gestionnaire",
+      "gestionnaire_salle",
       "participant",
     ]);
     sections.forEach((section) => {

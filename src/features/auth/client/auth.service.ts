@@ -5,7 +5,7 @@ import type { AuthSession, User, UserRole } from "@/shared/types";
 const USER_ROLES: UserRole[] = [
   "organisateur",
   "prestataire",
-  "gestionnaire",
+  "gestionnaire_salle",
   "participant",
 ];
 
