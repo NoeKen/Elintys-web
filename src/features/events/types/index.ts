@@ -21,6 +21,7 @@ export interface CreateEventInput {
   startDate: string;
   endDate: string;
   location?: string;
+  visibility?: 'public' | 'private' | 'invite_only';
 }
 
 export interface UpdateEventInput extends Partial<CreateEventInput> {
