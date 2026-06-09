@@ -1,7 +1,7 @@
 export type UserRole =
   | "organisateur"
   | "prestataire"
-  | "gestionnaire"
+  | "gestionnaire_salle"
   | "participant";
 
 export interface User {

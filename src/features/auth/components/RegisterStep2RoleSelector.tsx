@@ -30,7 +30,7 @@ const roleCards = [
     description: "Offrez vos services (traiteur, son, déco).",
   },
   {
-    value: "gestionnaire",
+    value: "gestionnaire_salle",
     icon: Building2,
     iconBg: "#FEF3C7",
     iconColor: "#C8862A",
