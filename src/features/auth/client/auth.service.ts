@@ -5,7 +5,7 @@ import type { AuthSession, User, UserRole } from "@/shared/types";
 const USER_ROLES: UserRole[] = [
   "organisateur",
   "prestataire",
-  "gestionnaire",
+  "gestionnaire_salle",
   "participant",
 ];
 
@@ -96,7 +96,7 @@ export interface RegisterData {
   fullName: string;
   email: string;
   password: string;
-  role: string;
+  role: UserRole;
 }
 
 export const authService = {

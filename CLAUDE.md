@@ -201,7 +201,7 @@ const buildNavSections = (user: User): NavSection[] => {
   const sections: NavSection[] = [];
   if (user.roles.includes('organisateur')) sections.push({ label: 'Organisateur', items: [...] });
   if (user.roles.includes('prestataire'))  sections.push({ label: 'Prestataire',  items: [...] });
-  if (user.roles.includes('gestionnaire')) sections.push({ label: 'Gestionnaire', items: [...] });
+  if (user.roles.includes('gestionnaire_salle')) sections.push({ label: 'Gestionnaire', items: [...] });
   if (user.roles.includes('participant'))  sections.push({ label: 'Participant',  items: [...] });
   // Commun à tous
   sections.push({ label: '', items: [favoris, decouvrir, parametres] });

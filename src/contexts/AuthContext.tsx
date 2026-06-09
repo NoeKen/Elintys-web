@@ -27,8 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setRefreshTokenFn(() => authService.refreshAccessToken());
-
     authService
       .refreshSession()
       .then((restoredSession) => {

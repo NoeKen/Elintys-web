@@ -104,7 +104,7 @@ export function buildNavSections(
     });
   }
 
-  if (roles.includes("gestionnaire")) {
+  if (roles.includes("gestionnaire_salle")) {
     sections.push({
       label: "Gestionnaire de lieu",
       items: [
