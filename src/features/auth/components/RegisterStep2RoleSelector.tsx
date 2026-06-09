@@ -4,15 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, Star, Building2, Loader2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { UserRole } from "@/shared/types";
 import { RoleCard } from "./RoleCard";
 import { StepIndicator } from "./StepIndicator";
 import { cn } from "@/shared/lib/utils";
 
 interface RegisterStep2Props {
-  onSubmit: (role: string) => Promise<void>;
+  onSubmit: (role: UserRole) => Promise<void>;
 }
 
-const roleCards = [
+const roleCards: { value: UserRole; icon: LucideIcon; iconBg: string; iconColor: string; title: string; description: string }[] = [
   {
     value: "organisateur",
     icon: Calendar,
@@ -50,7 +52,7 @@ const item = {
 };
 
 export function RegisterStep2RoleSelector({ onSubmit }: RegisterStep2Props) {
-  const [selectedRole, setSelectedRole] = useState("organisateur");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("organisateur");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {

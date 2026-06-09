@@ -96,7 +96,7 @@ export interface RegisterData {
   fullName: string;
   email: string;
   password: string;
-  role: string;
+  role: UserRole;
 }
 
 export const authService = {
