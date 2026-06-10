@@ -137,9 +137,9 @@ export function buildNavSections(
     sections.push({
       label: "Participant",
       items: [
-        {
-          label: "Mes billets",
-          href: "/tableau-de-bord/participant/billets",
+      {
+        label: "Mes billets",
+          href: "/billetterie",
           icon: "ticket",
         },
       ],
@@ -161,7 +161,7 @@ export function buildNavSections(
       },
       {
         label: "Paramètres",
-        href: "/tableau-de-bord/parametres",
+        href: "/parametres",
         icon: "settings",
       },
     ],

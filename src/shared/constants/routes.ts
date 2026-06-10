@@ -10,7 +10,7 @@ export const ROUTES = {
   DASHBOARD: {
     HOME: "/tableau-de-bord",
     EVENTS: "/tableau-de-bord/evenements",
-    VENDORS: "/prestataires",
+    VENDORS: "/tableau-de-bord/prestataires",
     GUESTS: "/invites",
     TICKETS: "/billetterie",
     SETTINGS: "/parametres",
