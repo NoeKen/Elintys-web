@@ -26,4 +26,14 @@ export const eventsService = {
   async delete(id: string): Promise<void> {
     await api.delete(`/events/${id}`);
   },
+
+  async getBySlug(slug: string): Promise<Event> {
+    const res = await api.get<Event>(`/events/slug/${slug}`);
+    return res.data;
+  },
+
+  async getMyEvents(params?: { page?: number; limit?: number; status?: string }): Promise<PaginatedResponse<Event>> {
+    const res = await api.get<PaginatedResponse<Event>>('/events/my', { params });
+    return res.data;
+  },
 };
