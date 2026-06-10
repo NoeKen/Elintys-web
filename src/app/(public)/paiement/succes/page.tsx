@@ -18,6 +18,7 @@ export default async function PaymentSuccessPage({
     <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col justify-center px-6 py-12">
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal-pale">
         <svg
+          aria-hidden="true"
           className="h-8 w-8 text-teal"
           fill="none"
           stroke="currentColor"
