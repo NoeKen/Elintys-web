@@ -68,7 +68,7 @@ export function EventWizard() {
         visibility: data.visibility,
         ...(capacity !== undefined && !isNaN(capacity) ? { capacity } : {}),
       });
-      router.push(`/evenements/${event.id}`);
+      router.push(`/tableau-de-bord/evenements/${event._id}`);
     } catch {
       setSubmitError('Une erreur est survenue. Veuillez réessayer.');
     } finally {

@@ -30,7 +30,7 @@ export function DashboardEventCard({ event }: Props) {
   });
 
   return (
-    <Link href={`/evenements/${event.id}`}>
+    <Link href={`/tableau-de-bord/evenements/${event._id}`}>
       <article className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer bg-white">
         <div className="flex justify-between items-start gap-2 mb-2">
           <h3 className="font-semibold text-navy line-clamp-2 flex-1">{event.title}</h3>
@@ -45,7 +45,11 @@ export function DashboardEventCard({ event }: Props) {
         </div>
         <p className="text-sm text-muted">{date}</p>
         {event.location && (
-          <p className="text-sm text-muted">{event.location}</p>
+          <p className="text-sm text-muted">
+            {event.location.type === 'online'
+              ? 'En ligne'
+              : event.location.city ?? event.location.address ?? ''}
+          </p>
         )}
       </article>
     </Link>

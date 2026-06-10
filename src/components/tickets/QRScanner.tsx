@@ -16,7 +16,7 @@ interface Props {
   eventId: string;
 }
 
-export function QRScanner({ eventId: _eventId }: Props) {
+export function QRScanner({ eventId }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -38,12 +38,12 @@ export function QRScanner({ eventId: _eventId }: Props) {
     stopCamera();
     setError(null);
     try {
-      const res = await api.post<ScanResult>('/tickets/scan', { qrCode });
+      const res = await api.post<ScanResult>('/tickets/scan', { eventId, qrCode });
       setResult(res.data);
     } catch {
       setError('Code QR invalide ou erreur de validation.');
     }
-  }, [stopCamera]);
+  }, [eventId, stopCamera]);
 
   const captureAndDecode = useCallback(async () => {
     const video = videoRef.current;

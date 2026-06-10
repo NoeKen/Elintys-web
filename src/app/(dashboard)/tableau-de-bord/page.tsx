@@ -51,7 +51,7 @@ export default function TableauDeBordPage() {
       {!isLoading && events.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {events.map((event: Event) => (
-            <DashboardEventCard key={event.id} event={event} />
+            <DashboardEventCard key={event._id} event={event} />
           ))}
         </div>
       )}

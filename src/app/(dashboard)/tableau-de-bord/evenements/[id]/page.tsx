@@ -27,9 +27,9 @@ export default function EventDashboardPage() {
   if (isError || !event) return <div className="p-8 text-red-500">Événement introuvable.</div>;
 
   const sections = [
-    { label: 'Billetterie', href: `/evenements/${id}/billetterie`, description: 'Types de billets, ventes' },
-    { label: 'Prestataires', href: `/evenements/${id}/prestataires`, description: 'Demandes envoyées' },
-    { label: 'Lieux', href: `/evenements/${id}/lieux`, description: 'Réservations de salle' },
+    { label: 'Billetterie', href: `/tableau-de-bord/evenements/${id}/billetterie`, description: 'Types de billets, ventes' },
+    { label: 'Prestataires', href: `/tableau-de-bord/evenements/${id}/prestataires`, description: 'Demandes envoyées' },
+    { label: 'Lieux', href: `/tableau-de-bord/evenements/${id}/lieux`, description: 'Réservations de salle' },
   ];
 
   return (
