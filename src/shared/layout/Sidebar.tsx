@@ -23,6 +23,7 @@ import type { ComponentType } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   buildNavSections,
   type SidebarIconName,
@@ -129,7 +130,10 @@ export function Sidebar({ session }: SidebarProps) {
       </nav>
 
       <div className="border-t border-outline-variant px-3 pt-4">
-        <div className="mt-3 flex items-center gap-3 px-3 py-2">
+        <div className="flex items-center justify-end px-3 py-1">
+          <NotificationBell />
+        </div>
+        <div className="mt-1 flex items-center gap-3 px-3 py-2">
           <Avatar
             src={user.avatarUrl}
             fallback={`${user.firstName[0]}${user.lastName[0]}`}
