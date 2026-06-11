@@ -123,7 +123,11 @@ export default function PrestataireDemandesPage() {
                 <>
                   {openReplyId === req._id ? (
                     <div className="space-y-3 pt-2 border-t border-border">
+                      <label htmlFor={`reply-msg-${req._id}`} className="block text-sm font-medium text-navy">
+                        Message (optionnel)
+                      </label>
                       <textarea
+                        id={`reply-msg-${req._id}`}
                         className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-teal resize-none"
                         rows={3}
                         placeholder="Message optionnel..."

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -54,8 +54,7 @@ export default function GestionnaireFichePage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<FormValues>({ resolver: zodResolver(schema) as any });
+  } = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues> });
 
   useEffect(() => {
     if (profile) {
