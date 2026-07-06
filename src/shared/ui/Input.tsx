@@ -1,8 +1,9 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { cn } from '@/shared/lib/utils';
+import { floatingLabelTransition, floatingLabelUp, floatingLabelDown, inputErrorReveal } from '@/lib/animations';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -31,6 +32,7 @@ export function Input({
   const currentValue = controlled ? value : internalValue;
   const hasValue = Boolean(currentValue) && String(currentValue).length > 0;
   const isFloated = focused || hasValue;
+  const shouldReduceMotion = useReducedMotion();
 
   if (!floatingLabel) {
     return (
@@ -44,6 +46,8 @@ export function Input({
           id={id}
           value={value}
           defaultValue={defaultValue}
+          onFocus={onFocus}
+          onBlur={onBlur}
           onChange={onChange}
           className={cn(
             'h-10 w-full rounded-[8px] border border-outline-variant bg-surface-lowest px-3 py-2 text-sm',
@@ -72,11 +76,14 @@ export function Input({
           <motion.label
             htmlFor={id}
             className="absolute left-0 origin-left pointer-events-none font-medium text-on-surface-variant"
-            animate={isFloated
-              ? { y: -20, scale: 0.8, color: error ? '#DC2626' : focused ? '#1A7A5E' : '#4F5F79' }
-              : { y: 0, scale: 1, color: '#4F5F79' }
+            animate={
+              shouldReduceMotion
+                ? {}
+                : isFloated
+                  ? { ...floatingLabelUp, color: error ? '#DC2626' : focused ? '#1A7A5E' : '#4F5F79' }
+                  : { ...floatingLabelDown, color: '#4F5F79' }
             }
-            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={shouldReduceMotion ? { duration: 0 } : floatingLabelTransition}
             style={{ fontSize: 14, top: 10 }}
           >
             {label}
@@ -106,9 +113,9 @@ export function Input({
       <AnimatePresence>
         {error && (
           <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            initial={shouldReduceMotion ? {} : inputErrorReveal.initial}
+            animate={inputErrorReveal.animate}
+            exit={shouldReduceMotion ? {} : inputErrorReveal.exit}
             className="mt-1 text-xs text-destructive"
           >
             {error}

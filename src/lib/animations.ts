@@ -121,3 +121,19 @@ export function useReducedMotionVariants<T>(full: T, reduced: T): T {
   const prefersReduced = useReducedMotion();
   return prefersReduced ? reduced : full;
 }
+
+// Floating label animation states for Input component
+export const floatingLabelTransition = {
+  duration: 0.2,
+  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+};
+
+export const floatingLabelUp = { y: -20, scale: 0.8 };
+export const floatingLabelDown = { y: 0, scale: 1 };
+
+// Error reveal for Input (used with AnimatePresence)
+export const inputErrorReveal = {
+  initial: { opacity: 0, y: -4 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -4 },
+};

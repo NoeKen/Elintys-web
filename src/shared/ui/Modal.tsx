@@ -1,7 +1,7 @@
 'use client';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { IconClose } from '@/lib/icons';
 import { cn } from '@/shared/lib/utils';
 import { scaleIn, modalOverlay } from '@/lib/animations';
@@ -16,6 +16,8 @@ interface ModalProps {
 }
 
 export function Modal({ open, onOpenChange, title, description, children, className }: ModalProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -24,10 +26,10 @@ export function Modal({ open, onOpenChange, title, description, children, classN
             <Dialog.Overlay asChild>
               <motion.div
                 className="fixed inset-0 z-50 bg-primary/30 backdrop-blur-sm"
-                variants={modalOverlay}
-                initial="hidden"
+                variants={shouldReduceMotion ? {} : modalOverlay}
+                initial={shouldReduceMotion ? false : 'hidden'}
                 animate="visible"
-                exit="exit"
+                exit={shouldReduceMotion ? {} : 'exit'}
               />
             </Dialog.Overlay>
             <Dialog.Content asChild>
@@ -40,10 +42,10 @@ export function Modal({ open, onOpenChange, title, description, children, classN
                   'focus:outline-none',
                   className
                 )}
-                variants={scaleIn}
-                initial="hidden"
+                variants={shouldReduceMotion ? {} : scaleIn}
+                initial={shouldReduceMotion ? false : 'hidden'}
                 animate="visible"
-                exit="exit"
+                exit={shouldReduceMotion ? {} : 'exit'}
               >
                 {title && (
                   <Dialog.Title className="mb-1 font-serif text-xl text-on-surface">

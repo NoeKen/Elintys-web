@@ -1,10 +1,10 @@
 'use client';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { IconClose } from '@/lib/icons';
 import { cn } from '@/shared/lib/utils';
-import { modalOverlay } from '@/lib/animations';
+import { modalOverlay, slideInRight, slideInLeft } from '@/lib/animations';
 
 interface SheetProps {
   open: boolean;
@@ -15,7 +15,7 @@ interface SheetProps {
 }
 
 export function Sheet({ open, onOpenChange, side = 'right', title, children }: SheetProps) {
-  const xInitial = side === 'right' ? 24 : -24;
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -25,10 +25,10 @@ export function Sheet({ open, onOpenChange, side = 'right', title, children }: S
             <Dialog.Overlay asChild>
               <motion.div
                 className="fixed inset-0 z-50 bg-primary/30 backdrop-blur-sm"
-                variants={modalOverlay}
-                initial="hidden"
+                variants={shouldReduceMotion ? {} : modalOverlay}
+                initial={shouldReduceMotion ? false : 'hidden'}
                 animate="visible"
-                exit="exit"
+                exit={shouldReduceMotion ? {} : 'exit'}
               />
             </Dialog.Overlay>
             <Dialog.Content asChild>
@@ -40,9 +40,10 @@ export function Sheet({ open, onOpenChange, side = 'right', title, children }: S
                   'focus:outline-none overflow-y-auto',
                   side === 'right' ? 'right-0' : 'left-0'
                 )}
-                initial={{ opacity: 0, x: xInitial }}
-                animate={{ opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
-                exit={{ opacity: 0, x: xInitial, transition: { duration: 0.21, ease: [0.55, 0, 1, 0.45] } }}
+                variants={shouldReduceMotion ? {} : (side === 'right' ? slideInRight : slideInLeft)}
+                initial={shouldReduceMotion ? false : 'hidden'}
+                animate="visible"
+                exit={shouldReduceMotion ? {} : 'exit'}
               >
                 <div className="mb-6 flex items-center justify-between">
                   {title && (
