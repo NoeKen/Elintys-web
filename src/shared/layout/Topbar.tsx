@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { Avatar } from '@/shared/ui/Avatar';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -59,17 +59,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </button>
 
       <div className="flex-1">
-        {breadcrumb && (
-          <motion.p
-            key={breadcrumb}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-sm font-semibold text-on-surface"
-          >
-            {breadcrumb}
-          </motion.p>
-        )}
+        <AnimatePresence mode="wait">
+          {breadcrumb && (
+            <motion.p
+              key={breadcrumb}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm font-semibold text-on-surface"
+            >
+              {breadcrumb}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="flex items-center gap-3">

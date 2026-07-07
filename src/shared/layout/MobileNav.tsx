@@ -2,14 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, useReducedMotion } from 'framer-motion';
-import {
-  LayoutGrid,
-  Calendar,
-  Inbox,
-  Search,
-  Settings,
-} from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { LayoutGrid } from 'lucide-react';
+import { IconCalendar, IconRequests, IconSearch, IconSettings } from '@/lib/icons';
 import type { ComponentType } from 'react';
 import { cn } from '@/shared/lib/utils';
 
@@ -21,10 +16,10 @@ interface MobileNavItem {
 
 const MOBILE_ITEMS: MobileNavItem[] = [
   { href: '/tableau-de-bord', label: 'Accueil', Icon: LayoutGrid },
-  { href: '/evenements', label: 'Événements', Icon: Calendar },
-  { href: '/messages', label: 'Messages', Icon: Inbox },
-  { href: '/prestataires', label: 'Explorer', Icon: Search },
-  { href: '/parametres', label: 'Paramètres', Icon: Settings },
+  { href: '/evenements', label: 'Événements', Icon: IconCalendar },
+  { href: '/messages', label: 'Messages', Icon: IconRequests },
+  { href: '/prestataires', label: 'Explorer', Icon: IconSearch },
+  { href: '/parametres', label: 'Paramètres', Icon: IconSettings },
 ];
 
 export function MobileNav() {
@@ -59,13 +54,15 @@ export function MobileNav() {
             >
               <div className="relative">
                 <Icon size={20} />
-                {active && (
-                  <motion.div
-                    layoutId="mobile-nav-indicator"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-accent"
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  />
-                )}
+                <AnimatePresence>
+                  {active && (
+                    <motion.div
+                      layoutId="mobile-nav-indicator"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-accent"
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
               <span className="text-[10px] font-medium leading-none">{label}</span>
             </motion.div>
