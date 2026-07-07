@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
 import Link from 'next/link';
 import {
@@ -35,13 +35,14 @@ interface StatCardProps {
 function StatCard({ value, label, delay }: StatCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.div
       ref={ref}
-      variants={fadeSlideUp}
-      initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
+      variants={shouldReduceMotion ? {} : fadeSlideUp}
+      initial={shouldReduceMotion ? false : 'hidden'}
+      animate={shouldReduceMotion ? {} : inView ? 'visible' : 'hidden'}
       custom={delay}
       className="flex flex-col items-center gap-2"
     >
@@ -55,6 +56,8 @@ export function LandingHero() {
   const full = { container: staggerContainer, item: staggerItem };
   const reduced = { container: {}, item: {} };
   const { container, item } = useReducedMotionVariants(full, reduced);
+
+  const shouldReduceMotion = useReducedMotion();
 
   const statsRef = useRef<HTMLElement>(null);
   const statsInView = useInView(statsRef, { once: true });
@@ -118,10 +121,10 @@ export function LandingHero() {
               Commencer gratuitement
             </Link>
             <Link
-              href="/evenements"
+              href="#features"
               className="text-sm font-semibold text-white/70 hover:text-white transition-colors flex items-center gap-1"
             >
-              Voir les événements →
+              En savoir plus →
             </Link>
           </motion.div>
 
@@ -154,9 +157,9 @@ export function LandingHero() {
         className="py-20 border-t border-white/5"
       >
         <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate={statsInView ? 'visible' : 'hidden'}
+          variants={shouldReduceMotion ? {} : staggerContainer}
+          initial={shouldReduceMotion ? false : 'hidden'}
+          animate={shouldReduceMotion ? {} : statsInView ? 'visible' : 'hidden'}
           className="flex flex-col md:flex-row items-center justify-center gap-16 max-w-2xl mx-auto px-6"
         >
           {STATS.map((stat, i) => (
@@ -166,26 +169,26 @@ export function LandingHero() {
       </section>
 
       {/* ── Journey Cards ── */}
-      <section ref={journeyRef} className="py-24 px-6 max-w-6xl mx-auto">
+      <section id="features" ref={journeyRef} className="py-24 px-6 max-w-6xl mx-auto">
         <motion.h2
-          variants={fadeSlideUp}
-          initial="hidden"
-          animate={journeyInView ? 'visible' : 'hidden'}
+          variants={shouldReduceMotion ? {} : fadeSlideUp}
+          initial={shouldReduceMotion ? false : 'hidden'}
+          animate={shouldReduceMotion ? {} : journeyInView ? 'visible' : 'hidden'}
           className="font-serif text-3xl md:text-4xl text-white text-center mb-16"
         >
           Un parcours pensé de bout en bout
         </motion.h2>
 
         <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate={journeyInView ? 'visible' : 'hidden'}
+          variants={shouldReduceMotion ? {} : staggerContainer}
+          initial={shouldReduceMotion ? false : 'hidden'}
+          animate={shouldReduceMotion ? {} : journeyInView ? 'visible' : 'hidden'}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {JOURNEY_STEPS.map((step, i) => (
             <motion.div
               key={step.label}
-              variants={staggerItem}
+              variants={shouldReduceMotion ? {} : staggerItem}
               className="rounded-[14px] bg-white/5 border border-white/[0.08] p-6 hover:bg-white/[0.08] transition-colors"
             >
               <span className="text-3xl font-serif text-accent-light opacity-40">
@@ -201,9 +204,9 @@ export function LandingHero() {
       {/* ── CTA Section ── */}
       <section className="py-24 px-6 text-center">
         <motion.div
-          variants={fadeSlideUp}
-          initial="hidden"
-          whileInView="visible"
+          variants={shouldReduceMotion ? {} : fadeSlideUp}
+          initial={shouldReduceMotion ? false : 'hidden'}
+          whileInView={shouldReduceMotion ? {} : 'visible'}
           viewport={{ once: true }}
           className="max-w-xl mx-auto flex flex-col items-center gap-6"
         >
