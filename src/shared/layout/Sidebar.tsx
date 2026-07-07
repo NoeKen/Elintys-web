@@ -10,7 +10,7 @@ import {
   Settings, Star, Ticket, Users,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
-import { cn } from '@/shared/lib/utils';
+import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Tooltip } from '@/shared/ui/Tooltip';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -186,7 +186,7 @@ export function Sidebar() {
         <div className={cn('flex items-center gap-3 px-3 py-2', collapsed && 'justify-center')}>
           <Avatar
             src={user.avatarUrl}
-            fallback={`${user.firstName[0]}${user.lastName[0]}`}
+            fallback={getInitials(`${user.firstName} ${user.lastName}`)}
             alt={`${user.firstName} ${user.lastName}`}
             size="sm"
           />

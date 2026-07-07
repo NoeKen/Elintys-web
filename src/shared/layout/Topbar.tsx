@@ -7,7 +7,7 @@ import { Avatar } from '@/shared/ui/Avatar';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { IconMenu } from '@/lib/icons';
 import { fadeSlideDown } from '@/lib/animations';
-import { cn } from '@/shared/lib/utils';
+import { cn, getInitials } from '@/shared/lib/utils';
 
 const BREADCRUMBS: Record<string, string> = {
   '/tableau-de-bord': 'Tableau de bord',
@@ -80,7 +80,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         {user && (
           <Avatar
             src={user.avatarUrl}
-            fallback={`${user.firstName[0]}${user.lastName[0]}`}
+            fallback={getInitials(`${user.firstName} ${user.lastName}`)}
             alt={`${user.firstName} ${user.lastName}`}
             size="sm"
           />

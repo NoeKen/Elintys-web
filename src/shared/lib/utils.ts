@@ -38,10 +38,6 @@ export function formatPrice(amount: number, currency = 'CAD'): string {
   }).format(amount);
 }
 
-export function formatCurrency(amount: number, currency = 'CAD'): string {
-  return formatPrice(amount, currency);
-}
-
 export function formatRole(role: string): string {
   const roles: Record<string, string> = {
     admin: 'Administrateur',
