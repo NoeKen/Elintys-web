@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-import { ROUTES } from "@/shared/constants/routes";
+import { LandingHero } from '@/components/landing/LandingHero';
 
 export default function RootPage() {
-  redirect(ROUTES.AUTH.LOGIN);
+  return <LandingHero />;
 }
