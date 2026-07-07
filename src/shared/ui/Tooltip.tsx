@@ -1,39 +1,48 @@
 'use client';
 
+import { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import * as RadixTooltip from '@radix-ui/react-tooltip';
-import { motion, AnimatePresence } from 'framer-motion';
+import { tooltipScale } from '@/lib/animations';
 import { cn } from '@/shared/lib/utils';
 
-interface TooltipProps {
+export interface TooltipProps {
   content: React.ReactNode;
   children: React.ReactNode;
-  side?: 'top' | 'right' | 'bottom' | 'left';
+  side?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
 }
 
 export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
+  const [open, setOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <RadixTooltip.Provider delayDuration={300}>
-      <RadixTooltip.Root>
+      <RadixTooltip.Root open={open} onOpenChange={setOpen}>
         <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
-        <RadixTooltip.Portal>
-          <RadixTooltip.Content side={side} sideOffset={6} asChild>
-            <motion.div
-              className={cn(
-                'rounded-[6px] bg-primary px-2.5 py-1.5 text-xs font-medium text-white',
-                'shadow-[0px_4px_16px_rgba(13,30,53,0.10)]',
-                'max-w-[200px] text-center',
-                className
-              )}
-              initial={{ opacity: 0, scale: 0.92, y: side === 'top' ? 4 : -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.15 } }}
-              exit={{ opacity: 0, scale: 0.92 }}
-            >
-              {content}
-              <RadixTooltip.Arrow className="fill-primary" />
-            </motion.div>
-          </RadixTooltip.Content>
-        </RadixTooltip.Portal>
+        <AnimatePresence>
+          {open && (
+            <RadixTooltip.Portal forceMount>
+              <RadixTooltip.Content forceMount side={side} sideOffset={6} asChild>
+                <motion.div
+                  variants={shouldReduceMotion ? {} : tooltipScale}
+                  initial={shouldReduceMotion ? false : 'hidden'}
+                  animate="visible"
+                  exit={shouldReduceMotion ? {} : 'exit'}
+                  className={cn(
+                    'z-50 rounded-[6px] px-3 py-1.5 text-xs font-medium',
+                    'bg-on-surface text-surface-lowest',
+                    'shadow-[0px_4px_12px_rgba(13,30,53,0.16)]',
+                    className
+                  )}
+                >
+                  {content}
+                </motion.div>
+              </RadixTooltip.Content>
+            </RadixTooltip.Portal>
+          )}
+        </AnimatePresence>
       </RadixTooltip.Root>
     </RadixTooltip.Provider>
   );

@@ -123,6 +123,21 @@ export function useReducedMotionVariants<T>(full: T, reduced: T): T {
 }
 
 // Floating label animation states for Input component
+// Tooltip scale animation
+export const tooltipScale: Variants = {
+  hidden: { opacity: 0, scale: 0.92 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.12, ease: 'easeOut' } },
+  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.08, ease: 'easeIn' } },
+};
+
+// Toast slide-in animation
+export const toastSlide: Variants = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 28 } },
+  exit: { opacity: 0, x: 40, transition: { duration: 0.18, ease: 'easeIn' } },
+};
+
+// Floating label animation states for Input component
 export const floatingLabelTransition = {
   duration: 0.2,
   ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],

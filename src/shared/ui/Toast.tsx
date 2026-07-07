@@ -1,7 +1,8 @@
 'use client';
 
 import * as RadixToast from '@radix-ui/react-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { toastSlide } from '@/lib/animations';
 import { IconClose, IconCheck, IconWarning, IconInfo } from '@/lib/icons';
 import { cn } from '@/shared/lib/utils';
 
@@ -29,6 +30,7 @@ const VARIANT_ICONS: Record<NonNullable<ToastProps['variant']>, React.ElementTyp
 
 export function Toast({ open, onOpenChange, title, description, variant = 'info' }: ToastProps) {
   const Icon = VARIANT_ICONS[variant];
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <RadixToast.Provider swipeDirection="right">
@@ -41,9 +43,10 @@ export function Toast({ open, onOpenChange, title, description, variant = 'info'
                 'bg-surface-lowest',
                 VARIANT_STYLES[variant]
               )}
-              initial={{ opacity: 0, x: 48, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1, transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] } }}
-              exit={{ opacity: 0, x: 32, transition: { duration: 0.18 } }}
+              variants={shouldReduceMotion ? {} : toastSlide}
+              initial={shouldReduceMotion ? false : 'hidden'}
+              animate="visible"
+              exit={shouldReduceMotion ? {} : 'exit'}
             >
               <Icon size={18} className="mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
