@@ -12,7 +12,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
-    <div className="flex items-center gap-0 mb-8">
+    <div className="mb-8 flex items-center gap-0">
       {steps.map((step, i) => {
         const stepNumber = i + 1;
         const isCompleted = stepNumber < currentStep;
@@ -23,17 +23,17 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             <div className="flex flex-col items-center gap-1.5">
               <div
                 className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors",
-                  isCompleted && "bg-accent text-white",
-                  isActive && "bg-primary text-white",
-                  !isCompleted && !isActive && "border-2 border-outline-variant text-on-surface-variant bg-transparent"
+                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors",
+                  isCompleted && "bg-accent text-white shadow-card",
+                  isActive && "bg-primary text-white shadow-card",
+                  !isCompleted && !isActive && "border border-outline-variant text-on-surface-variant bg-white/70"
                 )}
               >
                 {isCompleted ? <Check size={14} strokeWidth={2.5} /> : stepNumber}
               </div>
               <span
                 className={cn(
-                  "text-[11px] font-medium whitespace-nowrap",
+                  "whitespace-nowrap text-[11px] font-bold",
                   isActive && "text-on-surface",
                   isCompleted && "text-accent",
                   !isCompleted && !isActive && "text-on-surface-variant"
@@ -46,7 +46,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             {i < steps.length - 1 && (
               <div
                 className={cn(
-                  "h-[1.5px] w-16 mx-2 mb-5 rounded-full transition-colors",
+                  "mx-2 mb-5 h-[1.5px] w-16 rounded-full transition-colors",
                   isCompleted ? "bg-accent" : "bg-outline-variant"
                 )}
               />

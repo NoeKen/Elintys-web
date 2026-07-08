@@ -38,10 +38,11 @@ export function FeaturedSection({ events }: FeaturedSectionProps) {
   if (!events?.length) return null;
 
   return (
-    <section style={{ background: 'white', padding: '80px 0' }}>
+    <section className="cinematic-section">
       <div className="container-public">
         <div className="section-header">
           <div>
+            <span className="section-eyebrow">Sélection</span>
             <h2 className="section-title">Événements à la une</h2>
             <p style={{ color: 'var(--on-surface-variant)', fontSize: 14, marginTop: 6 }}>
               Les moments les plus attendus cette saison à Montréal.

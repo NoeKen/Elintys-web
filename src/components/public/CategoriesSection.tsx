@@ -11,11 +11,16 @@ const CATEGORIES = [
 
 export function CategoriesSection() {
   return (
-    <section style={{ background: 'var(--surface)', padding: '80px 0' }}>
+    <section className="cinematic-section mesh-gradient">
       <div className="container-public">
-        <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <span className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: 12 }}>
+            Découverte
+          </span>
+          <h2 className="section-title">
           Explorer par passion
-        </h2>
+          </h2>
+        </div>
         <div className="categories-grid">
           {CATEGORIES.map((cat) => (
             <Link

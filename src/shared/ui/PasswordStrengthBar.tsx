@@ -9,32 +9,36 @@ interface PasswordStrengthBarProps {
 function getScore(password: string): number {
   if (!password) return 0;
   let score = 0;
-  if (password.length >= 8) score += 25;
-  if (/[A-Z]/.test(password)) score += 25;
-  if (/[0-9]/.test(password)) score += 25;
-  if (/[^A-Za-z0-9]/.test(password)) score += 25;
+  if (password.length >= 8) score += 20;
+  if (password.length >= 12) score += 20;
+  if (/[A-Z]/.test(password)) score += 20;
+  if (/[0-9]/.test(password)) score += 20;
+  if (/[^A-Za-z0-9]/.test(password)) score += 20;
   return score;
 }
 
-type Strength = "faible" | "moyen" | "fort";
+type Strength = "faible" | "moyen" | "fort" | "tresFort";
 
 function getStrength(score: number): Strength | null {
   if (score === 0) return null;
   if (score < 40) return "faible";
-  if (score <= 70) return "moyen";
-  return "fort";
+  if (score < 70) return "moyen";
+  if (score < 100) return "fort";
+  return "tresFort";
 }
 
 const strengthConfig: Record<Strength, { label: string; color: string; segments: number }> = {
-  faible: { label: "FAIBLE", color: "bg-destructive", segments: 1 },
-  moyen: { label: "MOYEN", color: "bg-amber", segments: 2 },
-  fort: { label: "FORT", color: "bg-accent", segments: 3 },
+  faible: { label: "FAIBLE", color: "bg-terracotta", segments: 1 },
+  moyen: { label: "MOYEN", color: "bg-gold", segments: 2 },
+  fort: { label: "FORT", color: "bg-sage", segments: 3 },
+  tresFort: { label: "TRES FORT", color: "bg-teal", segments: 4 },
 };
 
 const strengthTextColor: Record<Strength, string> = {
-  faible: "text-destructive",
-  moyen: "text-amber",
-  fort: "text-accent",
+  faible: "text-terracotta",
+  moyen: "text-gold-dark",
+  fort: "text-sage",
+  tresFort: "text-teal",
 };
 
 export function PasswordStrengthBar({ password }: PasswordStrengthBarProps) {
@@ -44,7 +48,7 @@ export function PasswordStrengthBar({ password }: PasswordStrengthBarProps) {
   return (
     <div className="mt-2 flex flex-col gap-1.5">
       <div className="flex gap-1">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
             className={cn(

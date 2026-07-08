@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Building2, Calendar, CalendarCheck, CalendarDays, Handshake,
   Heart, Inbox, LayoutGrid, MapPin, MessageSquare, Search,
-  Settings, Star, Ticket, Users,
+  Settings, Star, Ticket, Users, LogOut,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { cn, getInitials } from '@/shared/lib/utils';
@@ -45,8 +45,10 @@ function SidebarIcon({ name, className }: { name: SidebarIconName; className?: s
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { logout, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const prefersReduced = useReducedMotion();
 
   if (!user) return null;
@@ -65,14 +67,21 @@ export function Sidebar() {
     ? {}
     : staggerItem;
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    router.replace('/connexion');
+    router.refresh();
+  };
+
   return (
     <motion.aside
       animate={{ width: collapsed ? 64 : 240 }}
       transition={sidebarTransition}
-      className="relative flex h-full flex-shrink-0 flex-col bg-surface-low py-6 overflow-hidden"
+      className="glass-card relative m-3 mr-0 flex h-[calc(100%-1.5rem)] flex-shrink-0 flex-col overflow-hidden py-5"
     >
       {/* Logo */}
-      <div className="px-4 mb-8 flex items-center justify-between overflow-hidden">
+      <div className="mb-6 flex items-center justify-between overflow-hidden px-4">
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -80,7 +89,7 @@ export function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="font-serif text-2xl font-normal text-primary whitespace-nowrap"
+              className="whitespace-nowrap font-serif text-2xl font-normal text-primary"
             >
               Elintys
             </motion.span>
@@ -89,7 +98,7 @@ export function Sidebar() {
         <button
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Étendre la barre latérale' : 'Réduire la barre latérale'}
-          className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-on-surface-variant hover:bg-surface transition-colors"
+          className="ml-auto flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-white/55 text-on-surface-variant transition-colors hover:bg-white/85 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {collapsed ? <IconSidebarExpand size={16} /> : <IconSidebarCollapse size={16} />}
         </button>
@@ -97,7 +106,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <motion.nav
-        className="flex flex-1 flex-col gap-1 px-2 overflow-y-auto overflow-x-hidden"
+        className="flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-2"
         variants={navVariants}
         initial="hidden"
         animate="visible"
@@ -106,7 +115,7 @@ export function Sidebar() {
           <motion.div key={`${section.label}-${sectionIndex}`} className="mb-2" variants={itemVariants}>
             {section.label && !collapsed && (
               <p className={cn(
-                'px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant',
+                'mb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant',
                 sectionIndex > 0 && 'mt-4 pt-4'
               )}>
                 {section.label}
@@ -123,17 +132,17 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'relative flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium transition-colors',
+                    'relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                     collapsed ? 'justify-center' : '',
                     active
-                      ? 'text-accent'
-                      : 'text-on-surface-variant hover:bg-surface hover:text-on-surface'
+                      ? 'text-teal-dark'
+                      : 'text-on-surface-variant hover:bg-white/60 hover:text-on-surface'
                   )}
                 >
                   {active && (
                     <motion.div
                       layoutId="nav-active-indicator"
-                      className="absolute inset-0 rounded-[8px] bg-accent-light"
+                      className="absolute inset-0 rounded-2xl border border-accent/20 bg-teal-pale/80 shadow-card"
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -158,7 +167,7 @@ export function Sidebar() {
                   {!collapsed && item.badge !== undefined && item.badge > 0 && (
                     <span className={cn(
                       'relative z-10 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
-                      active ? 'bg-accent text-white' : 'bg-accent-light text-accent'
+                      active ? 'bg-accent text-white' : 'bg-teal-pale text-teal'
                     )}>
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
@@ -183,13 +192,26 @@ export function Sidebar() {
             <NotificationBell />
           </div>
         )}
-        <div className={cn('flex items-center gap-3 px-3 py-2', collapsed && 'justify-center')}>
-          <Avatar
-            src={user.avatarUrl}
-            fallback={getInitials(`${user.firstName} ${user.lastName}`)}
-            alt={`${user.firstName} ${user.lastName}`}
-            size="sm"
-          />
+        <div
+          className={cn(
+            'flex items-center gap-3 rounded-2xl border border-outline-variant/50 bg-white/55 px-3 py-2',
+            collapsed && 'justify-center'
+          )}
+        >
+          <Tooltip content="Profil utilisateur" side={collapsed ? 'right' : 'top'}>
+            <Link
+              href="/tableau-de-bord/profil"
+              aria-label="Ouvrir le profil utilisateur"
+              className="rounded-full transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <Avatar
+                src={user.avatarUrl}
+                fallback={getInitials(`${user.firstName} ${user.lastName}`)}
+                alt={`${user.firstName} ${user.lastName}`}
+                size="sm"
+              />
+            </Link>
+          </Tooltip>
           <AnimatePresence>
             {!collapsed && (
               <motion.div
@@ -199,14 +221,43 @@ export function Sidebar() {
                 transition={{ duration: 0.15 }}
                 className="min-w-0 overflow-hidden"
               >
-                <p className="truncate text-sm font-medium text-on-surface whitespace-nowrap">
+                <p className="truncate whitespace-nowrap text-sm font-semibold text-on-surface">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="truncate text-xs text-on-surface-variant whitespace-nowrap">{user.email}</p>
+                <p className="truncate whitespace-nowrap text-xs text-on-surface-variant">{user.email}</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+        <Tooltip content="Se déconnecter" side={collapsed ? 'right' : 'top'}>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            aria-label="Se déconnecter"
+            className={cn(
+              'mt-2 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors',
+              'hover:bg-white/65 hover:text-destructive focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              collapsed && 'justify-center',
+              isLoggingOut && 'cursor-wait opacity-60'
+            )}
+          >
+            <LogOut size={18} aria-hidden="true" className="shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="truncate overflow-hidden whitespace-nowrap"
+                >
+                  {isLoggingOut ? 'Déconnexion...' : 'Se déconnecter'}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </Tooltip>
       </div>
     </motion.aside>
   );

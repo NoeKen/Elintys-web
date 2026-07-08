@@ -22,14 +22,14 @@ function InfoCard({ title, items }: { title: string; items: readonly string[] })
   return (
     <motion.div
       variants={staggerItem}
-      className="rounded-[14px] border border-white/[0.07] bg-white/[0.03] p-6"
+      className="premium-card p-6"
     >
-      <h3 className="mb-5 text-lg font-semibold text-white">{title}</h3>
+      <h3 className="mb-5 text-lg font-semibold text-navy-dark">{title}</h3>
       <div className="space-y-4">
         {items.map((item) => (
           <div key={item} className="flex items-start gap-3">
-            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-accent flex-shrink-0" />
-            <p className="text-sm leading-relaxed text-white/60">{item}</p>
+            <span className="mt-2 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-accent" />
+            <p className="text-sm leading-relaxed text-on-surface-variant">{item}</p>
           </div>
         ))}
       </div>
@@ -39,7 +39,7 @@ function InfoCard({ title, items }: { title: string; items: readonly string[] })
 
 export function WhyNowSection() {
   return (
-    <section className="px-6 py-24 max-w-5xl mx-auto">
+    <section className="mx-auto max-w-5xl px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -47,13 +47,13 @@ export function WhyNowSection() {
         transition={{ duration: 0.5 }}
         className="max-w-3xl mb-10"
       >
-        <span className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/60">
+        <span className="section-eyebrow mb-5">
           Pourquoi maintenant
         </span>
-        <h2 className="mt-4 font-serif text-3xl md:text-[2.1rem] leading-tight tracking-tight text-white">
+        <h2 className="mt-4 font-serif text-3xl leading-tight text-navy-dark md:text-[2.1rem]">
           Les premiers arrivés construisent quelque chose avec nous.
         </h2>
-        <p className="mt-4 text-base leading-relaxed text-white/55">
+        <p className="premium-subtitle mt-4">
           Elintys n&apos;est pas encore lancé. C&apos;est une opportunité rare : celle d&apos;influencer
           une plateforme avant qu&apos;elle existe complètement. Les early adopters ne sont pas juste
           des utilisateurs — ils sont co-constructeurs.

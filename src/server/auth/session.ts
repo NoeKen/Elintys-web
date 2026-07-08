@@ -27,7 +27,9 @@ function decodeJwtPayload(token: string): { sub?: string; email?: string; role?:
 
 export async function getSession(): Promise<AuthSession | null> {
   const cookieStore = await cookies()
-  const token = cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
+  const token =
+    cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value ??
+    cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
   if (!token) return null
 
   const payload = decodeJwtPayload(token)
@@ -38,8 +40,14 @@ export async function getSession(): Promise<AuthSession | null> {
 }
 
 export async function setSession(accessToken: string, refreshToken: string) {
-  void accessToken
   const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 15,
+    path: '/',
+  })
   cookieStore.set(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -51,5 +59,6 @@ export async function setSession(accessToken: string, refreshToken: string) {
 
 export async function clearSession() {
   const cookieStore = await cookies()
+  cookieStore.delete(COOKIE_NAMES.ACCESS_TOKEN)
   cookieStore.delete(COOKIE_NAMES.REFRESH_TOKEN)
 }

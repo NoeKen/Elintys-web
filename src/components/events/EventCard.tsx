@@ -45,8 +45,8 @@ export function EventCard({
     return (
       <article
         className={cn(
-          'group flex items-center gap-4 rounded-xl bg-surface p-3',
-          'transition-shadow duration-200 hover:shadow-card',
+          'group flex items-center gap-4 rounded-xl border border-outline-variant/70 bg-white/80 p-3',
+          'shadow-[var(--shadow-soft-line)] backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-float',
           className
         )}
         data-testid="event-card"
@@ -79,8 +79,8 @@ export function EventCard({
     return (
       <article
         className={cn(
-          'group flex items-center gap-3 rounded-xl bg-surface p-3',
-          'transition-shadow duration-200 hover:shadow-card',
+          'group flex items-center gap-3 rounded-xl border border-outline-variant/70 bg-white/80 p-3',
+          'shadow-[var(--shadow-soft-line)] backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-float',
           className
         )}
         data-testid="event-card"
@@ -102,7 +102,7 @@ export function EventCard({
         </div>
         <Link
           href={href}
-          className="flex-shrink-0 rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+          className="flex-shrink-0 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:shadow-float"
           data-testid="event-card-link"
         >
           Découvrir
@@ -115,8 +115,8 @@ export function EventCard({
     return (
       <article
         className={cn(
-          'group overflow-hidden rounded-xl bg-surface',
-          'transition-shadow duration-200 hover:shadow-[var(--shadow-hover)]',
+          'premium-card group overflow-hidden',
+          'transition duration-500 ease-out hover:-translate-y-1 hover:shadow-premium',
           className
         )}
         data-testid="event-card"
@@ -128,7 +128,7 @@ export function EventCard({
               alt={event.title}
               fill
               unoptimized
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="image-cinematic transition-transform duration-500 group-hover:scale-[1.035]"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
           ) : (
@@ -136,7 +136,7 @@ export function EventCard({
               <span className="font-serif text-6xl text-white/70" aria-hidden="true">E</span>
             </div>
           )}
-          <span className="absolute left-3 top-3 rounded-full bg-primary/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-primary/70 px-2.5 py-1 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] backdrop-blur-md">
             {event.eventType}
           </span>
           {showFavorite && (
@@ -163,7 +163,7 @@ export function EventCard({
             <span className="text-sm font-semibold text-amber">{priceLabel}</span>
             <Link
               href={href}
-              className="rounded-md bg-accent px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-teal-dark"
               data-testid="event-card-link"
             >
               Voir l&apos;événement
@@ -178,8 +178,8 @@ export function EventCard({
   return (
     <article
       className={cn(
-        'group overflow-hidden rounded-lg border border-outline-variant bg-surface',
-        'transition-shadow duration-200 hover:shadow-card',
+        'premium-card group overflow-hidden',
+        'transition duration-500 ease-out hover:-translate-y-1 hover:shadow-premium',
         className
       )}
       data-testid="event-card"
@@ -191,7 +191,7 @@ export function EventCard({
             alt={event.title}
             fill
             unoptimized
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="image-cinematic transition-transform duration-500 group-hover:scale-[1.035]"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
@@ -202,7 +202,7 @@ export function EventCard({
         <span
           className={cn(
             'absolute left-3 top-3 rounded-full px-2.5 py-1',
-            'bg-primary/90 text-xs font-medium text-white backdrop-blur-sm'
+            'border border-white/15 bg-primary/70 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] backdrop-blur-md'
           )}
         >
           {event.eventType}
@@ -239,8 +239,8 @@ export function EventCard({
           <Link
             href={href}
             className={cn(
-              'rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-white',
-              'transition-opacity hover:opacity-90'
+              'rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white',
+              'shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-teal-dark'
             )}
             data-testid="event-card-link"
           >
@@ -255,7 +255,7 @@ export function EventCard({
 export function EventCardSkeleton() {
   return (
     <div
-      className="animate-pulse overflow-hidden rounded-lg border border-outline-variant bg-surface"
+      className="premium-skeleton overflow-hidden rounded-2xl border border-outline-variant bg-surface"
       aria-hidden="true"
     >
       <div className="h-44 bg-background" />

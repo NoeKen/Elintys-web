@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import type { AuthSession, User } from "@/shared/types";
-import { setAuthToken, setRefreshTokenFn } from "@/shared/lib/api";
 import { authService } from "@/features/auth/client/auth.service";
 
 interface AuthContextValue {
@@ -17,7 +16,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (session: AuthSession) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -29,49 +28,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     authService
       .refreshSession()
-      .then((restoredSession) => {
-        setSession(restoredSession);
-        setAuthToken(restoredSession?.tokens.accessToken ?? null);
-      })
+      .then((restoredSession) => setSession(restoredSession))
       .catch(() => {
         setSession(null);
-        setAuthToken(null);
       })
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback((newSession: AuthSession) => {
     setSession(newSession);
-    setAuthToken(newSession.tokens.accessToken);
   }, []);
 
-  const logout = useCallback(() => {
-    authService.logout().finally(() => {
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
       setSession(null);
-      setAuthToken(null);
-    });
+    }
   }, []);
-
-  useEffect(() => {
-    setRefreshTokenFn(async () => {
-      const accessToken = await authService.refreshAccessToken();
-      if (!accessToken) {
-        logout();
-        return null;
-      }
-
-      setSession((currentSession) => currentSession
-        ? {
-            ...currentSession,
-            tokens: {
-              ...currentSession.tokens,
-              accessToken,
-            },
-          }
-        : currentSession);
-      return accessToken;
-    });
-  }, [logout]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -1,5 +1,4 @@
-import type { AxiosError } from "axios";
-import api, { setAuthToken } from "@/shared/lib/api";
+import api, { ApiClientError } from "@/shared/lib/api";
 import type { AuthSession, User, UserRole } from "@/shared/types";
 
 const USER_ROLES: UserRole[] = [
@@ -8,10 +7,6 @@ const USER_ROLES: UserRole[] = [
   "gestionnaire_salle",
   "participant",
 ];
-
-function toUserRole(role?: string): UserRole {
-  return USER_ROLES.find((userRole) => userRole === role) ?? "organisateur";
-}
 
 interface ApiUser {
   _id?: string;
@@ -24,28 +19,14 @@ interface ApiUser {
   referralBalance?: number;
   createdAt?: string;
   updatedAt?: string;
+  isEmailVerified?: boolean;
+  onboardingCompleted?: boolean;
+  onboardingByRole?: Record<string, boolean>;
+  onboardingData?: Record<string, Record<string, string | string[] | number>>;
 }
 
 interface AuthApiResponse {
-  accessToken: string;
   user: ApiUser;
-}
-
-interface RefreshApiResponse {
-  accessToken: string;
-}
-
-function decodeAccessTokenExpiresAt(accessToken: string): number {
-  try {
-    const [, payload] = accessToken.split(".");
-    if (!payload) return Date.now() + 15 * 60 * 1000;
-
-    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = JSON.parse(atob(normalizedPayload)) as { exp?: number };
-    return decoded.exp ? decoded.exp * 1000 : Date.now() + 15 * 60 * 1000;
-  } catch {
-    return Date.now() + 15 * 60 * 1000;
-  }
 }
 
 function normalizeUser(apiUser: ApiUser): User {
@@ -66,24 +47,33 @@ function normalizeUser(apiUser: ApiUser): User {
     referralBalance: apiUser.referralBalance ?? 0,
     createdAt: apiUser.createdAt ?? "",
     updatedAt: apiUser.updatedAt ?? "",
+    isEmailVerified: apiUser.isEmailVerified ?? false,
+    onboardingCompleted: apiUser.onboardingCompleted ?? false,
+    onboardingByRole: apiUser.onboardingByRole ?? {},
+    onboardingData: apiUser.onboardingData ?? {},
   };
 }
 
-function buildSession({ accessToken, user }: AuthApiResponse): AuthSession {
-  return {
-    user: normalizeUser(user),
-    tokens: {
-      accessToken,
-      expiresAt: decodeAccessTokenExpiresAt(accessToken),
-    },
-  };
+function buildSession(user: ApiUser): AuthSession {
+  return { user: normalizeUser(user) };
 }
 
-function toAuthError(error: unknown): { code: string } {
-  const status = (error as AxiosError).response?.status;
-  if (status === 401) return { code: "INVALID_CREDENTIALS" };
-  if (status === 409) return { code: "EMAIL_TAKEN" };
-  if (status === 400) return { code: "BAD_REQUEST" };
+function getApiMessage(error: unknown): string | undefined {
+  if (!(error instanceof ApiClientError)) return undefined;
+  const payload = error.payload;
+  if (!payload || typeof payload !== "object" || !("message" in payload)) return undefined;
+  const message = (payload as { message?: unknown }).message;
+  if (typeof message === "string") return message;
+  if (Array.isArray(message)) return message.filter((item): item is string => typeof item === "string").join(" ");
+  return undefined;
+}
+
+function toAuthError(error: unknown): { code: string; message?: string } {
+  const status = error instanceof ApiClientError ? error.status : 0;
+  const message = getApiMessage(error);
+  if (status === 401) return { code: "INVALID_CREDENTIALS", message };
+  if (status === 409) return { code: "EMAIL_TAKEN", message };
+  if (status === 400) return { code: "BAD_REQUEST", message };
   return { code: "UNKNOWN_ERROR" };
 }
 
@@ -96,16 +86,17 @@ export interface RegisterData {
   fullName: string;
   email: string;
   password: string;
-  role: UserRole;
+  roles: UserRole[];
 }
+
+export type OnboardingRole = "organisateur" | "prestataire" | "gestionnaire_salle";
+export type OnboardingPayload = Record<string, string | string[] | number>;
 
 export const authService = {
   async login(data: LoginData): Promise<AuthSession> {
     try {
       const response = await api.post<AuthApiResponse>("/auth/login", data);
-      const session = buildSession(response.data);
-      setAuthToken(session.tokens.accessToken);
-      return session;
+      return buildSession(response.data.user);
     } catch (error) {
       throw toAuthError(error);
     }
@@ -113,40 +104,19 @@ export const authService = {
 
   async register(data: RegisterData): Promise<AuthSession> {
     try {
-      const response = await api.post<AuthApiResponse>("/auth/register", {
-        fullName: data.fullName,
-        email: data.email,
-        password: data.password,
-        roles: [toUserRole(data.role)],
-      });
-      const session = buildSession(response.data);
-      setAuthToken(session.tokens.accessToken);
-      return session;
+      const response = await api.post<AuthApiResponse>("/auth/register", data);
+      return buildSession(response.data.user);
     } catch (error) {
       throw toAuthError(error);
     }
   },
 
-  async refreshAccessToken(): Promise<string | null> {
-    try {
-      const response = await api.post<RefreshApiResponse>("/auth/refresh");
-      setAuthToken(response.data.accessToken);
-      return response.data.accessToken;
-    } catch {
-      setAuthToken(null);
-      return null;
-    }
-  },
-
   async refreshSession(): Promise<AuthSession | null> {
-    const accessToken = await this.refreshAccessToken();
-    if (!accessToken) return null;
-
     try {
+      await api.post("/auth/refresh");
       const response = await api.get<ApiUser>("/auth/me");
-      return buildSession({ accessToken, user: response.data });
+      return buildSession(response.data);
     } catch {
-      setAuthToken(null);
       return null;
     }
   },
@@ -159,7 +129,7 @@ export const authService = {
     try {
       await api.post("/auth/reset-password", { token, password: newPassword });
     } catch (error) {
-      const status = (error as AxiosError).response?.status;
+      const status = error instanceof ApiClientError ? error.status : 0;
       throw { code: status === 400 ? "TOKEN_EXPIRED" : "UNKNOWN_ERROR" };
     }
   },
@@ -172,11 +142,16 @@ export const authService = {
     await api.post("/auth/resend-verification", { email });
   },
 
-  async logout(): Promise<void> {
+  async saveOnboarding(role: OnboardingRole, payload: OnboardingPayload): Promise<AuthSession> {
     try {
-      await api.post("/auth/logout");
-    } finally {
-      setAuthToken(null);
+      const response = await api.patch<AuthApiResponse>(`/auth/onboarding/${role}`, payload);
+      return buildSession(response.data.user);
+    } catch (error) {
+      throw toAuthError(error);
     }
+  },
+
+  async logout(): Promise<void> {
+    await api.post("/auth/logout");
   },
 };
