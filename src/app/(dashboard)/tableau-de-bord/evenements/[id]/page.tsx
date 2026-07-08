@@ -30,6 +30,7 @@ export default function EventDashboardPage() {
     { label: 'Billetterie', href: `/tableau-de-bord/evenements/${id}/billetterie`, description: 'Types de billets, ventes' },
     { label: 'Prestataires', href: `/tableau-de-bord/evenements/${id}/prestataires`, description: 'Demandes envoyées' },
     { label: 'Lieux', href: `/tableau-de-bord/evenements/${id}/lieux`, description: 'Réservations de salle' },
+    { label: 'Invités', href: `/tableau-de-bord/evenements/${id}/invites`, description: 'Liste et statuts des invités' },
   ];
 
   return (

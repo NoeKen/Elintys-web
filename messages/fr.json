@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "title": "Elintys — L'événementiel québécois réinventé",
+    "description": "Créez, équipez, vendez, gérez et accueillez votre événement. Tout en un seul endroit."
+  },
+  "nav": {
+    "evenements": "Événements",
+    "prestataires": "Prestataires",
+    "lieux": "Lieux",
+    "connexion": "Se connecter",
+    "commencer": "Commencer"
+  },
+  "hero": {
+    "badge": "Plateforme événementielle québécoise",
+    "headline": "L'événementiel québécois, réinventé.",
+    "subtitle": "Créez, équipez, vendez, gérez et accueillez votre événement. Tout en un seul endroit.",
+    "cta_primary": "Commencer gratuitement",
+    "cta_secondary": "Voir les événements"
+  },
+  "parcours": {
+    "creer": "Créer",
+    "equiper": "Équiper",
+    "vendre": "Vendre",
+    "gerer": "Gérer",
+    "diffuser": "Diffuser",
+    "valider": "Valider"
+  },
+  "dashboard": {
+    "organisateur": {
+      "titre": "Hub événementiel",
+      "subtitle": "Gérez tous vos événements depuis un seul endroit"
+    },
+    "prestataire": {
+      "titre": "Tableau de bord",
+      "subtitle": "Suivez vos demandes et votre profil"
+    },
+    "gestionnaire": {
+      "titre": "Tableau de bord",
+      "subtitle": "Gérez vos espaces et réservations"
+    }
+  },
+  "actions": {
+    "sauvegarder": "Sauvegarder",
+    "annuler": "Annuler",
+    "supprimer": "Supprimer",
+    "modifier": "Modifier",
+    "publier": "Publier",
+    "brouillon": "Enregistrer le brouillon",
+    "creer": "Créer",
+    "rechercher": "Rechercher",
+    "filtrer": "Filtrer",
+    "exporter": "Exporter"
+  },
+  "statuts": {
+    "brouillon": "Brouillon",
+    "publie": "Publié",
+    "annule": "Annulé",
+    "termine": "Terminé",
+    "en_attente": "En attente"
+  },
+  "erreurs": {
+    "champ_requis": "Ce champ est obligatoire",
+    "email_invalide": "Adresse courriel invalide",
+    "mot_de_passe_min": "8 caractères minimum",
+    "serveur": "Une erreur est survenue. Veuillez réessayer.",
+    "non_autorise": "Vous n'êtes pas autorisé à effectuer cette action."
+  }
+}

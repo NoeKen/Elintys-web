@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "title": "Elintys — Quebec Event Management Reinvented",
+    "description": "Create, equip, sell, manage and welcome your event. All in one place."
+  },
+  "nav": {
+    "evenements": "Events",
+    "prestataires": "Vendors",
+    "lieux": "Venues",
+    "connexion": "Sign in",
+    "commencer": "Get started"
+  },
+  "hero": {
+    "badge": "Quebec event platform",
+    "headline": "Quebec events, reinvented.",
+    "subtitle": "Create, equip, sell, manage and welcome your event. All in one place.",
+    "cta_primary": "Get started for free",
+    "cta_secondary": "Browse events"
+  },
+  "parcours": {
+    "creer": "Create",
+    "equiper": "Equip",
+    "vendre": "Sell",
+    "gerer": "Manage",
+    "diffuser": "Promote",
+    "valider": "Validate"
+  },
+  "dashboard": {
+    "organisateur": {
+      "titre": "Event Hub",
+      "subtitle": "Manage all your events from one place"
+    },
+    "prestataire": {
+      "titre": "Dashboard",
+      "subtitle": "Track your requests and profile"
+    },
+    "gestionnaire": {
+      "titre": "Dashboard",
+      "subtitle": "Manage your spaces and bookings"
+    }
+  },
+  "actions": {
+    "sauvegarder": "Save",
+    "annuler": "Cancel",
+    "supprimer": "Delete",
+    "modifier": "Edit",
+    "publier": "Publish",
+    "brouillon": "Save as draft",
+    "creer": "Create",
+    "rechercher": "Search",
+    "filtrer": "Filter",
+    "exporter": "Export"
+  },
+  "statuts": {
+    "brouillon": "Draft",
+    "publie": "Published",
+    "annule": "Cancelled",
+    "termine": "Completed",
+    "en_attente": "Pending"
+  },
+  "erreurs": {
+    "champ_requis": "This field is required",
+    "email_invalide": "Invalid email address",
+    "mot_de_passe_min": "Minimum 8 characters",
+    "serveur": "Something went wrong. Please try again.",
+    "non_autorise": "You are not authorized to perform this action."
+  }
+}

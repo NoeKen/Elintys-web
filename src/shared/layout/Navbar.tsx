@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { Button } from "@/shared/ui/Button";
 import { Avatar } from "@/shared/ui/Avatar";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { getInitials } from "@/shared/lib/utils";
 
 export function Navbar() {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export function Navbar() {
         {user && (
           <Avatar
             src={user.avatarUrl}
-            fallback={`${user.firstName[0]}${user.lastName[0]}`}
+            fallback={getInitials(`${user.firstName} ${user.lastName}`)}
             alt={`${user.firstName} ${user.lastName}`}
             size="sm"
           />

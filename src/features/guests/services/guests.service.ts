@@ -1,26 +1,82 @@
-import api from "@/shared/lib/api";
-import type { PaginatedResponse } from "@/shared/types";
-import type { Guest, CreateGuestInput, GuestStatus } from "../types";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+
+export interface Guest {
+  _id: string;
+  name: string;
+  email?: string;
+  status: 'invited' | 'confirmed' | 'declined' | 'present';
+  note?: string;
+  createdAt: string;
+}
+
+export interface GuestListResponse {
+  data: Guest[];
+  total: number;
+  page: number;
+}
+
+export interface CreateGuestData {
+  name: string;
+  email?: string;
+  note?: string;
+}
+
+async function authFetch<T>(
+  url: string,
+  token: string,
+  options?: RequestInit,
+): Promise<T> {
+  const res = await fetch(`${API_URL}${url}`, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...options?.headers,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }
+
+  if (res.status === 204) {
+    return undefined as unknown as T;
+  }
+
+  return res.json() as Promise<T>;
+}
 
 export const guestsService = {
-  async listByEvent(eventId: string, page = 1, perPage = 50): Promise<PaginatedResponse<Guest>> {
-    const res = await api.get<PaginatedResponse<Guest>>(`/events/${eventId}/guests`, {
-      params: { page, perPage },
+  async list(token: string, eventId: string, page = 1): Promise<GuestListResponse> {
+    return authFetch<GuestListResponse>(
+      `/events/${eventId}/guests?page=${page}&limit=50`,
+      token,
+    );
+  },
+
+  async add(token: string, eventId: string, data: CreateGuestData): Promise<Guest> {
+    return authFetch<Guest>(`/events/${eventId}/guests`, token, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
-    return res.data;
   },
 
-  async create(data: CreateGuestInput): Promise<Guest> {
-    const res = await api.post<Guest>(`/events/${data.eventId}/guests`, data);
-    return res.data;
+  async updateStatus(
+    token: string,
+    eventId: string,
+    guestId: string,
+    status: Guest['status'],
+  ): Promise<Guest> {
+    return authFetch<Guest>(`/events/${eventId}/guests/${guestId}`, token, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
   },
 
-  async updateStatus(eventId: string, guestId: string, status: GuestStatus): Promise<Guest> {
-    const res = await api.patch<Guest>(`/events/${eventId}/guests/${guestId}`, { status });
-    return res.data;
-  },
-
-  async delete(eventId: string, guestId: string): Promise<void> {
-    await api.delete(`/events/${eventId}/guests/${guestId}`);
+  async remove(token: string, eventId: string, guestId: string): Promise<void> {
+    return authFetch<void>(`/events/${eventId}/guests/${guestId}`, token, {
+      method: 'DELETE',
+    });
   },
 };

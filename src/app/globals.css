@@ -752,4 +752,64 @@ body {
     color: var(--on-surface-variant);
     font-family: var(--font-sans);
   }
+
+  /* ─── Motion utilities ────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--color-teal);
+    color: white;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    transition: background 200ms, transform 150ms;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: #155F4A; }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .card-elintys {
+    background: white;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--shadow-ambient);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    background: var(--color-teal-pale);
+    color: var(--color-teal);
+  }
+}
+
+/* ─── Focus visible — global ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+/* ─── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
