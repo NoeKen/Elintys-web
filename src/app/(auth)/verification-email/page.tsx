@@ -7,12 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Check, CheckCircle2 } from "lucide-react";
 import { authService } from "@/features/auth/client/auth.service";
 import { ROUTES } from "@/shared/constants/routes";
+import { getPostAuthPath, sanitizeRedirectPath } from "@/lib/auth/redirects";
 import { cn } from "@/shared/lib/utils";
 
 function VerificationEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
   const token = searchParams.get("token");
+  const nextPath = sanitizeRedirectPath(searchParams.get("next"));
 
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState(false);
@@ -42,13 +44,16 @@ function VerificationEmailContent() {
     authService
       .verifyEmailCheck(token)
       .then(() => {
-        window.location.href = ROUTES.DASHBOARD.HOME;
+        return authService.refreshSession();
+      })
+      .then((session) => {
+        window.location.href = nextPath ?? (session ? getPostAuthPath(session.user) : ROUTES.DASHBOARD.HOME);
       })
       .catch(() => {
         setVerificationError(true);
         setIsVerifying(false);
       });
-  }, [token]);
+  }, [nextPath, token]);
 
   const startCountdown = () => {
     setCountdown(60);
@@ -66,14 +71,15 @@ function VerificationEmailContent() {
 
   const handleVerify = async () => {
     if (!token) {
-      window.location.href = ROUTES.DASHBOARD.HOME;
+      window.location.href = nextPath ?? ROUTES.DASHBOARD.HOME;
       return;
     }
 
     setIsVerifying(true);
     try {
       await authService.verifyEmailCheck(token);
-      window.location.href = ROUTES.DASHBOARD.HOME;
+      const session = await authService.refreshSession();
+      window.location.href = nextPath ?? (session ? getPostAuthPath(session.user) : ROUTES.DASHBOARD.HOME);
     } catch {
       setVerificationError(true);
       setIsVerifying(false);

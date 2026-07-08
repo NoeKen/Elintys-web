@@ -29,12 +29,14 @@ async function authFetch<T>(
   token: string,
   options?: RequestInit,
 ): Promise<T> {
+  const authHeader: Record<string, string> = {};
+  if (token && token !== 'cookie-session') authHeader.Authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      ...authHeader,
       ...options?.headers,
     },
   });

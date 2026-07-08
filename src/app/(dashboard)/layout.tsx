@@ -7,13 +7,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   await requireAuth();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <div className="hidden md:flex h-full">
+    <div className="mesh-gradient premium-noise flex h-screen overflow-hidden bg-background text-on-surface">
+      <div className="hidden h-full md:flex">
         <Sidebar />
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+        <main className="flex-1 overflow-y-auto px-3 pb-24 pt-4 md:px-5 md:pb-6">
           {children}
         </main>
         <MobileNav />

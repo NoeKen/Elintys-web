@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AuthSplitLayout } from "@/features/auth/components/AuthSplitLayout";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
@@ -9,7 +10,9 @@ export default function ConnexionPage() {
       backHref="/"
       backLabel="Retour à l'accueil"
     >
-      <LoginForm />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </AuthSplitLayout>
   );
 }

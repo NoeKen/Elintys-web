@@ -6,24 +6,32 @@ import { COOKIE_NAMES } from "./src/server/auth/cookies";
 // ⚠️ Ne pas inclure /evenements, /prestataires, /lieux — zone publique accessible sans compte
 const PROTECTED_PREFIXES = [
   "/tableau-de-bord",
+  "/dashboard",
+  "/onboarding",
   "/invites",
   "/billetterie",
   "/favoris",
   "/messages",
   "/parametres",
+  "/profil",
+  "/admin",
 ];
 
 // Routes accessibles uniquement aux visiteurs non connectés
 const AUTH_ONLY_PREFIXES = [
   "/connexion",
   "/inscription",
+  "/mot-de-passe-oublie",
+  "/reinitialiser-mot-de-passe",
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Source de vérité : cookie refresh_token posé par NestJS (httpOnly)
-  const hasSession = request.cookies.has(COOKIE_NAMES.REFRESH_TOKEN);
+  // Source de vérité : cookies httpOnly posés par NestJS.
+  const hasSession =
+    request.cookies.has(COOKIE_NAMES.ACCESS_TOKEN) ||
+    request.cookies.has(COOKIE_NAMES.REFRESH_TOKEN);
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuthOnly  = AUTH_ONLY_PREFIXES.some((p) => pathname.startsWith(p));
@@ -32,7 +40,7 @@ export function middleware(request: NextRequest) {
   if (isProtected && !hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = "/connexion";
-    url.searchParams.set("redirect", pathname);
+    url.searchParams.set("redirect", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
   }
 
@@ -40,6 +48,7 @@ export function middleware(request: NextRequest) {
   if (isAuthOnly && hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = "/tableau-de-bord";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
