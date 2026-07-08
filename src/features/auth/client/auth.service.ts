@@ -5,7 +5,7 @@ import type { AuthSession, User, UserRole } from "@/shared/types";
 const USER_ROLES: UserRole[] = [
   "organisateur",
   "prestataire",
-  "gestionnaire",
+  "gestionnaire_salle",
   "participant",
 ];
 
@@ -20,6 +20,8 @@ interface ApiUser {
   email: string;
   roles?: string[];
   avatarUrl?: string;
+  subscriptions?: Record<string, unknown>[];
+  referralBalance?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -57,9 +59,11 @@ function normalizeUser(apiUser: ApiUser): User {
     email: apiUser.email,
     firstName,
     lastName: lastNameParts.join(" "),
-    role: roles[0],
     roles,
+    role: roles[0],
     avatarUrl: apiUser.avatarUrl,
+    subscriptions: apiUser.subscriptions ?? [],
+    referralBalance: apiUser.referralBalance ?? 0,
     createdAt: apiUser.createdAt ?? "",
     updatedAt: apiUser.updatedAt ?? "",
   };
@@ -92,7 +96,7 @@ export interface RegisterData {
   fullName: string;
   email: string;
   password: string;
-  role: string;
+  role: UserRole;
 }
 
 export const authService = {

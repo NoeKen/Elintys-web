@@ -88,15 +88,21 @@ components/
 
 ### Couleurs — utiliser les tokens, jamais les hex inline
 
-```typescript
-// tailwind.config.ts — tokens définis
-navy.DEFAULT   = '#0D1E35'  // fond sidebar, headers
-teal.DEFAULT   = '#1A7A5E'  // action principale, badges succès
-teal.pale      = '#E6F5F0'  // fonds de highlights
-amber.DEFAULT  = '#C8862A'  // alertes, prix, états en attente
-border         = '#E4E8F0'  // toutes les bordures
-muted          = '#6B7A99'  // texte secondaire
-surface        = '#F8F9FB'  // fond principal
+Tailwind v4 CSS-first : les tokens sont définis dans `src/app/globals.css`
+(`:root` + `@theme inline`). Il n'y a **pas** de `tailwind.config.ts`.
+
+```css
+/* src/app/globals.css — palette V2 (juillet 2026) */
+navy.DEFAULT       = '#1E3D4F'  // fond sidebar, headers, sections sombres
+teal.DEFAULT       = '#4A8E9E'  // action principale, badges succès
+teal.pale          = '#E8F4F7'  // fonds de highlights
+terracotta.DEFAULT = '#D4844A'  // CTA chaud / mouvement public
+gold.DEFAULT       = '#C4A558'  // "à la une", premium
+sage.DEFAULT       = '#6E7F58'  // succès, statuts actifs
+amber.DEFAULT      = '#C8862A'  // alertes, prix, états en attente (inchangé)
+border             = '#E4E8F0'  // toutes les bordures
+muted              = '#6B7A99'  // texte secondaire
+surface            = '#F8F9FB'  // fond principal
 ```
 
 ```tsx
@@ -104,7 +110,7 @@ surface        = '#F8F9FB'  // fond principal
 <div className="bg-teal text-white">
 
 // ❌ Interdit — jamais de hex inline dans Tailwind
-<div className="bg-[#1A7A5E] text-white">
+<div className="bg-[#4A8E9E] text-white">
 ```
 
 ### Typographie — polices définies dans le layout racine
@@ -201,7 +207,7 @@ const buildNavSections = (user: User): NavSection[] => {
   const sections: NavSection[] = [];
   if (user.roles.includes('organisateur')) sections.push({ label: 'Organisateur', items: [...] });
   if (user.roles.includes('prestataire'))  sections.push({ label: 'Prestataire',  items: [...] });
-  if (user.roles.includes('gestionnaire')) sections.push({ label: 'Gestionnaire', items: [...] });
+  if (user.roles.includes('gestionnaire_salle')) sections.push({ label: 'Gestionnaire', items: [...] });
   if (user.roles.includes('participant'))  sections.push({ label: 'Participant',  items: [...] });
   // Commun à tous
   sections.push({ label: '', items: [favoris, decouvrir, parametres] });
@@ -280,7 +286,7 @@ RESEND_API_KEY=
 9. **Ignorer les erreurs TypeScript** avec `@ts-ignore` ou `as any`
 10. **Créer des routes en anglais** — toutes les routes sont en français
 11. **Ajouter des dépendances npm** sans les lister explicitement dans la réponse
-12. **Modifier `tailwind.config.ts`** pour ajouter des couleurs hors du design system
+12. **Ajouter des couleurs hors du design system** dans `src/app/globals.css` (`:root` / `@theme inline`)
 
 ---
 

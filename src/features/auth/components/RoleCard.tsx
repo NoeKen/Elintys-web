@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import type { UserRole } from "@/shared/types";
 import { cn } from "@/shared/lib/utils";
 
 interface RoleCardProps {
@@ -9,9 +10,9 @@ interface RoleCardProps {
   iconColor: string;
   title: string;
   description: string;
-  value: string;
+  value: UserRole;
   selected: boolean;
-  onSelect: (value: string) => void;
+  onSelect: (value: UserRole) => void;
 }
 
 export function RoleCard({
