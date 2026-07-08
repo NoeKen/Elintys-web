@@ -47,7 +47,7 @@ export function EventMarquee() {
             className="whitespace-nowrap text-sm font-medium text-white/40 hover:text-white/70 transition-colors cursor-default select-none"
           >
             {item}
-            <span className="ml-8 text-white/15">·</span>
+            <span className="ml-8 text-terracotta">·</span>
           </span>
         ))}
       </motion.div>

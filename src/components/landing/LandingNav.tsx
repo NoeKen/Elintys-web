@@ -12,8 +12,8 @@ const NAV_LINKS = [
 
 export function LandingNav() {
   const { scrollY } = useScroll();
-  // rgba values mirror the navy token (--color-navy: 13,30,53) — motion style values can't consume Tailwind classes.
-  const bg = useTransform(scrollY, [0, 72], ['rgba(13,30,53,0)', 'rgba(13,30,53,0.90)']);
+  // rgba values mirror the navy token (--color-navy: 30,61,79) — motion style values can't consume Tailwind classes.
+  const bg = useTransform(scrollY, [0, 72], ['rgba(30,61,79,0)', 'rgba(30,61,79,0.90)']);
   const blur = useTransform(scrollY, [0, 72], ['blur(0px)', 'blur(18px)']);
   const borderColor = useTransform(scrollY, [0, 72], ['rgba(255,255,255,0)', 'rgba(255,255,255,0.07)']);
 

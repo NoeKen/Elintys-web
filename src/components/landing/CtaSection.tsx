@@ -69,8 +69,8 @@ export function CtaSection({ id }: { id?: string }) {
       className="relative overflow-hidden px-6 py-28"
       style={{
         background: `
-          radial-gradient(ellipse 65% 55% at 50% 45%, rgba(26,122,94,0.16) 0%, transparent 65%),
-          radial-gradient(ellipse 100% 80% at 50% 110%, rgba(13,30,53,0.85) 0%, transparent 55%)
+          radial-gradient(ellipse 65% 55% at 50% 45%, rgba(74,142,158,0.16) 0%, transparent 65%),
+          radial-gradient(ellipse 100% 80% at 50% 110%, rgba(30,61,79,0.85) 0%, transparent 55%)
         `,
       }}
     >
@@ -188,7 +188,7 @@ export function CtaSection({ id }: { id?: string }) {
           <motion.button
             type="submit"
             disabled={mutation.isPending}
-            whileHover={mutation.isPending ? undefined : { boxShadow: '0 0 48px rgba(26,122,94,0.40)', scale: 1.02, y: -2 }}
+            whileHover={mutation.isPending ? undefined : { boxShadow: '0 0 48px rgba(74,142,158,0.40)', scale: 1.02, y: -2 }}
             whileTap={mutation.isPending ? undefined : { scale: 0.97 }}
             className="mt-1 flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3.5 text-sm font-semibold text-white disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--on-primary-container) 100%)' }}

@@ -67,7 +67,7 @@ export function FaqAccordion({ id }: { id?: string }) {
             key={item.q}
             variants={staggerItem}
             className="rounded-[10px] overflow-hidden transition-colors border"
-            style={{ borderColor: open === i ? 'rgba(26,122,94,0.30)' : 'rgba(255,255,255,0.06)' }}
+            style={{ borderColor: open === i ? 'rgba(74,142,158,0.30)' : 'rgba(255,255,255,0.06)' }}
           >
             <button
               onClick={() => setOpen(open === i ? null : i)}

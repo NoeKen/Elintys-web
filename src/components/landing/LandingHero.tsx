@@ -62,7 +62,7 @@ export function LandingHero() {
           <motion.span
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider text-on-primary-container border border-accent/30 bg-accent/[0.08]"
             animate={{
-              boxShadow: ['0 0 0 0 rgba(26,122,94,0.35)', '0 0 0 10px rgba(26,122,94,0)'],
+              boxShadow: ['0 0 0 0 rgba(74,142,158,0.35)', '0 0 0 10px rgba(74,142,158,0)'],
             }}
             transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
           >
@@ -92,8 +92,8 @@ export function LandingHero() {
           <motion.a
             href="#cta"
             className="group relative overflow-hidden rounded-[10px] px-8 py-4 text-base font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 55%, var(--on-primary-container) 100%)' }}
-            whileHover={{ scale: 1.02, y: -2, boxShadow: '0 12px 40px rgba(26,122,94,0.35)' }}
+            style={{ background: 'var(--gradient-warm)' }}
+            whileHover={{ scale: 1.02, y: -2, boxShadow: '0 12px 40px rgba(212,132,74,0.35)' }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           >
@@ -111,7 +111,7 @@ export function LandingHero() {
 
           <motion.a
             href="#probleme"
-            className="flex items-center gap-2 rounded-[10px] px-6 py-4 text-base font-medium text-white/65 hover:text-white border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.07] transition-all"
+            className="flex items-center gap-2 rounded-[10px] px-6 py-4 text-base font-medium border border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all"
           >
             Découvrir la plateforme ↓
           </motion.a>

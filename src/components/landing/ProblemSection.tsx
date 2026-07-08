@@ -42,7 +42,7 @@ function PersonaCard({ title, description }: { title: string; description: strin
         });
       }}
       onMouseLeave={() => setSpot((s) => ({ ...s, visible: false }))}
-      whileHover={{ y: -3, borderColor: 'rgba(26,122,94,0.28)' }}
+      whileHover={{ y: -3, borderColor: 'rgba(74,142,158,0.28)' }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       variants={staggerItem}
     >
@@ -51,7 +51,7 @@ function PersonaCard({ title, description }: { title: string; description: strin
         className="pointer-events-none absolute inset-0 rounded-[14px] transition-opacity duration-300"
         style={{
           opacity: spot.visible ? 1 : 0,
-          background: `radial-gradient(300px circle at ${spot.x}% ${spot.y}%, rgba(26,122,94,0.10) 0%, transparent 70%)`,
+          background: `radial-gradient(300px circle at ${spot.x}% ${spot.y}%, rgba(74,142,158,0.10) 0%, transparent 70%)`,
         }}
       />
       <h3 className="relative font-serif text-xl text-white mb-3">{title}</h3>
