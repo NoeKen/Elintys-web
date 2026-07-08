@@ -17,7 +17,7 @@ export function Card({ className, interactive = false, glass = false, ...props }
     glass
       ? 'bg-white/85 backdrop-blur-[20px]'
       : 'bg-surface-lowest',
-    'shadow-[0px_4px_16px_rgba(13,30,53,0.04)]',
+    'shadow-[0px_4px_16px_rgba(30,61,79,0.04)]',
     className
   );
 

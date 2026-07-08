@@ -53,7 +53,7 @@ export function AuthSplitLayout({
       {/* ── Panneau gauche ── */}
       <div
         className="hidden lg:flex w-1/2 relative overflow-hidden flex-col"
-        style={{ background: "linear-gradient(160deg, #0D1E35 0%, #162840 100%)" }}
+        style={{ background: "linear-gradient(160deg, #1E3D4F 0%, #162840 100%)" }}
       >
         {/* Grille overlay */}
         <div

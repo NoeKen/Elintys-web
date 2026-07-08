@@ -19,7 +19,7 @@ const roleCards: { value: UserRole; icon: LucideIcon; iconBg: string; iconColor:
     value: "organisateur",
     icon: Calendar,
     iconBg: "#E6F5F0",
-    iconColor: "#1A7A5E",
+    iconColor: "#4A8E9E",
     title: "Organisateur",
     description: "Créez et gérez vos propres événements.",
   },

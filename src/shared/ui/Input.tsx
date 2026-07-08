@@ -80,7 +80,7 @@ export function Input({
               shouldReduceMotion
                 ? {}
                 : isFloated
-                  ? { ...floatingLabelUp, color: error ? '#DC2626' : focused ? '#1A7A5E' : '#4F5F79' }
+                  ? { ...floatingLabelUp, color: error ? '#DC2626' : focused ? '#4A8E9E' : '#4F5F79' }
                   : { ...floatingLabelDown, color: '#4F5F79' }
             }
             transition={shouldReduceMotion ? { duration: 0 } : floatingLabelTransition}

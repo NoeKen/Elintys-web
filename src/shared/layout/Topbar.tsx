@@ -47,7 +47,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       className={cn(
         'sticky top-0 z-40 flex h-14 items-center gap-4 px-4',
         'bg-surface/80 backdrop-blur-[20px]',
-        'shadow-[0_1px_0_rgba(13,30,53,0.06)]'
+        'shadow-[0_1px_0_rgba(30,61,79,0.06)]'
       )}
     >
       <button
