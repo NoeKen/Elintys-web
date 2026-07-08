@@ -8,16 +8,16 @@ import { buttonPress } from '@/lib/animations';
 import { IconLoader } from '@/lib/icons';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none',
   {
     variants: {
       variant: {
-        primary:     'bg-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] hover:bg-accent/90',
-        accent:      'bg-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] hover:bg-accent/90',
-        secondary:   'border border-accent text-accent bg-transparent hover:bg-accent hover:text-white',
-        tertiary:    'text-accent hover:underline underline-offset-4 bg-transparent',
-        outline:     'border border-outline-variant bg-surface text-on-surface hover:bg-surface-low',
-        ghost:       'text-on-surface hover:bg-surface-low',
+        primary:     '[background:var(--gradient-premium-button)] text-white shadow-[var(--shadow-soft-line),0_14px_30px_rgba(30,61,79,0.20)] hover:shadow-[var(--shadow-soft-line),0_18px_42px_rgba(30,61,79,0.26)]',
+        accent:      '[background:var(--gradient-premium-button)] text-white shadow-[var(--shadow-soft-line),0_14px_30px_rgba(30,61,79,0.20)] hover:shadow-[var(--shadow-soft-line),0_18px_42px_rgba(30,61,79,0.26)]',
+        secondary:   'border border-accent/30 bg-white/70 text-teal-dark shadow-[var(--shadow-soft-line)] hover:bg-teal-pale',
+        tertiary:    'bg-transparent text-accent underline-offset-4 hover:underline',
+        outline:     'border border-outline-variant/70 bg-white/70 text-on-surface shadow-[var(--shadow-soft-line)] hover:bg-white/90',
+        ghost:       'text-on-surface hover:bg-white/65',
         destructive: 'bg-destructive text-white hover:bg-destructive/90',
         link:        'text-accent underline-offset-4 hover:underline',
       },

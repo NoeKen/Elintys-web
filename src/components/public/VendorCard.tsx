@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export interface PublicVendor {
@@ -27,8 +28,14 @@ export function VendorCard({ vendor }: VendorCardProps) {
     <Link href={`/prestataires/${vendor._id}`} className="vendor-card">
       <div className="vendor-card-image">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt={displayName} />
+          <Image
+            src={photo}
+            alt={displayName}
+            fill
+            unoptimized
+            className="image-cinematic"
+            sizes="(max-width: 560px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
         ) : (
           <div
             style={{

@@ -71,8 +71,8 @@ export function GradientMesh() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ mixBlendMode: 'screen' }}
+      className="fixed inset-0 pointer-events-none z-0 opacity-80"
+      style={{ mixBlendMode: 'multiply' }}
     />
   );
 }

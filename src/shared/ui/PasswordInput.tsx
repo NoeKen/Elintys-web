@@ -17,23 +17,20 @@ export function PasswordInput({ error, showCheckIcon, className, ...props }: Pas
       <input
         type={show ? "text" : "password"}
         className={cn(
-          "w-full bg-transparent py-2 pr-10 text-sm text-on-surface",
-          "border-0 border-b border-outline-variant",
-          "focus:outline-none focus:border-b-2 focus:border-accent",
-          "placeholder:text-on-surface-variant transition-colors",
-          error && "border-destructive focus:border-destructive",
+          "premium-input pr-12 text-sm placeholder:text-on-surface-variant",
+          error && "border-destructive",
           className
         )}
         {...props}
       />
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1">
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
         {showCheckIcon && !error && (
           <CheckCircle2 size={16} className="text-accent" />
         )}
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          className="p-1 text-on-surface-variant hover:text-on-surface transition-colors"
+          className="rounded-full p-1 text-on-surface-variant transition-colors hover:bg-teal-pale/70 hover:text-on-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           tabIndex={-1}
           aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
         >

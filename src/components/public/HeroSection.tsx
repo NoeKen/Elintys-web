@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { CategoryChip } from './CategoryChip';
 import { SearchBar } from './SearchBar';
 
@@ -13,6 +14,11 @@ const CHIPS = [
 ];
 
 const EASE = 'easeOut' as const;
+const PROOF_POINTS = [
+  { value: '500+', label: 'événements et expériences à explorer' },
+  { value: '4 rôles', label: 'organisateurs, prestataires, lieux, participants' },
+  { value: 'QC', label: 'pensé pour le marché québécois' },
+] as const;
 
 export function HeroSection() {
   return (
@@ -47,9 +53,23 @@ export function HeroSection() {
         </motion.p>
 
         <motion.div
+          className="hero-cta-row"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.26 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.24 }}
+        >
+          <Link href="/evenements/recherche" className="premium-button">
+            Explorer les événements
+          </Link>
+          <Link href="/comment-ca-marche" className="premium-button-secondary">
+            Voir le fonctionnement
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.32 }}
           style={{ width: '100%', maxWidth: 720 }}
         >
           <SearchBar />
@@ -59,7 +79,7 @@ export function HeroSection() {
           className="hero-chips"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.34 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.40 }}
         >
           {CHIPS.map((chip) => (
             <CategoryChip
@@ -67,6 +87,20 @@ export function HeroSection() {
               label={chip.label}
               href={`/evenements?category=${chip.slug}`}
             />
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="hero-proof-row"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.48 }}
+        >
+          {PROOF_POINTS.map((point) => (
+            <div key={point.value} className="hero-proof-card">
+              <strong>{point.value}</strong>
+              <span>{point.label}</span>
+            </div>
           ))}
         </motion.div>
       </div>

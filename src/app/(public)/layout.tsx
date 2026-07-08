@@ -16,7 +16,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <PublicNavbar />
-      <main>{children}</main>
+      <main className="page-premium-bg">{children}</main>
       <PublicFooter />
     </>
   );

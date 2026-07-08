@@ -10,16 +10,16 @@ export function FounderQuote() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.55 }}
-        className="mx-auto max-w-3xl rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-6 py-8"
+        className="glass-card mx-auto max-w-3xl px-6 py-8"
       >
         <div className="border-l-4 border-accent pl-5">
-          <p className="text-lg leading-relaxed text-white/85">
+          <p className="text-lg leading-relaxed text-on-surface">
             &quot;J&apos;ai construit Elintys parce que l&apos;événementiel mérite mieux. Mieux que des
             outils déconnectés, mieux que des heures perdues à synchroniser ce qui devrait couler de
             source. Notre ambition est de devenir la plateforme de référence de toute une industrie —
             en commençant par Montréal.&quot;
           </p>
-          <footer className="mt-4 text-sm text-white/50">
+          <footer className="mt-4 text-sm font-semibold text-on-surface-variant">
             — Noe Kenfack, fondateur d&apos;Elintys · Montréal, Québec
           </footer>
         </div>
@@ -30,7 +30,7 @@ export function FounderQuote() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.15, duration: 0.5 }}
-        className="mx-auto mt-8 max-w-3xl text-center text-sm leading-relaxed text-white/45"
+        className="mx-auto mt-8 max-w-3xl text-center text-sm leading-relaxed text-on-surface-variant"
       >
         Déjà rejoint par des organisateurs de mariages, conférences, galas, festivals et soirées
         corporatives — ainsi que par des prestataires et gestionnaires d&apos;espaces.

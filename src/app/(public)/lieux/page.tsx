@@ -51,26 +51,11 @@ export default async function LieuxPage({
 
   return (
     <>
-      <section style={{ background: 'var(--surface-low)', padding: '56px 0 48px' }}>
+      <section className="catalog-hero">
         <div className="container-public">
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 'clamp(30px, 5vw, 48px)',
-              color: 'var(--on-surface)',
-              marginBottom: 10,
-            }}
-          >
-            Trouver un espace
-          </h1>
-          <p
-            style={{
-              color: 'var(--on-surface-variant)',
-              fontSize: 16,
-              marginBottom: 28,
-              maxWidth: 500,
-            }}
-          >
+          <span className="section-eyebrow">Lieux d&apos;exception</span>
+          <h1>Trouver un espace</h1>
+          <p>
             Salles de conférence, espaces de réception, studios — tous vérifiés pour vos événements
             à Montréal.
           </p>

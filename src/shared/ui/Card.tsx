@@ -13,11 +13,11 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({ className, interactive = false, glass = false, ...props }: CardProps) {
   const base = cn(
-    'rounded-[14px] p-6',
+    'rounded-2xl border p-6',
     glass
-      ? 'bg-white/85 backdrop-blur-[20px]'
-      : 'bg-surface-lowest',
-    'shadow-[0px_4px_16px_rgba(30,61,79,0.04)]',
+      ? 'border-white/50 bg-white/72 backdrop-blur-[24px]'
+      : 'border-outline-variant/60 bg-white/78',
+    'shadow-[var(--shadow-float)]',
     className
   );
 
@@ -42,7 +42,7 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-lg font-semibold text-on-surface font-sans', className)} {...props} />;
+  return <h3 className={cn('font-serif text-2xl leading-tight text-navy-dark', className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

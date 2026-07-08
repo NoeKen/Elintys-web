@@ -59,12 +59,15 @@ export function EventWizard() {
     setSubmitError(null);
     try {
       const capacity = data.capacityRaw ? parseInt(data.capacityRaw, 10) : undefined;
+      const location = step2Data.location?.trim()
+        ? { type: 'physical' as const, address: step2Data.location.trim() }
+        : undefined;
       const event = await eventsService.create({
         title: step1Data.title,
         description: step1Data.description,
         startDate: step1Data.startDate,
-        endDate: step1Data.endDate ?? '',
-        location: step2Data.location,
+        ...(step1Data.endDate ? { endDate: step1Data.endDate } : {}),
+        ...(location ? { location } : {}),
         visibility: data.visibility,
         ...(capacity !== undefined && !isNaN(capacity) ? { capacity } : {}),
       });

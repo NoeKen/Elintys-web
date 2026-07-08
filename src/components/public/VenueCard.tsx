@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export interface PublicVenue {
@@ -25,8 +26,14 @@ export function VenueCard({ venue }: VenueCardProps) {
     <Link href={`/lieux/${venue._id}`} className="venue-card">
       <div className="venue-card-image">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt={venue.name} />
+          <Image
+            src={photo}
+            alt={venue.name}
+            fill
+            unoptimized
+            className="image-cinematic"
+            sizes="(max-width: 560px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
         ) : (
           <div
             style={{

@@ -13,7 +13,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 
 export default function RootPage() {
   return (
-    <div className="relative min-h-screen bg-primary overflow-x-hidden">
+    <div className="page-premium-bg mesh-gradient relative min-h-screen overflow-x-hidden text-on-surface">
       <GradientMesh />
       <ScrollProgress />
       <LandingNav />
