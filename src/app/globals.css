@@ -2,13 +2,13 @@
 
 :root {
   /* Colors — Primary */
-  --primary: #0D1E35;
+  --primary: #1E3D4F;
   --primary-foreground: #FFFFFF;
 
   /* Colors — Accent */
-  --accent: #1A7A5E;
+  --accent: #4A8E9E;
   --accent-light: #E6F5F0;
-  --on-primary-container: #3C9477;
+  --on-primary-container: #88C4D0;
 
   /* Colors — Surface */
   --background: #F8F9FB;
@@ -26,6 +26,10 @@
   --destructive: #DC2626;
   --success: #16A34A;
 
+  /* Colors — Semantic (V2 additions) */
+  --color-accent-warm: #D4844A;
+  --color-featured: #C4A558;
+
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -33,15 +37,38 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-ambient: 0px 12px 32px rgba(13, 30, 53, 0.06);
-  --shadow-hover: 0px 20px 48px rgba(13, 30, 53, 0.10);
-  --shadow-card: 0px 4px 16px rgba(13, 30, 53, 0.04);
+  --shadow-ambient: 0px 12px 32px rgba(30, 61, 79, 0.06);
+  --shadow-hover: 0px 20px 48px rgba(30, 61, 79, 0.10);
+  --shadow-card: 0px 4px 16px rgba(30, 61, 79, 0.04);
+  --shadow-glow-teal: 0 0 40px rgba(74, 142, 158, 0.30);
+  --shadow-glow-terracotta: 0 0 40px rgba(212, 132, 74, 0.30);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, #1E3D4F 0%, #4A8E9E 60%, #6E7F58 100%);
+  --gradient-cta: linear-gradient(135deg, #1E3D4F 0%, #4A8E9E 55%, #88C4D0 100%);
+  --gradient-warm: linear-gradient(135deg, #D4844A 0%, #C4A558 100%);
 
   /* Public design aliases */
-  --color-navy: #0D1E35;
-  --color-teal: #1A7A5E;
-  --color-teal-light: #3C9477;
-  --color-teal-pale: #E6F5F0;
+  --color-navy: #1E3D4F;
+  --color-navy-light: #2E5468;
+  --color-navy-pale: #EAF0F4;
+  --color-navy-dark: #0F2230;
+  --color-teal: #4A8E9E;
+  --color-teal-light: #88C4D0;
+  --color-teal-pale: #E8F4F7;
+  --color-teal-dark: #2A6070;
+  --color-terracotta: #D4844A;
+  --color-terracotta-light: #F0C5A0;
+  --color-terracotta-pale: #FDF0E8;
+  --color-terracotta-dark: #A85E2E;
+  --color-gold: #C4A558;
+  --color-gold-light: #E8D5A0;
+  --color-gold-pale: #FBF5E6;
+  --color-gold-dark: #8C7030;
+  --color-sage: #6E7F58;
+  --color-sage-light: #A8BB90;
+  --color-sage-pale: #EDF2E8;
+  --color-sage-dark: #4A5838;
   --color-amber: #C8862A;
   --surface-white: #FFFFFF;
   --navbar-height: 68px;
@@ -53,6 +80,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-accent-warm: var(--color-accent-warm);
   --color-on-primary-container: var(--on-primary-container);
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -64,6 +92,29 @@
   --color-amber: var(--amber);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
+  --color-featured: var(--color-featured);
+
+  /* Colors — V2 palette */
+  --color-navy: var(--color-navy);
+  --color-navy-light: var(--color-navy-light);
+  --color-navy-pale: var(--color-navy-pale);
+  --color-navy-dark: var(--color-navy-dark);
+  --color-teal: var(--color-teal);
+  --color-teal-light: var(--color-teal-light);
+  --color-teal-pale: var(--color-teal-pale);
+  --color-teal-dark: var(--color-teal-dark);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-light: var(--color-terracotta-light);
+  --color-terracotta-pale: var(--color-terracotta-pale);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-gold-pale: var(--color-gold-pale);
+  --color-gold-dark: var(--color-gold-dark);
+  --color-sage: var(--color-sage);
+  --color-sage-light: var(--color-sage-light);
+  --color-sage-pale: var(--color-sage-pale);
+  --color-sage-dark: var(--color-sage-dark);
 
   /* Border radius */
   --radius-sm: var(--radius-sm);
@@ -74,6 +125,8 @@
   /* Shadows */
   --shadow-ambient: var(--shadow-ambient);
   --shadow-card: var(--shadow-card);
+  --shadow-glow-teal: var(--shadow-glow-teal);
+  --shadow-glow-terracotta: var(--shadow-glow-terracotta);
 
   /* Fonts */
   --font-serif: var(--font-dm-serif), "DM Serif Display", Georgia, serif;
@@ -150,7 +203,7 @@ body {
     transition: background 200ms;
     margin-top: 8px;
   }
-  .btn-primary-full:hover { background: #155F4A; }
+  .btn-primary-full:hover { background: #2A6070; }
 
   /* ─── Navbar ───────────────────────────────────────────────── */
   .public-navbar {
@@ -165,7 +218,7 @@ body {
     transition: background 300ms ease, backdrop-filter 300ms ease, box-shadow 300ms ease;
   }
   .public-navbar.solid {
-    background: rgba(13, 30, 53, 0.95);
+    background: rgba(30, 61, 79, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
   }
@@ -232,7 +285,7 @@ body {
     transition: background 200ms;
     white-space: nowrap;
   }
-  .navbar-btn-primary:hover { background: #155F4A; }
+  .navbar-btn-primary:hover { background: #2A6070; }
 
   .navbar-hamburger {
     background: none;
@@ -325,7 +378,7 @@ body {
   .searchbar-divider {
     width: 1px;
     height: 26px;
-    background: rgba(13, 30, 53, 0.10);
+    background: rgba(30, 61, 79, 0.10);
     flex-shrink: 0;
   }
   .searchbar-btn {
@@ -343,7 +396,7 @@ body {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
     transition: background 200ms;
   }
-  .searchbar-btn:hover { background: #155F4A; }
+  .searchbar-btn:hover { background: #2A6070; }
   @media (max-width: 640px) {
     .searchbar-container { flex-direction: column; border-radius: 12px; }
     .searchbar-divider { width: 100%; height: 1px; }
@@ -375,7 +428,7 @@ body {
 
   /* ─── Hero Section ──────────────────────────────────────────── */
   .hero-section {
-    background: linear-gradient(180deg, #0D1E35 0%, #0F2A42 100%);
+    background: linear-gradient(180deg, #1E3D4F 0%, #2E5468 100%);
     min-height: 100svh;
     padding-top: var(--navbar-height);
     display: flex;
@@ -392,9 +445,9 @@ body {
     max-width: 860px;
   }
   .hero-badge {
-    background: rgba(26, 122, 94, 0.18);
+    background: rgba(74, 142, 158, 0.18);
     color: var(--color-teal-light);
-    border: 1px solid rgba(26, 122, 94, 0.28);
+    border: 1px solid rgba(74, 142, 158, 0.28);
     border-radius: 999px;
     padding: 7px 18px;
     font-size: 13px;
@@ -456,7 +509,7 @@ body {
   .category-tile-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(13, 30, 53, 0.80) 0%, rgba(13, 30, 53, 0.15) 60%, transparent 100%);
+    background: linear-gradient(to top, rgba(30, 61, 79, 0.80) 0%, rgba(30, 61, 79, 0.15) 60%, transparent 100%);
   }
   .category-tile-content {
     position: absolute;
@@ -660,7 +713,7 @@ body {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: rgba(13, 30, 53, 0.85);
+    background: rgba(30, 61, 79, 0.85);
     color: var(--color-teal-light);
     font-size: 10px;
     font-weight: 700;
@@ -773,7 +826,7 @@ body {
     text-decoration: none;
     white-space: nowrap;
   }
-  .btn-primary:hover { background: #155F4A; }
+  .btn-primary:hover { background: #2A6070; }
   .btn-primary:active { transform: scale(0.97); }
 
   .card-elintys {
