@@ -6,11 +6,11 @@ import { CategoryChip } from './CategoryChip';
 import { SearchBar } from './SearchBar';
 
 const CHIPS = [
-  { label: '🎤 Conférence', slug: 'conference' },
-  { label: '🥂 Gala', slug: 'gala' },
-  { label: '🎵 Concert', slug: 'concert' },
-  { label: '🎨 Atelier', slug: 'atelier' },
-  { label: '🎭 Théâtre', slug: 'theatre' },
+  { label: 'Conférence', slug: 'conference' },
+  { label: 'Gala', slug: 'gala' },
+  { label: 'Concert', slug: 'concert' },
+  { label: 'Atelier', slug: 'atelier' },
+  { label: 'Théâtre', slug: 'theatre' },
 ];
 
 const EASE = 'easeOut' as const;
@@ -30,7 +30,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE, delay: 0 }}
         >
-          ✦ Plateforme événementielle québécoise
+          Plateforme événementielle québécoise
         </motion.div>
 
         <motion.h1
@@ -39,7 +39,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE, delay: 0.10 }}
         >
-          Trouvez votre prochain<br />événement à Montréal
+          Découvrez les événements<br />qui méritent votre soirée.
         </motion.h1>
 
         <motion.p
@@ -48,8 +48,8 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE, delay: 0.18 }}
         >
-          Découvrez une sélection exclusive de moments culturels,<br />
-          professionnels et artistiques au cœur de la métropole.
+          Une sélection publique d&apos;événements, de lieux et de prestataires
+          pour composer une expérience cohérente, du billet au dernier détail.
         </motion.p>
 
         <motion.div
@@ -70,7 +70,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE, delay: 0.32 }}
-          style={{ width: '100%', maxWidth: 720 }}
+          className="w-full max-w-[760px]"
         >
           <SearchBar />
         </motion.div>

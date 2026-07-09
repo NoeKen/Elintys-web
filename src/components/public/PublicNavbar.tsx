@@ -23,28 +23,15 @@ function NavLink({ href, label }: { href: string; label: string }) {
 
 export function PublicNavbar() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const isTransparentPage =
-    pathname === '/evenements' || pathname.startsWith('/evenements/');
-
-  useEffect(() => {
-    if (!isTransparentPage) return;
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [isTransparentPage]);
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
-  const isSolid = !isTransparentPage || scrolled;
-
   return (
     <>
-      <nav className={`public-navbar${isSolid ? ' solid' : ''}`}>
+      <nav className="public-navbar solid">
         <Link href="/evenements" className="navbar-logo">
           Elintys
         </Link>
@@ -89,13 +76,12 @@ export function PublicNavbar() {
               {l.label}
             </Link>
           ))}
-          <Link href="/connexion" style={{ opacity: 0.65 }}>
+          <Link href="/connexion" className="navbar-mobile-muted">
             Se connecter
           </Link>
           <Link
             href="/inscription"
             className="navbar-btn-primary"
-            style={{ textAlign: 'center', marginTop: 8 }}
           >
             S&apos;inscrire gratuitement
           </Link>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 
 const CATEGORIES = [
   { label: 'Musique & Festivals', count: 124, bg: '#4A8E9E', slug: 'musique' },
@@ -13,12 +14,12 @@ export function CategoriesSection() {
   return (
     <section className="cinematic-section mesh-gradient">
       <div className="container-public">
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <span className="section-eyebrow" style={{ justifyContent: 'center', marginBottom: 12 }}>
+        <div className="mb-10 text-center">
+          <span className="section-eyebrow justify-center mb-3">
             Découverte
           </span>
           <h2 className="section-title">
-          Explorer par passion
+            Explorer par passion
           </h2>
         </div>
         <div className="categories-grid">
@@ -27,7 +28,7 @@ export function CategoriesSection() {
               key={cat.slug}
               href={`/evenements?category=${cat.slug}`}
               className="category-tile"
-              style={{ background: cat.bg }}
+              style={{ '--category-color': cat.bg } as CSSProperties}
             >
               <div className="category-tile-overlay" />
               <div className="category-tile-content">

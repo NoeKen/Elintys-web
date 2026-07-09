@@ -61,7 +61,7 @@ export function LieuxContent({
     <div className="catalog-layout container-public">
       <aside className="catalog-filters">
         <div className="filter-header">
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>Filtres</h3>
+          <h3 className="text-base font-bold text-on-surface">Filtres</h3>
           <button className="filter-reset" onClick={resetFilters}>
             Réinitialiser
           </button>
@@ -95,7 +95,7 @@ export function LieuxContent({
         </FilterSection>
 
         <FilterSection title="CAPACITÉ">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="flex flex-col gap-1.5">
             {CAPACITIES.map((cap) => (
               <label key={cap.value} className="filter-checkbox">
                 <input
@@ -115,15 +115,8 @@ export function LieuxContent({
       </aside>
 
       <main>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: 24,
-          }}
-        >
-          <p style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>
+        <div className="mb-6 flex items-baseline justify-between">
+          <p className="rounded-full border border-outline-variant/70 bg-white/70 px-4 py-2 text-sm font-medium text-on-surface-variant shadow-[var(--shadow-soft-line)] backdrop-blur-md">
             {total} lieu{total !== 1 ? 'x' : ''} trouvé{total !== 1 ? 's' : ''}
           </p>
         </div>

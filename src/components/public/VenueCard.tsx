@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Check, Heart, Star } from 'lucide-react';
 
 export interface PublicVenue {
   _id: string;
@@ -52,9 +53,13 @@ export function VenueCard({ venue }: VenueCardProps) {
           </div>
         )}
         {venue.isVerified && (
-          <span className="badge-verified">VÉRIFIÉ ✓</span>
+          <span className="badge-verified">
+            <Check className="h-3 w-3" aria-hidden="true" />
+            Vérifié
+          </span>
         )}
         <button
+          type="button"
           className="btn-favorite"
           onClick={(e) => {
             e.preventDefault();
@@ -62,16 +67,16 @@ export function VenueCard({ venue }: VenueCardProps) {
           }}
           aria-label="Sauvegarder ce lieu"
         >
-          🤍
+          <Heart className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
       <div className="venue-card-body">
         {venue.rating != null && venue.rating > 0 && (
           <div className="rating-row">
-            <span style={{ color: 'var(--color-amber)' }}>★</span>
-            <span style={{ fontWeight: 700 }}>{venue.rating.toFixed(1)}</span>
+            <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
+            <span className="font-bold">{venue.rating.toFixed(1)}</span>
             {venue.reviewsCount != null && venue.reviewsCount > 0 && (
-              <span style={{ color: 'var(--on-surface-variant)', fontSize: 12 }}>
+              <span className="text-xs text-on-surface-variant">
                 ({venue.reviewsCount} avis)
               </span>
             )}
@@ -82,10 +87,10 @@ export function VenueCard({ venue }: VenueCardProps) {
           <p className="venue-card-desc">{venue.description}</p>
         )}
         <div className="venue-card-footer">
-          <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
+          <span className="text-[13px] text-on-surface-variant">
             {venue.capacity ? `Capacité ${venue.capacity} pers.` : 'Capacité sur demande'}
           </span>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--on-surface)' }}>
+          <span className="text-[17px] font-bold text-on-surface">
             {venue.pricePerHour ? `${venue.pricePerHour}$/h` : 'Sur devis'}
           </span>
         </div>

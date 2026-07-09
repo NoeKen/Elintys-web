@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Heart, Sparkles, Star } from 'lucide-react';
 
 export interface PublicVendor {
   _id: string;
@@ -54,9 +55,13 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
         )}
         {vendor.isRecommended && (
-          <span className="badge-recommended">RECOMMANDÉ ✦</span>
+          <span className="badge-recommended">
+            <Sparkles className="h-3 w-3" aria-hidden="true" />
+            Recommandé
+          </span>
         )}
         <button
+          type="button"
           className="btn-favorite"
           onClick={(e) => {
             e.preventDefault();
@@ -64,16 +69,16 @@ export function VendorCard({ vendor }: VendorCardProps) {
           }}
           aria-label="Sauvegarder ce prestataire"
         >
-          🤍
+          <Heart className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
       <div className="vendor-card-body">
         {vendor.rating != null && vendor.rating > 0 && (
           <div className="rating-row">
-            <span style={{ color: 'var(--color-amber)' }}>★</span>
-            <span style={{ fontWeight: 700 }}>{vendor.rating.toFixed(1)}</span>
+            <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
+            <span className="font-bold">{vendor.rating.toFixed(1)}</span>
             {vendor.reviewsCount != null && vendor.reviewsCount > 0 && (
-              <span style={{ color: 'var(--on-surface-variant)', fontSize: 12 }}>
+              <span className="text-xs text-on-surface-variant">
                 ({vendor.reviewsCount} avis)
               </span>
             )}
@@ -87,8 +92,8 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </p>
         )}
         <div className="vendor-card-footer">
-          <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>À partir de</span>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--on-surface)' }}>
+          <span className="text-[13px] text-on-surface-variant">À partir de</span>
+          <span className="text-[17px] font-bold text-on-surface">
             {vendor.startingPrice ? `${vendor.startingPrice}$` : 'Sur devis'}
           </span>
         </div>
