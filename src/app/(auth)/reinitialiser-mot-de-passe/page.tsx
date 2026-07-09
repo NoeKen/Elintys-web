@@ -193,7 +193,7 @@ function ReinitialiserContent() {
               className="bg-surface rounded-2xl p-10 text-center"
               style={{ boxShadow: "0px 12px 32px rgba(13, 30, 53, 0.06)" }}
             >
-              <div className="inline-flex w-14 h-14 rounded-xl bg-[#FEF3C7] items-center justify-center mb-6">
+              <div className="inline-flex w-14 h-14 rounded-xl bg-gold-pale items-center justify-center mb-6">
                 <AlertTriangle size={28} className="text-amber" />
               </div>
               <h1 className="font-serif text-[28px] text-on-surface mb-3">

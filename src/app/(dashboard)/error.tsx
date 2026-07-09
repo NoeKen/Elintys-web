@@ -18,7 +18,7 @@ export default function DashboardError({
         Une erreur est survenue
       </h2>
       <button onClick={reset}
-              className="rounded-lg bg-[#1A7A5E] px-4 py-2 text-white text-sm">
+              className="rounded-lg bg-[#4A8E9E] px-4 py-2 text-white text-sm">
         Réessayer
       </button>
     </div>

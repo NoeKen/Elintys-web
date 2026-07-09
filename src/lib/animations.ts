@@ -1,6 +1,62 @@
 import type { Variants } from 'framer-motion';
 import { useReducedMotion } from 'framer-motion';
 
+export const premiumEase = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
+export const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.46, ease: premiumEase },
+  },
+  exit: {
+    opacity: 0,
+    y: 10,
+    transition: { duration: 0.22, ease: [0.55, 0, 1, 0.45] },
+  },
+};
+
+export const softScale: Variants = {
+  hidden: { opacity: 0, scale: 0.98, y: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.42, ease: premiumEase },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    y: 8,
+    transition: { duration: 0.2, ease: [0.55, 0, 1, 0.45] },
+  },
+};
+
+export const blurIn: Variants = {
+  hidden: { opacity: 0, filter: 'blur(10px)', y: 16 },
+  visible: {
+    opacity: 1,
+    filter: 'blur(0px)',
+    y: 0,
+    transition: { duration: 0.52, ease: premiumEase },
+  },
+};
+
+export const slideIn: Variants = {
+  hidden: { opacity: 0, x: 24 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.38, ease: premiumEase },
+  },
+  exit: {
+    opacity: 0,
+    x: 16,
+    transition: { duration: 0.22, ease: [0.55, 0, 1, 0.45] },
+  },
+};
+
 export const fadeSlideUp: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: {
@@ -11,6 +67,22 @@ export const fadeSlideUp: Variants = {
   exit: {
     opacity: 0,
     y: 8,
+    transition: { duration: 0.24, ease: [0.55, 0, 1, 0.45] },
+  },
+};
+
+export const pageTransition: Variants = {
+  hidden: { opacity: 0, y: 18, filter: 'blur(8px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.42, ease: premiumEase },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    filter: 'blur(6px)',
     transition: { duration: 0.24, ease: [0.55, 0, 1, 0.45] },
   },
 };

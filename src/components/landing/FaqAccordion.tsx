@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Plus } from 'lucide-react';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 const FAQ_ITEMS = [
@@ -39,7 +40,7 @@ export function FaqAccordion({ id }: { id?: string }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id={id} className="px-6 py-24 max-w-3xl mx-auto">
+    <section id={id} className="mx-auto max-w-3xl px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -47,10 +48,10 @@ export function FaqAccordion({ id }: { id?: string }) {
         transition={{ duration: 0.5 }}
         className="mb-10 text-center"
       >
-        <span className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/60">
+        <span className="section-eyebrow mb-5">
           Questions fréquentes
         </span>
-        <h2 className="mt-4 font-serif text-3xl md:text-4xl leading-tight tracking-tight text-white">
+        <h2 className="mt-4 font-serif text-3xl leading-tight text-navy-dark md:text-4xl">
           Tout ce que vous voulez savoir.
         </h2>
       </motion.div>
@@ -66,22 +67,22 @@ export function FaqAccordion({ id }: { id?: string }) {
           <motion.div
             key={item.q}
             variants={staggerItem}
-            className="rounded-[10px] overflow-hidden transition-colors border"
-            style={{ borderColor: open === i ? 'rgba(26,122,94,0.30)' : 'rgba(255,255,255,0.06)' }}
+            className="overflow-hidden rounded-[10px] border bg-white/70 shadow-card transition-colors"
+            style={{ borderColor: open === i ? 'rgba(74,142,158,0.32)' : 'rgba(30,61,79,0.10)' }}
           >
             <button
               onClick={() => setOpen(open === i ? null : i)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03]"
+              className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-teal-pale/40 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
               aria-expanded={open === i}
             >
-              <span className="text-sm font-medium text-white/80">{item.q}</span>
+              <span className="text-sm font-semibold text-on-surface">{item.q}</span>
               <motion.span
-                className="flex-shrink-0 ml-4 text-accent text-lg font-light"
+                className="ml-4 flex-shrink-0 text-accent"
                 animate={{ rotate: open === i ? 45 : 0 }}
                 transition={{ duration: 0.2 }}
                 aria-hidden="true"
               >
-                +
+                <Plus size={18} />
               </motion.span>
             </button>
 
@@ -93,9 +94,9 @@ export function FaqAccordion({ id }: { id?: string }) {
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
                   style={{ overflow: 'hidden' }}
-                  className="bg-white/[0.03]"
+                  className="bg-white/55"
                 >
-                  <p className="px-5 pb-5 text-sm text-white/50 leading-relaxed">{item.a}</p>
+                  <p className="px-5 pb-5 text-sm leading-relaxed text-on-surface-variant">{item.a}</p>
                 </motion.div>
               )}
             </AnimatePresence>

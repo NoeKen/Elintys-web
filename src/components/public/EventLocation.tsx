@@ -1,3 +1,5 @@
+import { MapPin } from 'lucide-react';
+
 interface LocationData {
   address?: string;
   city?: string;
@@ -29,7 +31,7 @@ export function EventLocation({ location }: EventLocationProps) {
           alignItems: 'flex-start',
         }}
       >
-        <span style={{ fontSize: 22, flexShrink: 0 }}>📍</span>
+        <MapPin className="h-5 w-5 flex-shrink-0 text-teal" aria-hidden="true" />
         <div>
           <p style={{ fontWeight: 600, fontSize: 15, color: 'var(--on-surface)', marginBottom: 4 }}>
             {location.address ?? location.city}

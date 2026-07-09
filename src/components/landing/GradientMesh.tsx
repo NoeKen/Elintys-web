@@ -3,11 +3,11 @@
 import { useEffect, useRef } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
-// rgb triplets mirror the teal/navy tokens in globals.css — canvas gradients can't consume Tailwind classes.
+// rgb triplets mirror the teal/terracotta/navy tokens in globals.css — canvas gradients can't consume Tailwind classes.
 const ORBS = [
-  { x: 0.22, y: 0.3, r: 0.45, rgb: '26,122,94', spd: 0.00016, ph: 0 },
-  { x: 0.75, y: 0.6, r: 0.38, rgb: '60,148,119', spd: 0.00011, ph: 2.0 },
-  { x: 0.5, y: 0.85, r: 0.3, rgb: '13,30,53', spd: 0.0002, ph: 4.2 },
+  { x: 0.22, y: 0.3, r: 0.45, rgb: '74,142,158', spd: 0.00016, ph: 0 },
+  { x: 0.75, y: 0.6, r: 0.38, rgb: '212,132,74', spd: 0.00011, ph: 2.0 },
+  { x: 0.5, y: 0.85, r: 0.3, rgb: '30,61,79', spd: 0.0002, ph: 4.2 },
 ];
 
 export function GradientMesh() {
@@ -36,7 +36,7 @@ export function GradientMesh() {
         const cy = (o.y + Math.cos(t * o.spd * 0.7 + o.ph) * 0.09) * canvas.height;
         const r = o.r * Math.min(canvas.width, canvas.height);
         const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        g.addColorStop(0, `rgba(${o.rgb},0.13)`);
+        g.addColorStop(0, `rgba(${o.rgb},0.16)`);
         g.addColorStop(0.5, `rgba(${o.rgb},0.05)`);
         g.addColorStop(1, `rgba(${o.rgb},0)`);
         ctx.fillStyle = g;
@@ -61,7 +61,7 @@ export function GradientMesh() {
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           background:
-            'radial-gradient(ellipse 80% 60% at 22% 30%, rgba(26,122,94,0.11) 0%, transparent 65%)',
+            'radial-gradient(ellipse 80% 60% at 22% 30%, rgba(74,142,158,0.11) 0%, transparent 65%)',
         }}
       />
     );
@@ -71,8 +71,8 @@ export function GradientMesh() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ mixBlendMode: 'screen' }}
+      className="fixed inset-0 pointer-events-none z-0 opacity-80"
+      style={{ mixBlendMode: 'multiply' }}
     />
   );
 }

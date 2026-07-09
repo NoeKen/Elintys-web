@@ -32,7 +32,7 @@ function PersonaCard({ title, description }: { title: string; description: strin
 
   return (
     <motion.article
-      className="relative overflow-hidden rounded-[14px] p-6 cursor-default border border-white/[0.06] bg-white/[0.03]"
+      className="premium-card relative cursor-default overflow-hidden p-6"
       onMouseMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         setSpot({
@@ -42,7 +42,7 @@ function PersonaCard({ title, description }: { title: string; description: strin
         });
       }}
       onMouseLeave={() => setSpot((s) => ({ ...s, visible: false }))}
-      whileHover={{ y: -3, borderColor: 'rgba(26,122,94,0.28)' }}
+      whileHover={{ y: -3, borderColor: 'rgba(74,142,158,0.28)' }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       variants={staggerItem}
     >
@@ -51,18 +51,18 @@ function PersonaCard({ title, description }: { title: string; description: strin
         className="pointer-events-none absolute inset-0 rounded-[14px] transition-opacity duration-300"
         style={{
           opacity: spot.visible ? 1 : 0,
-          background: `radial-gradient(300px circle at ${spot.x}% ${spot.y}%, rgba(26,122,94,0.10) 0%, transparent 70%)`,
+          background: `radial-gradient(300px circle at ${spot.x}% ${spot.y}%, rgba(74,142,158,0.14) 0%, transparent 70%)`,
         }}
       />
-      <h3 className="relative font-serif text-xl text-white mb-3">{title}</h3>
-      <p className="relative text-sm text-white/55 leading-relaxed">{description}</p>
+      <h3 className="relative mb-3 font-serif text-xl text-navy-dark">{title}</h3>
+      <p className="relative text-sm leading-relaxed text-on-surface-variant">{description}</p>
     </motion.article>
   );
 }
 
 export function ProblemSection({ id }: { id?: string }) {
   return (
-    <section id={id} className="px-6 py-24 max-w-6xl mx-auto">
+    <section id={id} className="mx-auto max-w-6xl px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -70,13 +70,13 @@ export function ProblemSection({ id }: { id?: string }) {
         transition={{ duration: 0.5 }}
         className="max-w-3xl mb-14"
       >
-        <span className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/60">
+        <span className="section-eyebrow mb-5">
           Le problème
         </span>
-        <h2 className="mt-4 font-serif text-3xl md:text-[2.5rem] leading-tight tracking-tight text-white">
+        <h2 className="premium-heading mt-4 md:text-[2.5rem]">
           Dans l&apos;événementiel, tout le monde subit la même fragmentation.
         </h2>
-        <p className="mt-4 text-base leading-relaxed text-white/55">
+        <p className="premium-subtitle mt-4">
           L&apos;industrie événementielle est vivante, créative et en pleine croissance. Pourtant, les
           outils qui la soutiennent sont dispersés, déconnectés, et conçus en silos.
         </p>
@@ -87,7 +87,7 @@ export function ProblemSection({ id }: { id?: string }) {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-60px' }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
         {PORTRAITS.map((p) => (
           <PersonaCard key={p.title} {...p} />
@@ -99,7 +99,7 @@ export function ProblemSection({ id }: { id?: string }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.15, duration: 0.4 }}
-        className="mt-10 text-center text-white/60 font-medium"
+        className="mt-10 text-center font-semibold text-on-surface-variant"
       >
         Quatre acteurs. Un même problème : ils ne sont pas connectés. Elintys change ça.
       </motion.p>

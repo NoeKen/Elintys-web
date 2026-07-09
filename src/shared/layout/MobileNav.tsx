@@ -28,7 +28,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 bg-surface/90 backdrop-blur-[20px] shadow-[0_-1px_0_rgba(13,30,53,0.06)] md:hidden"
+      className="fixed bottom-4 left-4 right-4 z-40 flex h-16 rounded-full border border-white/50 bg-white/78 shadow-nav backdrop-blur-[24px] md:hidden"
       aria-label="Navigation mobile"
     >
       {MOBILE_ITEMS.map(({ href, label, Icon }) => {
@@ -43,8 +43,8 @@ export function MobileNav() {
             href={href}
             aria-label={label}
             className={cn(
-              'flex flex-1 flex-col items-center justify-center gap-1',
-              active ? 'text-accent' : 'text-on-surface-variant'
+              'flex flex-1 flex-col items-center justify-center gap-1 rounded-full transition-colors',
+              active ? 'text-teal-dark' : 'text-on-surface-variant hover:text-on-surface'
             )}
           >
             <motion.div
@@ -58,13 +58,13 @@ export function MobileNav() {
                   {active && (
                     <motion.div
                       layoutId="mobile-nav-indicator"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-accent"
+                      className="absolute -bottom-1 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-accent"
                       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     />
                   )}
                 </AnimatePresence>
               </div>
-              <span className="text-[10px] font-medium leading-none">{label}</span>
+              <span className="text-[10px] font-semibold leading-none">{label}</span>
             </motion.div>
           </Link>
         );

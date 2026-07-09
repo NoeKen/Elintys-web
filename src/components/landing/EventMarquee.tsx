@@ -22,18 +22,18 @@ export function EventMarquee() {
   const doubled = [...ITEMS, ...ITEMS];
 
   return (
-    <div className="relative w-full overflow-hidden py-6">
-      <p className="text-center text-xs font-semibold tracking-[0.15em] uppercase text-white/25 mb-5">
+    <div className="relative w-full overflow-hidden py-8">
+      <p className="mb-5 text-center text-xs font-bold uppercase tracking-[0.15em] text-on-surface-variant">
         Tous types d&apos;événements
       </p>
 
       <div
         aria-hidden="true"
-        className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-r from-primary to-transparent"
+        className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-32 bg-gradient-to-r from-background to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-l from-primary to-transparent"
+        className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-32 bg-gradient-to-l from-background to-transparent"
       />
 
       <motion.div
@@ -44,10 +44,10 @@ export function EventMarquee() {
         {doubled.map((item, i) => (
           <span
             key={`${item}-${i}`}
-            className="whitespace-nowrap text-sm font-medium text-white/40 hover:text-white/70 transition-colors cursor-default select-none"
+            className="cursor-default select-none whitespace-nowrap text-sm font-semibold text-on-surface-variant transition-colors hover:text-primary"
           >
             {item}
-            <span className="ml-8 text-white/15">·</span>
+            <span className="ml-8 text-terracotta">·</span>
           </span>
         ))}
       </motion.div>

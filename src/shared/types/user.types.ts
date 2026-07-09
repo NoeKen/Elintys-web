@@ -16,14 +16,12 @@ export interface User {
   referralBalance: number;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  expiresAt: number;
+  isEmailVerified: boolean;
+  onboardingCompleted: boolean;
+  onboardingByRole: Record<string, boolean>;
+  onboardingData: Record<string, Record<string, string | string[] | number>>;
 }
 
 export interface AuthSession {
   user: User;
-  tokens: AuthTokens;
 }

@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Loader2, AlertCircle } from "lucide-react";
+import { ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { authService } from "../client/auth.service";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ROUTES } from "@/shared/constants/routes";
+import { getPostAuthPath, sanitizeRedirectPath } from "@/lib/auth/redirects";
 import { cn } from "@/shared/lib/utils";
 
 const loginSchema = z.object({
@@ -32,22 +33,19 @@ const item = {
 };
 
 const fieldClass = cn(
-  "w-full bg-transparent py-2 text-sm text-on-surface",
-  "border-0 border-b border-outline-variant",
-  "focus:outline-none focus:border-b-2 focus:border-accent",
-  "placeholder:text-on-surface-variant transition-colors"
+  "premium-input text-sm",
+  "placeholder:text-on-surface-variant"
 );
 
 const fieldErrorClass = cn(
-  "w-full bg-transparent py-2 text-sm text-on-surface",
-  "border-0 border-b border-destructive",
-  "focus:outline-none focus:border-b-2 focus:border-destructive",
-  "placeholder:text-on-surface-variant transition-colors"
+  "premium-input text-sm",
+  "border-destructive placeholder:text-on-surface-variant"
 );
 
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   const {
@@ -63,7 +61,7 @@ export function LoginForm() {
     try {
       const session = await authService.login(data);
       login(session);
-      router.push(ROUTES.DASHBOARD.HOME);
+      router.push(sanitizeRedirectPath(searchParams.get("redirect")) ?? getPostAuthPath(session.user));
     } catch (err: unknown) {
       const authErr = err as { code?: string };
       if (authErr?.code === "INVALID_CREDENTIALS") {
@@ -78,10 +76,11 @@ export function LoginForm() {
     <motion.div variants={container} initial="hidden" animate="show">
       {/* Titre */}
       <motion.div variants={item} className="mb-8">
-        <h1 className="font-serif text-[36px] text-on-surface leading-tight mb-2">
-          Bon retour 👋
+        <p className="section-eyebrow mb-4">Connexion</p>
+        <h1 className="font-serif text-[clamp(32px,5vw,44px)] text-navy-dark leading-tight mb-3">
+          Connectez-vous à Elintys
         </h1>
-        <p className="text-sm text-on-surface-variant">
+        <p className="text-sm leading-6 text-on-surface-variant">
           Veuillez entrer vos identifiants pour accéder à votre tableau de bord.
         </p>
       </motion.div>
@@ -90,7 +89,7 @@ export function LoginForm() {
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
           {/* Email */}
           <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label className="text-sm text-on-surface-variant">Adresse e-mail</label>
+            <label className="text-sm font-semibold text-on-surface">Adresse e-mail</label>
             <input
               type="email"
               autoComplete="email"
@@ -106,10 +105,10 @@ export function LoginForm() {
           {/* Mot de passe */}
           <motion.div variants={item} className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-sm text-on-surface-variant">Mot de passe</label>
+              <label className="text-sm font-semibold text-on-surface">Mot de passe</label>
               <Link
                 href={ROUTES.AUTH.FORGOT_PASSWORD}
-                className="text-sm text-accent hover:underline"
+                className="text-sm font-semibold text-accent hover:underline"
               >
                 Mot de passe oublié ?
               </Link>
@@ -127,7 +126,7 @@ export function LoginForm() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 rounded-md bg-destructive/8 border border-destructive/20 px-3 py-2.5"
+              className="flex items-center gap-2 rounded-2xl bg-destructive/8 border border-destructive/20 px-3 py-2.5"
             >
               <AlertCircle size={15} className="text-destructive shrink-0" />
               <p className="text-sm text-destructive">{globalError}</p>
@@ -140,9 +139,8 @@ export function LoginForm() {
               type="submit"
               disabled={isSubmitting}
               className={cn(
-                "w-full h-12 rounded-md bg-accent text-white text-sm font-semibold",
-                "flex items-center justify-center gap-2 transition-opacity",
-                "hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                "premium-button w-full min-h-12",
+                "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
             >
               {isSubmitting ? (
@@ -151,7 +149,10 @@ export function LoginForm() {
                   Connexion...
                 </>
               ) : (
-                "Se connecter"
+                <>
+                  Se connecter
+                  <ArrowRight size={16} aria-hidden="true" />
+                </>
               )}
             </button>
           </motion.div>
@@ -159,14 +160,14 @@ export function LoginForm() {
           {/* Séparateur */}
           <motion.div variants={item} className="flex items-center gap-3">
             <div className="flex-1 h-px bg-outline-variant" />
-            <span className="text-xs text-on-surface-variant px-3">ou</span>
+              <span className="px-3 text-xs font-semibold text-on-surface-variant">ou</span>
             <div className="flex-1 h-px bg-outline-variant" />
           </motion.div>
 
           {/* Bouton Google (désactivé) */}
           <motion.div variants={item} className="relative">
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
-              <span className="bg-on-surface text-white text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded">
+              <span className="rounded-full bg-navy text-white text-[9px] uppercase tracking-[0.1em] px-2 py-0.5">
                 BIENTÔT DISPONIBLE
               </span>
             </div>
@@ -174,7 +175,7 @@ export function LoginForm() {
               type="button"
               disabled
               className={cn(
-                "w-full h-12 rounded-md bg-surface-low border border-outline-variant",
+                "w-full h-12 rounded-full bg-white/65 border border-outline-variant",
                 "flex items-center justify-center gap-3 text-sm text-on-surface-variant",
                 "opacity-70 cursor-not-allowed"
               )}
@@ -187,7 +188,7 @@ export function LoginForm() {
           {/* Footer form */}
           <motion.p variants={item} className="text-center text-sm text-on-surface-variant">
             Vous n&apos;avez pas de compte ?{" "}
-            <Link href={ROUTES.AUTH.REGISTER} className="text-accent hover:underline font-medium">
+            <Link href={ROUTES.AUTH.REGISTER} className="text-accent hover:underline font-semibold">
               S&apos;inscrire
             </Link>
           </motion.p>

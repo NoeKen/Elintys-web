@@ -38,17 +38,18 @@ export function FeaturedSection({ events }: FeaturedSectionProps) {
   if (!events?.length) return null;
 
   return (
-    <section style={{ background: 'white', padding: '80px 0' }}>
+    <section className="cinematic-section">
       <div className="container-public">
         <div className="section-header">
           <div>
+            <span className="section-eyebrow">Sélection</span>
             <h2 className="section-title">Événements à la une</h2>
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: 14, marginTop: 6 }}>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-on-surface-variant">
               Les moments les plus attendus cette saison à Montréal.
             </p>
           </div>
           <Link href="/evenements?featured=true" className="link-voir-tout">
-            Voir tout →
+            Voir tout
           </Link>
         </div>
         <div className="featured-grid">

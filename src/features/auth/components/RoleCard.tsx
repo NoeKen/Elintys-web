@@ -6,8 +6,7 @@ import { cn } from "@/shared/lib/utils";
 
 interface RoleCardProps {
   icon: LucideIcon;
-  iconBg: string;
-  iconColor: string;
+  iconClassName: string;
   title: string;
   description: string;
   value: UserRole;
@@ -17,8 +16,7 @@ interface RoleCardProps {
 
 export function RoleCard({
   icon: Icon,
-  iconBg,
-  iconColor,
+  iconClassName,
   title,
   description,
   value,
@@ -28,21 +26,18 @@ export function RoleCard({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={() => onSelect(value)}
       className={cn(
-        "w-full flex items-center gap-4 p-4 rounded-xl text-left cursor-pointer",
-        "border-[1.5px] transition-colors duration-150",
+        "w-full flex items-center gap-4 p-4 rounded-2xl text-left cursor-pointer hover-lift",
+        "border transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         selected
-          ? "bg-accent-light border-accent"
-          : "bg-surface border-outline-variant hover:border-accent/40"
+          ? "bg-teal-pale/85 border-teal shadow-float"
+          : "bg-white/70 border-outline-variant hover:border-teal/40 hover:bg-white/90"
       )}
     >
-      {/* Icône */}
-      <div
-        className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-        style={{ backgroundColor: iconBg }}
-      >
-        <Icon size={20} style={{ color: iconColor }} />
+      <div className={cn("w-11 h-11 rounded-2xl flex items-center justify-center shrink-0", iconClassName)}>
+        <Icon size={20} />
       </div>
 
       {/* Texte */}
@@ -54,11 +49,11 @@ export function RoleCard({
       {/* Radio visuel */}
       <div
         className={cn(
-          "w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center",
-          selected ? "border-accent" : "border-outline-variant"
+          "w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors",
+          selected ? "border-teal bg-teal" : "border-outline-variant bg-white/70"
         )}
       >
-        {selected && <div className="w-2 h-2 rounded-full bg-accent" />}
+        {selected && <span className="h-2 w-2 rounded-full bg-white" />}
       </div>
     </button>
   );

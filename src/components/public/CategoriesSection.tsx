@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 
 const CATEGORIES = [
-  { label: 'Musique & Festivals', count: 124, bg: '#1A7A5E', slug: 'musique' },
-  { label: 'Affaires & Réseautage', count: 86, bg: '#0D1E35', slug: 'affaires' },
+  { label: 'Musique & Festivals', count: 124, bg: '#4A8E9E', slug: 'musique' },
+  { label: 'Affaires & Réseautage', count: 86, bg: '#1E3D4F', slug: 'affaires' },
   { label: 'Art & Culture', count: 52, bg: '#3C6478', slug: 'art' },
   { label: 'Gastronomie', count: 37, bg: '#6B4226', slug: 'gastronomie' },
   { label: 'Sport & Bien-être', count: 45, bg: '#C8862A', slug: 'sport' },
@@ -11,18 +12,23 @@ const CATEGORIES = [
 
 export function CategoriesSection() {
   return (
-    <section style={{ background: 'var(--surface)', padding: '80px 0' }}>
+    <section className="cinematic-section mesh-gradient">
       <div className="container-public">
-        <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 40 }}>
-          Explorer par passion
-        </h2>
+        <div className="mb-10 text-center">
+          <span className="section-eyebrow justify-center mb-3">
+            Découverte
+          </span>
+          <h2 className="section-title">
+            Explorer par passion
+          </h2>
+        </div>
         <div className="categories-grid">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/evenements?category=${cat.slug}`}
               className="category-tile"
-              style={{ background: cat.bg }}
+              style={{ '--category-color': cat.bg } as CSSProperties}
             >
               <div className="category-tile-overlay" />
               <div className="category-tile-content">

@@ -1,3 +1,5 @@
+import { Search } from 'lucide-react';
+
 interface EmptyStateProps {
   message: string;
   onReset?: () => void;
@@ -6,28 +8,16 @@ interface EmptyStateProps {
 
 export function EmptyState({ message, onReset, resetLabel = 'Effacer les filtres' }: EmptyStateProps) {
   return (
-    <div className="empty-state">
-      <div
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: '50%',
-          background: 'var(--surface-low)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 20,
-          fontSize: 28,
-        }}
-      >
-        🔍
+    <div className="empty-state glass-card">
+      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-teal-pale text-teal">
+        <Search className="h-7 w-7" aria-hidden="true" />
       </div>
-      <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface)', marginBottom: 8 }}>
+      <p className="mb-2 text-base font-semibold text-on-surface">
         Aucun résultat
       </p>
-      <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', maxWidth: 320 }}>{message}</p>
+      <p className="max-w-xs text-sm leading-6 text-on-surface-variant">{message}</p>
       {onReset && (
-        <button className="btn-secondary" onClick={onReset} style={{ marginTop: 20 }}>
+        <button className="btn-secondary mt-5" onClick={onReset}>
           {resetLabel}
         </button>
       )}

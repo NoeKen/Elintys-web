@@ -53,11 +53,11 @@ function ProgressBar({ label, pct }: { label: string; pct: number }) {
   const inView = useInView(ref, { once: true });
   return (
     <div ref={ref} className="flex flex-col gap-1.5">
-      <div className="flex justify-between text-xs text-white/50">
+      <div className="flex justify-between text-xs font-semibold text-on-surface-variant">
         <span>{label}</span>
         <span>{pct}%</span>
       </div>
-      <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+      <div className="h-1.5 overflow-hidden rounded-full bg-teal-pale">
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-accent to-on-primary-container"
           initial={{ width: 0 }}
@@ -73,7 +73,7 @@ export function SolutionStepper({ id }: { id?: string }) {
   const [active, setActive] = useState(0);
 
   return (
-    <section id={id} className="px-6 py-24 max-w-6xl mx-auto">
+    <section id={id} className="mx-auto max-w-6xl px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -81,43 +81,43 @@ export function SolutionStepper({ id }: { id?: string }) {
         transition={{ duration: 0.5 }}
         className="max-w-3xl mb-14"
       >
-        <span className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/60">
+        <span className="section-eyebrow mb-5">
           La solution Elintys
         </span>
-        <h2 className="mt-4 font-serif text-3xl md:text-[2.5rem] leading-tight tracking-tight text-white">
+        <h2 className="premium-heading mt-4 md:text-[2.5rem]">
           Un seul endroit. Chaque étape. Chaque acteur connecté.
         </h2>
-        <p className="mt-4 text-base leading-relaxed text-white/55">
+        <p className="premium-subtitle mt-4">
           Avec Elintys, vous n&apos;avancez plus seul. Chaque étape est connectée à la suivante — et
           peut être effectuée maintenant ou plus tard depuis votre tableau de bord.
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-[280px_1fr] gap-8">
+      <div className="grid gap-8 md:grid-cols-[280px_1fr]">
         <div className="flex flex-col gap-1">
           {STEPS.map((s, i) => (
             <button
               key={s.n}
               onClick={() => setActive(i)}
-              className="relative flex items-center gap-3 px-4 py-3 rounded-[8px] text-left transition-colors hover:bg-white/[0.04]"
+              className="relative flex items-center gap-3 rounded-[8px] px-4 py-3 text-left transition-colors hover:bg-teal-pale/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {active === i && (
                 <motion.div
                   layoutId="step-active-bg"
-                  className="absolute inset-0 rounded-[8px] bg-accent/[0.12]"
+                  className="absolute inset-0 rounded-[8px] bg-white/75 shadow-card"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
               <span
                 className={`relative z-10 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                  active === i ? 'bg-accent text-white' : 'bg-white/[0.08] text-white/40'
+                  active === i ? 'bg-accent text-white' : 'bg-white/75 text-on-surface-variant'
                 }`}
               >
                 {s.n}
               </span>
               <span
                 className={`relative z-10 text-sm font-medium transition-colors ${
-                  active === i ? 'text-white' : 'text-white/50'
+                  active === i ? 'text-navy-dark' : 'text-on-surface-variant'
                 }`}
               >
                 {s.label}
@@ -134,13 +134,13 @@ export function SolutionStepper({ id }: { id?: string }) {
               initial="hidden"
               animate="visible"
               exit={{ opacity: 0, y: -8, transition: { duration: 0.2 } }}
-              className="rounded-[14px] p-6 border border-white/[0.07] bg-white/[0.03]"
+              className="glass-card p-6"
             >
-              <span className="font-serif text-4xl text-white/10">
+              <span className="font-serif text-4xl text-teal/20">
                 {String(STEPS[active].n).padStart(2, '0')}
               </span>
-              <h3 className="font-serif text-2xl text-white mt-2 mb-3">{STEPS[active].label}</h3>
-              <p className="text-white/55 leading-relaxed">{STEPS[active].desc}</p>
+              <h3 className="mb-3 mt-2 font-serif text-2xl text-navy-dark">{STEPS[active].label}</h3>
+              <p className="leading-relaxed text-on-surface-variant">{STEPS[active].desc}</p>
 
               {active === 3 && (
                 <div className="mt-6 flex flex-col gap-3">
@@ -155,7 +155,7 @@ export function SolutionStepper({ id }: { id?: string }) {
       </div>
 
       <p className="mt-10 text-center">
-        <span className="inline-flex items-center rounded-full border border-accent/20 bg-accent/[0.06] px-5 py-2 text-sm text-on-primary-container">
+        <span className="inline-flex items-center rounded-full border border-accent/20 bg-white/75 px-5 py-2 text-sm font-semibold text-teal-dark shadow-card">
           → Chaque étape à votre rythme. Tout connecté dans un seul tableau de bord.
         </span>
       </p>

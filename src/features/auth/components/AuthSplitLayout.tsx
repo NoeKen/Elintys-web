@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowLeft, BadgeCheck, CalendarDays, Sparkles, Users } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface AuthorProps {
@@ -33,8 +34,18 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
 };
 
-const socialAvatarColors = ["bg-accent/40", "bg-on-primary-container/50", "bg-amber/40"];
+const socialAvatarColors = [
+  "bg-teal-pale text-teal",
+  "bg-gold-pale text-gold-dark",
+  "bg-terracotta-pale text-terracotta",
+];
 const socialInitials = ["A", "B", "C"];
+
+const featureItems = [
+  { icon: CalendarDays, label: "Événements structurés", tone: "bg-teal-pale text-teal" },
+  { icon: Users, label: "Rôles connectés", tone: "bg-gold-pale text-gold-dark" },
+  { icon: BadgeCheck, label: "Accès sécurisé", tone: "bg-sage-pale text-sage" },
+];
 
 export function AuthSplitLayout({
   headline,
@@ -49,149 +60,172 @@ export function AuthSplitLayout({
   children,
 }: AuthSplitLayoutProps) {
   return (
-    <div className="min-h-screen flex">
-      {/* ── Panneau gauche ── */}
+    <main className="mesh-gradient premium-noise relative min-h-screen overflow-hidden px-4 py-5 text-on-surface sm:px-6 lg:px-8">
       <div
-        className="hidden lg:flex w-1/2 relative overflow-hidden flex-col"
-        style={{ background: "linear-gradient(160deg, #0D1E35 0%, #162840 100%)" }}
-      >
-        {/* Grille overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-            opacity: 0.08,
-          }}
-        />
+        className="pointer-events-none absolute left-[8%] top-[10%] h-64 w-64 rounded-full bg-teal-pale/70 blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute bottom-[8%] right-[7%] h-72 w-72 rounded-full bg-terracotta-pale/70 blur-3xl"
+        aria-hidden="true"
+      />
 
-        {/* Logo */}
-        <div className="relative z-10 p-8">
-          <span className="font-serif text-2xl text-white">Elintys</span>
-        </div>
+      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between">
+        <Link href="/" className="font-serif text-2xl text-primary transition-opacity hover:opacity-80">
+          Elintys
+        </Link>
+        <Link href={backHref} className="premium-button-ghost min-h-10">
+          <ArrowLeft size={16} aria-hidden="true" />
+          {backLabel}
+        </Link>
+      </header>
 
-        {/* Contenu central */}
-        <div className="relative z-10 flex-1 flex items-center px-12">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="w-full space-y-6"
-          >
-            {headline && (
-              <motion.h2
-                variants={itemVariants}
-                className="font-serif italic text-white text-[44px] leading-[1.15]"
-              >
-                {headline}
-              </motion.h2>
-            )}
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-92px)] w-full max-w-6xl items-center gap-8 py-8 lg:grid-cols-[0.88fr_1fr] lg:py-10">
+        <aside className="hidden lg:block">
+          <div className="glass-card overflow-hidden p-7">
+            <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-pale text-teal">
+              <Sparkles size={22} aria-hidden="true" />
+            </div>
 
-            {subheadline && (
-              <motion.p
-                variants={itemVariants}
-                className="font-serif italic text-white/70 text-[22px] leading-[1.4]"
-              >
-                {subheadline}
-              </motion.p>
-            )}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="space-y-6"
+            >
+              {headline && (
+                <motion.h2
+                  variants={itemVariants}
+                  className="font-serif text-[clamp(38px,4vw,58px)] leading-[1.03] text-navy-dark"
+                >
+                  {headline}
+                </motion.h2>
+              )}
 
-            {quote && (
-              <motion.p
-                variants={itemVariants}
-                className="font-serif italic text-white text-[44px] leading-[1.15]"
-              >
-                «{quote}
-              </motion.p>
-            )}
+              {subheadline && (
+                <motion.p
+                  variants={itemVariants}
+                  className="max-w-md text-base leading-7 text-on-surface-variant"
+                >
+                  {subheadline}
+                </motion.p>
+              )}
 
-            {author && (
-              <motion.div variants={itemVariants} className="flex items-center gap-3 pt-2">
-                <div className="w-10 h-10 rounded-full bg-accent/30 flex items-center justify-center shrink-0 overflow-hidden">
-                  {author.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={author.avatarUrl}
-                      alt={author.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-sm font-bold">
-                      {author.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">{author.name}</p>
-                  <p className="text-white/60 text-xs">{author.title}</p>
-                </div>
-              </motion.div>
-            )}
+              {quote && (
+                <motion.blockquote variants={itemVariants} className="border-l-4 border-accent pl-5">
+                  <p className="font-serif text-[clamp(34px,4vw,52px)] leading-[1.06] text-navy-dark">
+                    « {quote} »
+                  </p>
+                </motion.blockquote>
+              )}
 
-            {showSocialProof && (
-              <motion.div variants={itemVariants} className="flex items-center gap-3 pt-2">
-                <div className="flex items-center">
-                  {socialAvatarColors.map((color, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-8 h-8 rounded-full border-2 border-[#162840] flex items-center justify-center",
-                        color,
-                        i > 0 && "-ml-2"
-                      )}
-                    >
-                      <span className="text-white text-[10px] font-bold">{socialInitials[i]}</span>
+              {author && (
+                <motion.div variants={itemVariants} className="flex items-center gap-3 pt-2">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-teal-pale text-teal">
+                    {author.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={author.avatarUrl}
+                        alt={author.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold">{author.name.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-on-surface">{author.name}</p>
+                    <p className="text-xs text-on-surface-variant">{author.title}</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {showSocialProof && (
+                <motion.div
+                  variants={itemVariants}
+                  className="flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-4"
+                >
+                  <div className="flex items-center">
+                    {socialAvatarColors.map((color, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-full border-2 border-white font-bold",
+                          color,
+                          i > 0 && "-ml-2"
+                        )}
+                      >
+                        <span className="text-[10px]">{socialInitials[i]}</span>
+                      </div>
+                    ))}
+                    <div className="-ml-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-accent text-white">
+                      <span className="text-[8px] font-bold leading-none">+200</span>
                     </div>
-                  ))}
-                  <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center -ml-2 border-2 border-[#162840]">
-                    <span className="text-white text-[8px] font-bold leading-none">+200</span>
+                  </div>
+                  <p className="text-sm font-semibold text-on-surface-variant">
+                    Plus de 200 professionnels nous font confiance
+                  </p>
+                </motion.div>
+              )}
+
+              <motion.div variants={itemVariants} className="grid gap-3 pt-2">
+                {featureItems.map((feature) => {
+                  const Icon = feature.icon;
+                  return (
+                    <div
+                      key={feature.label}
+                      className="flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-3.5"
+                    >
+                      <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", feature.tone)}>
+                        <Icon size={17} aria-hidden="true" />
+                      </div>
+                      <p className="text-sm font-semibold text-on-surface">{feature.label}</p>
+                    </div>
+                  );
+                })}
+              </motion.div>
+            </motion.div>
+
+            <div className="mt-8 flex items-end justify-between gap-5 border-t border-outline-variant/60 pt-5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">
+                Curated with excellence · Québec
+              </span>
+              {progressStep != null && progressTotal != null && (
+                <div className="flex min-w-32 flex-col items-end gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+                    ÉTAPE {progressStep} SUR {progressTotal}
+                  </span>
+                  <div className="h-1.5 w-28 overflow-hidden rounded-full bg-teal-pale">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-500"
+                      style={{ width: `${(progressStep / progressTotal) * 100}%` }}
+                    />
                   </div>
                 </div>
-                <p className="text-white text-sm">Plus de 200 professionnels nous font confiance</p>
-              </motion.div>
-            )}
-          </motion.div>
-        </div>
-
-        {/* Footer gauche */}
-        <div className="relative z-10 px-8 pb-8 flex justify-between items-end">
-          <span className="text-white/40 text-[10px] uppercase tracking-[0.15em]">
-            CURATED WITH EXCELLENCE • QUEBEC
-          </span>
-          {progressStep != null && progressTotal != null && (
-            <div className="flex flex-col items-end gap-1.5">
-              <span className="text-white/40 text-[10px] uppercase tracking-[0.05em]">
-                ÉTAPE {progressStep} SUR {progressTotal}
-              </span>
-              <div className="w-28 h-[3px] rounded-full bg-white/20 overflow-hidden">
-                <div
-                  className="h-full bg-accent rounded-full transition-all duration-500"
-                  style={{ width: `${(progressStep / progressTotal) * 100}%` }}
-                />
+              )}
               </div>
             </div>
-          )}
+        </aside>
+
+        <div className="flex justify-center lg:justify-end">
+          <div className="glass-card w-full max-w-[560px] p-5 sm:p-8 lg:p-9">
+            {progressStep != null && progressTotal != null && (
+              <div className="mb-6 flex items-center justify-between rounded-2xl border border-outline-variant/60 bg-white/65 px-4 py-3 lg:hidden">
+                <span className="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+                  Étape {progressStep} sur {progressTotal}
+                </span>
+                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-teal-pale">
+                  <div
+                    className="h-full rounded-full bg-accent"
+                    style={{ width: `${(progressStep / progressTotal) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            {children}
+          </div>
         </div>
       </div>
-
-      {/* ── Panneau droit ── */}
-      <div className="flex-1 bg-surface flex flex-col min-h-screen">
-        {/* Lien retour */}
-        <div className="flex justify-end p-6">
-          <Link
-            href={backHref}
-            className="text-sm text-on-surface-variant hover:text-on-surface transition-colors"
-          >
-            ← {backLabel}
-          </Link>
-        </div>
-
-        {/* Contenu centré */}
-        <div className="flex-1 flex items-center justify-center px-6 py-8">
-          <div className="w-full max-w-[480px]">{children}</div>
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

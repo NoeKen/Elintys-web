@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import * as Checkbox from "@radix-ui/react-checkbox";
-import { Check, AlertCircle } from "lucide-react";
+import { ArrowRight, Check, AlertCircle } from "lucide-react";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { PasswordStrengthBar } from "@/shared/ui/PasswordStrengthBar";
 import { StepIndicator } from "./StepIndicator";
@@ -16,7 +16,6 @@ import { cn } from "@/shared/lib/utils";
 
 const step1Schema = z
   .object({
-    fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
     email: z.string().email("Adresse email invalide"),
     password: z
       .string()
@@ -34,7 +33,6 @@ const step1Schema = z
   });
 
 export type Step1Data = {
-  fullName: string;
   email: string;
   password: string;
 };
@@ -42,6 +40,7 @@ export type Step1Data = {
 interface RegisterStep1FormProps {
   onSuccess: (data: Step1Data) => void;
   emailTakenError?: string | null;
+  initialEmail?: string;
 }
 
 const container = {
@@ -55,20 +54,16 @@ const item = {
 };
 
 const baseField = cn(
-  "w-full bg-transparent py-2 text-sm text-on-surface",
-  "border-0 border-b border-outline-variant",
-  "focus:outline-none focus:border-b-2 focus:border-accent",
-  "placeholder:text-on-surface-variant transition-colors"
+  "premium-input text-sm",
+  "placeholder:text-on-surface-variant"
 );
 
 const errorField = cn(
-  "w-full bg-transparent py-2 text-sm text-on-surface",
-  "border-0 border-b border-destructive",
-  "focus:outline-none focus:border-b-2 focus:border-destructive",
-  "placeholder:text-on-surface-variant transition-colors"
+  "premium-input text-sm",
+  "border-destructive placeholder:text-on-surface-variant"
 );
 
-export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1FormProps) {
+export function RegisterStep1Form({ onSuccess, emailTakenError, initialEmail = "" }: RegisterStep1FormProps) {
   const {
     register,
     handleSubmit,
@@ -77,7 +72,7 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof step1Schema>>({
     resolver: zodResolver(step1Schema),
-    defaultValues: { acceptTerms: false },
+    defaultValues: { acceptTerms: false, email: initialEmail },
   });
 
   const password = watch("password") ?? "";
@@ -91,7 +86,7 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
   }, [emailTakenError, setError]);
 
   const onSubmit = (data: z.infer<typeof step1Schema>) => {
-    onSuccess({ fullName: data.fullName, email: data.email, password: data.password });
+    onSuccess({ email: data.email, password: data.password });
   };
 
   return (
@@ -103,44 +98,37 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
 
       {/* Chip gratuit */}
       <div className="mb-4">
-        <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent-light text-accent text-[10px] uppercase tracking-[0.08em] font-semibold">
+        <span className="inline-flex items-center rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-accent">
           GRATUIT
         </span>
       </div>
 
-      <h1 className="font-serif text-[32px] text-on-surface leading-tight mb-8">
+      <h1 className="mb-8 font-serif text-[clamp(32px,5vw,44px)] leading-tight text-navy-dark">
         Créer votre compte
       </h1>
 
+      {emailTakenError && (
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-destructive/20 bg-white/80 px-4 py-3 text-sm text-destructive shadow-card">
+          <AlertCircle size={17} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <p>{emailTakenError}</p>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
-          {/* Nom complet */}
-          <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
-              NOM COMPLET
-            </label>
-            <input
-              type="text"
-              placeholder="Jean Dupont"
-              autoComplete="name"
-              className={errors.fullName ? errorField : baseField}
-              {...register("fullName")}
-            />
-            {errors.fullName && (
-              <p className="text-xs text-destructive">{errors.fullName.message}</p>
-            )}
-          </motion.div>
-
           {/* Email */}
           <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
+            <label htmlFor="register-email" className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-bold">
               ADRESSE E-MAIL
             </label>
             <div className="relative">
               <input
+                id="register-email"
                 type="email"
                 placeholder="nom@exemple.com"
                 autoComplete="email"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "register-email-error" : undefined}
                 className={cn(
                   errors.email ? errorField : baseField,
                   errors.email && "pr-8"
@@ -155,16 +143,17 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
               )}
             </div>
             {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
+              <p id="register-email-error" className="text-xs text-destructive">{errors.email.message}</p>
             )}
           </motion.div>
 
           {/* Mot de passe */}
           <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
+            <label htmlFor="register-password" className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-bold">
               MOT DE PASSE
             </label>
             <PasswordInput
+              id="register-password"
               placeholder="••••••••"
               autoComplete="new-password"
               error={errors.password?.message}
@@ -175,10 +164,11 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
 
           {/* Confirmer mot de passe */}
           <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
+            <label htmlFor="register-confirm-password" className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-bold">
               CONFIRMER LE MOT DE PASSE
             </label>
             <PasswordInput
+              id="register-confirm-password"
               placeholder="••••••••"
               autoComplete="new-password"
               error={errors.confirmPassword?.message}
@@ -192,7 +182,7 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
             <Checkbox.Root
               id="acceptTerms"
               className={cn(
-                "w-4 h-4 shrink-0 mt-0.5 rounded border border-outline-variant bg-surface",
+                "w-5 h-5 shrink-0 mt-0.5 rounded-md border border-outline-variant bg-white/75",
                 "data-[state=checked]:bg-accent data-[state=checked]:border-accent",
                 "focus:outline-none focus:ring-2 focus:ring-accent/30 transition-colors"
               )}
@@ -212,13 +202,13 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
             </Checkbox.Root>
             <label htmlFor="acceptTerms" className="text-sm text-on-surface-variant cursor-pointer leading-relaxed">
               J&apos;accepte les{" "}
-              <a href="#" className="font-bold text-on-surface hover:underline">
+              <Link href="/conditions" className="font-bold text-on-surface hover:underline">
                 conditions d&apos;utilisation
-              </a>{" "}
+              </Link>{" "}
               et la{" "}
-              <a href="#" className="font-bold text-on-surface hover:underline">
+              <Link href="/confidentialite" className="font-bold text-on-surface hover:underline">
                 politique de confidentialité
-              </a>
+              </Link>
               .
             </label>
           </motion.div>
@@ -232,19 +222,19 @@ export function RegisterStep1Form({ onSuccess, emailTakenError }: RegisterStep1F
               type="submit"
               disabled={isSubmitting}
               className={cn(
-                "w-full h-12 rounded-md bg-accent text-white text-sm font-semibold",
-                "flex items-center justify-center transition-opacity",
-                "hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                "premium-button w-full min-h-12",
+                "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
             >
-              Continuer →
+              Continuer
+              <ArrowRight size={16} aria-hidden="true" />
             </button>
           </motion.div>
 
           {/* Footer */}
           <motion.p variants={item} className="text-center text-sm text-on-surface-variant">
             Vous avez déjà un compte ?{" "}
-            <Link href={ROUTES.AUTH.LOGIN} className="text-accent hover:underline font-medium">
+            <Link href={ROUTES.AUTH.LOGIN} className="text-accent hover:underline font-semibold">
               Se connecter
             </Link>
           </motion.p>
