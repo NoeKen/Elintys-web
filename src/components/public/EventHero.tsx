@@ -1,7 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { CalendarDays, MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 interface EventLocation {
   city?: string;
@@ -28,7 +30,7 @@ function formatDateTime(dateStr: string) {
   });
 }
 
-function MetaItem({ label, value, icon }: { label: string; value: string; icon: string }) {
+function MetaItem({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
   return (
     <div>
       <span
@@ -44,8 +46,9 @@ function MetaItem({ label, value, icon }: { label: string; value: string; icon: 
       >
         {label}
       </span>
-      <span>
-        {icon} {value}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        {icon}
+        {value}
       </span>
     </div>
   );
@@ -156,20 +159,24 @@ export function EventHero({ event }: EventHeroProps) {
           }}
         >
           {event.startDate && (
-            <MetaItem label="Date & Heure" value={formatDateTime(event.startDate)} icon="📅" />
+            <MetaItem
+              label="Date & Heure"
+              value={formatDateTime(event.startDate)}
+              icon={<CalendarDays size={16} aria-hidden="true" />}
+            />
           )}
           {(event.location?.address ?? event.location?.city) && (
             <MetaItem
               label="Lieu"
               value={event.location?.address ?? event.location?.city ?? ''}
-              icon="📍"
+              icon={<MapPin size={16} aria-hidden="true" />}
             />
           )}
           {event.attendeesCount != null && event.attendeesCount > 0 && (
             <MetaItem
               label="Participants"
               value={`${event.attendeesCount} personnes inscrites`}
-              icon="👥"
+              icon={<Users size={16} aria-hidden="true" />}
             />
           )}
         </div>

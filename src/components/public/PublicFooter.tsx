@@ -24,12 +24,12 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
   return (
     <div>
       <h4 className="footer-col-title">{title}</h4>
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
         {links.map((l) => (
           <li key={l.href}>
             <Link
               href={l.href}
-              style={{ fontSize: 14, opacity: 0.70, color: 'white', textDecoration: 'none', transition: 'opacity 200ms' }}
+              className="text-sm text-on-surface-variant no-underline transition-colors hover:text-primary"
             >
               {l.label}
             </Link>
@@ -47,18 +47,7 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
       aria-label={label}
       target="_blank"
       rel="noopener noreferrer"
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: '50%',
-        border: '1px solid rgba(255,255,255,0.18)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'rgba(255,255,255,0.60)',
-        transition: 'border-color 200ms, color 200ms',
-        textDecoration: 'none',
-      }}
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/70 bg-white/60 text-on-surface-variant no-underline shadow-[var(--shadow-soft-line)] transition-colors hover:border-teal/30 hover:text-teal"
     >
       {children}
     </a>
@@ -67,23 +56,23 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
 
 export function PublicFooter() {
   return (
-    <footer style={{ background: 'var(--color-navy)', color: 'white', padding: '64px 0 32px' }}>
+    <footer className="border-t border-outline-variant/60 bg-white/30 py-12 backdrop-blur-md">
       <div className="container-public">
         <div className="footer-grid">
           <div>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: 'var(--color-teal-light)' }}>
+            <span className="font-serif text-2xl text-primary">
               Elintys
             </span>
-            <p style={{ fontSize: 13, opacity: 0.55, marginTop: 14, lineHeight: 1.75, maxWidth: 260 }}>
+            <p className="mt-3 max-w-[270px] text-sm leading-7 text-on-surface-variant">
               L&apos;art de la curation événementielle. Nous connectons les esprits créatifs aux
               expériences les plus mémorables de Montréal.
             </p>
-            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+            <div className="mt-5 flex gap-2.5">
               <SocialIcon href="https://instagram.com" label="Instagram">
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
                   <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+                  <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none" />
                 </svg>
               </SocialIcon>
               <SocialIcon href="https://tiktok.com" label="TikTok">
@@ -92,8 +81,8 @@ export function PublicFooter() {
                 </svg>
               </SocialIcon>
               <SocialIcon href="https://linkedin.com" label="LinkedIn">
-                <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6ZM2 9h4v12H2z" />
                   <circle cx="4" cy="4" r="2" />
                 </svg>
               </SocialIcon>
@@ -105,40 +94,18 @@ export function PublicFooter() {
 
           <div>
             <h4 className="footer-col-title">NEWSLETTER</h4>
-            <p style={{ fontSize: 13, opacity: 0.60, marginBottom: 16, lineHeight: 1.65 }}>
+            <p className="mb-4 text-sm leading-6 text-on-surface-variant">
               Recevez chaque jeudi notre sélection exclusive directement dans votre boîte.
             </p>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="Email"
                 aria-label="Adresse courriel pour la newsletter"
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 8,
-                  color: 'white',
-                  fontSize: 14,
-                  fontFamily: 'var(--font-sans)',
-                  outline: 'none',
-                  minWidth: 0,
-                }}
+                className="premium-input min-w-0 flex-1 text-sm"
               />
               <button
-                style={{
-                  padding: '10px 16px',
-                  background: 'var(--color-teal)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontWeight: 700,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)',
-                  flexShrink: 0,
-                }}
+                className="premium-button min-h-11 shrink-0 px-5 py-2 text-sm"
               >
                 OK
               </button>
@@ -146,27 +113,16 @@ export function PublicFooter() {
           </div>
         </div>
 
-        <div
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            paddingTop: 24,
-            marginTop: 0,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 12,
-          }}
-        >
-          <span style={{ fontSize: 12, opacity: 0.35 }}>
-            © 2025 Elintys. L&apos;art de la curation événementielle.
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/60 pt-6">
+          <span className="text-xs text-on-surface-variant/70">
+            © 2026 Elintys. L&apos;art de la curation événementielle.
           </span>
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div className="flex gap-6">
             {BOTTOM_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                style={{ fontSize: 12, opacity: 0.45, textDecoration: 'none', color: 'white' }}
+                className="text-xs text-on-surface-variant/70 no-underline transition-colors hover:text-primary"
               >
                 {l.label}
               </Link>

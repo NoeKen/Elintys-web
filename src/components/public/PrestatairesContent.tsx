@@ -54,7 +54,7 @@ export function PrestatairesContent({
     <div className="catalog-layout container-public">
       <aside className="catalog-filters">
         <div className="filter-header">
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>Filtres</h3>
+          <h3 className="text-base font-bold text-on-surface">Filtres</h3>
           <button className="filter-reset" onClick={resetFilters}>
             Réinitialiser
           </button>
@@ -88,7 +88,7 @@ export function PrestatairesContent({
         </FilterSection>
 
         <FilterSection title="GAMME DE PRIX">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2">
             {PRICE_CHIPS.map((p) => (
               <button
                 key={p}
@@ -107,15 +107,8 @@ export function PrestatairesContent({
       </aside>
 
       <main>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: 24,
-          }}
-        >
-          <p style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>
+        <div className="mb-6 flex items-baseline justify-between">
+          <p className="rounded-full border border-outline-variant/70 bg-white/70 px-4 py-2 text-sm font-medium text-on-surface-variant shadow-[var(--shadow-soft-line)] backdrop-blur-md">
             {total} prestataire{total !== 1 ? 's' : ''} trouvé{total !== 1 ? 's' : ''}
           </p>
         </div>

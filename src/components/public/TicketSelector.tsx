@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Heart, Lock, Share2 } from 'lucide-react';
 
 interface TicketType {
   _id: string;
@@ -187,19 +188,28 @@ export function TicketSelector({ eventId, ticketTypes }: TicketSelectorProps) {
           transition: 'all 200ms',
         }}
       >
-        Acheter mes billets →
+        Acheter mes billets
       </button>
 
       <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 10 }}>
-        🔒 Paiement sécurisé par Stripe
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Lock size={13} aria-hidden="true" />
+          Paiement sécurisé par Stripe
+        </span>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
         <button style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--on-surface-variant)', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>
-          📤 Partager
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Share2 size={14} aria-hidden="true" />
+            Partager
+          </span>
         </button>
         <button style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--on-surface-variant)', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>
-          🤍 Sauvegarder
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Heart size={14} aria-hidden="true" />
+            Sauvegarder
+          </span>
         </button>
       </div>
     </div>
