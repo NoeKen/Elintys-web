@@ -292,6 +292,19 @@ RESEND_API_KEY=
 - Sélecteurs E2E : `data-testid` uniquement — jamais de sélecteurs CSS
 - Nommage : `'devrait [comportement attendu]'`
 
+**Commandes** : `npm test`, `npm run test:watch`, `npm run test:coverage`, `npm run test:e2e`.
+Détail complet (conventions, seuils de couverture, travail restant) : voir
+**[`TESTING.md`](./TESTING.md)**.
+
+- 100% de couverture est l'objectif — les tests rendent le vibe coding sûr
+- Toute nouvelle fonction s'accompagne d'un test correspondant
+- Tout bug corrigé s'accompagne d'un test de non-régression
+- Toute gestion d'erreur ajoutée s'accompagne d'un test qui déclenche l'erreur
+- Tout conditionnel (if/else, switch) est testé sur ses deux branches
+- Ne jamais committer du code qui fait échouer les tests existants
+- `vitest.config.ts` verrouille à 100% chaque module déjà entièrement couvert
+  (`coverage.thresholds`) — ajouter tout nouveau module 100% à cette liste
+
 ---
 
 ## Ce que Claude Code NE doit JAMAIS faire
