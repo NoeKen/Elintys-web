@@ -1,6 +1,6 @@
 import { GradientMesh } from '@/components/landing/GradientMesh';
 import { ScrollProgress } from '@/components/landing/ScrollProgress';
-import { LandingNav } from '@/components/landing/LandingNav';
+import { PublicNavbar } from '@/components/public/PublicNavbar';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { EventMarquee } from '@/components/landing/EventMarquee';
 import { ProblemSection } from '@/components/landing/ProblemSection';
@@ -16,7 +16,7 @@ export default function RootPage() {
     <div className="page-premium-bg mesh-gradient relative min-h-screen overflow-x-hidden text-on-surface">
       <GradientMesh />
       <ScrollProgress />
-      <LandingNav />
+      <PublicNavbar showWaitlistCta fixed />
       <main className="relative">
         <LandingHero />
         <EventMarquee />

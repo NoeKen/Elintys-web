@@ -6,6 +6,27 @@ Il définit les règles absolues de ce dépôt.
 
 ---
 
+## Philosophie de Design — directive permanente
+
+Avant toute nouvelle interface ou fonctionnalité UI, lire et appliquer
+**[`../docs/design-principles.md`](../docs/design-principles.md)**.
+
+Cette directive de gouvernance s'applique à toutes les interfaces d'Elintys
+(landing page, app web, mobile, dashboard, back-office). Elle définit
+l'approche émotionnelle et narrative du design, prime sur les préférences
+esthétiques par défaut, et ne doit jamais être ignorée sans justification
+explicite.
+
+Rappel rapide — avant toute nouvelle interface, répondre mentalement à :
+1. Quelle émotion doit ressentir l'utilisateur ?
+2. Quelle histoire raconte cette page ?
+3. Pourquoi cette interface est-elle différente des autres pages d'Elintys ?
+4. Est-ce que cette page pourrait être confondue avec un template SaaS générique ?
+
+Si la réponse à la question 4 est oui, repenser la conception avant implémentation.
+
+---
+
 ## Projet
 
 **Elintys** est une plateforme SaaS événementielle québécoise (Montréal).
@@ -270,6 +291,19 @@ RESEND_API_KEY=
 - Flows E2E avec Playwright : inscription, achat billet, scan QR
 - Sélecteurs E2E : `data-testid` uniquement — jamais de sélecteurs CSS
 - Nommage : `'devrait [comportement attendu]'`
+
+**Commandes** : `npm test`, `npm run test:watch`, `npm run test:coverage`, `npm run test:e2e`.
+Détail complet (conventions, seuils de couverture, travail restant) : voir
+**[`TESTING.md`](./TESTING.md)**.
+
+- 100% de couverture est l'objectif — les tests rendent le vibe coding sûr
+- Toute nouvelle fonction s'accompagne d'un test correspondant
+- Tout bug corrigé s'accompagne d'un test de non-régression
+- Toute gestion d'erreur ajoutée s'accompagne d'un test qui déclenche l'erreur
+- Tout conditionnel (if/else, switch) est testé sur ses deux branches
+- Ne jamais committer du code qui fait échouer les tests existants
+- `vitest.config.ts` verrouille à 100% chaque module déjà entièrement couvert
+  (`coverage.thresholds`) — ajouter tout nouveau module 100% à cette liste
 
 ---
 
