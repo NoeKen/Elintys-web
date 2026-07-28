@@ -14,25 +14,37 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+const STATIC_FETCH_TIMEOUT_MS = 3_000;
+
+async function fetchJsonWithTimeout<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(STATIC_FETCH_TIMEOUT_MS),
+    });
+
+    if (!res.ok) return null;
+
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
 
 export default async function EvenementsPage() {
-  const [featuredRes, recentRes] = await Promise.allSettled([
-    fetch(`${API_URL}/discovery/featured`, { next: { revalidate: 60 } }),
-    fetch(`${API_URL}/events?limit=5&status=published`, { next: { revalidate: 60 } }),
+  const [featuredData, recentData] = await Promise.all([
+    fetchJsonWithTimeout<{ data?: unknown[] } | unknown[]>(`${API_URL}/discovery/featured`),
+    fetchJsonWithTimeout<{ data?: unknown[]; items?: unknown[] } | unknown[]>(
+      `${API_URL}/events?limit=5&status=published`,
+    ),
   ]);
 
-  const featuredData =
-    featuredRes.status === 'fulfilled' && featuredRes.value.ok
-      ? await featuredRes.value.json()
-      : null;
-
-  const recentData =
-    recentRes.status === 'fulfilled' && recentRes.value.ok
-      ? await recentRes.value.json()
-      : null;
-
-  const featured: unknown[] = featuredData?.data ?? featuredData ?? [];
-  const recent: unknown[] = recentData?.data ?? recentData?.items ?? [];
+  const featured: unknown[] = Array.isArray(featuredData)
+    ? featuredData
+    : featuredData?.data ?? [];
+  const recent: unknown[] = Array.isArray(recentData)
+    ? recentData
+    : recentData?.data ?? recentData?.items ?? [];
 
   return (
     <>
