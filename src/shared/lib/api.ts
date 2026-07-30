@@ -97,15 +97,22 @@ async function request<T>(
   config: ApiRequestConfig = {},
   retried = false,
 ): Promise<ApiResponse<T>> {
+  const isFormData =
+    typeof FormData !== "undefined" && body instanceof FormData;
   const response = await fetch(buildUrl(path, config.params), {
     method,
     credentials: "include",
     signal: config.signal,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...config.headers,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body:
+      body === undefined
+        ? undefined
+        : isFormData
+          ? body
+          : JSON.stringify(body),
   });
 
   if (shouldRefresh(path, response.status, retried)) {

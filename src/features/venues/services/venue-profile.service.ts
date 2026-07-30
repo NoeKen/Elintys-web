@@ -1,3 +1,5 @@
+import api from '@/shared/lib/api';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export interface VenueProfile {
@@ -29,6 +31,13 @@ export interface VenueBooking {
   createdAt: string;
 }
 
+export interface VenueCatalogResponse {
+  data: VenueProfile[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 async function authFetch<T>(
   url: string,
   token: string,
@@ -58,6 +67,13 @@ async function authFetch<T>(
 }
 
 export const venueProfileService = {
+  async list(page = 1, limit = 20): Promise<VenueCatalogResponse> {
+    const response = await api.get<VenueCatalogResponse>('/venues', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
   async getMyProfile(token: string): Promise<VenueProfile> {
     return authFetch<VenueProfile>('/venues/me', token);
   },

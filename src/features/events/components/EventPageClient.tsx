@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { CalendarDays, MapPin, Ticket } from 'lucide-react';
 import { PurchaseModal } from '@/components/tickets/PurchaseModal';
 import { cn } from '@/shared/lib/utils';
+import type { MediaImageSource } from '@/shared/types/media.types';
+import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 interface TicketType {
   _id: string;
@@ -27,7 +29,7 @@ interface Event {
   _id: string;
   title: string;
   description?: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   startDate: string;
   endDate?: string;
   location?: EventLocation;
@@ -42,6 +44,9 @@ interface Props {
 
 export function EventPageClient({ event, ticketTypes }: Props) {
   const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
+  const coverUrl = event.coverImage
+    ? getOptimizedMediaUrl(event.coverImage, 'cover')
+    : undefined;
 
   const startDate = new Date(event.startDate).toLocaleDateString('fr-CA', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -52,12 +57,11 @@ export function EventPageClient({ event, ticketTypes }: Props) {
       <div className="container-public">
         <article className="public-detail-hero">
           <div className="public-detail-cover">
-            {event.coverImage ? (
+            {coverUrl ? (
               <Image
-                src={event.coverImage}
+                src={coverUrl}
                 alt={event.title}
                 fill
-                unoptimized
                 className="image-cinematic"
                 sizes="(max-width: 768px) 100vw, 1200px"
                 priority

@@ -25,7 +25,7 @@ const AUTH_ONLY_PREFIXES = [
   "/reinitialiser-mot-de-passe",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Source de vérité : cookies httpOnly posés par NestJS.
