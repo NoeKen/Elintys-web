@@ -1,6 +1,5 @@
 import type { JoinWaitlistInput, JoinWaitlistResult } from '../types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+import { API_URL } from '@/shared/config/api-url';
 
 export const waitlistService = {
   async join(input: JoinWaitlistInput): Promise<JoinWaitlistResult> {

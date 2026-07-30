@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { EventPageClient } from '@/features/events/components/EventPageClient';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+import { API_URL } from '@/shared/config/api-url';
 
 interface Props {
   params: Promise<{ slug: string }>;

@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/public/HeroSection';
 import { FeaturedSection } from '@/components/public/FeaturedSection';
 import { CategoriesSection } from '@/components/public/CategoriesSection';
 import { WeeklySection } from '@/components/public/WeeklySection';
+import { API_URL } from '@/shared/config/api-url';
 
 export const metadata: Metadata = {
   title: 'Événements à Montréal',
@@ -13,7 +14,6 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
 const STATIC_FETCH_TIMEOUT_MS = 3_000;
 
 async function fetchJsonWithTimeout<T>(url: string): Promise<T | null> {

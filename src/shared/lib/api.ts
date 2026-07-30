@@ -1,3 +1,5 @@
+import { API_URL } from "@/shared/config/api-url";
+
 export interface ApiResponse<T> {
   data: T;
   status: number;
@@ -19,8 +21,6 @@ export class ApiClientError extends Error {
     this.name = "ApiClientError";
   }
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 let refreshPromise: Promise<boolean> | null = null;
 

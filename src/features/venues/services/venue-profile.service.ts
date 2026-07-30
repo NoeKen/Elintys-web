@@ -1,6 +1,5 @@
 import api from '@/shared/lib/api';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+import { API_URL } from '@/shared/config/api-url';
 
 export interface VenueProfile {
   _id: string;
