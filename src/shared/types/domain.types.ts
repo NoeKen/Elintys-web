@@ -1,4 +1,5 @@
 // ─── Events ──────────────────────────────────────────────────────────────────
+import type { MediaImageSource } from './media.types';
 
 export interface Event {
   _id: string;
@@ -6,7 +7,7 @@ export interface Event {
   title: string;
   slug: string;
   description: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   startDate: string;
   endDate?: string;
   locationType: 'physical' | 'online' | 'hybrid';

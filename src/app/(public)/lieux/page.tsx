@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SearchBar } from '@/components/public/SearchBar';
 import { LieuxContent } from '@/components/public/LieuxContent';
 import type { PublicVenue } from '@/components/public/VenueCard';
+import { API_URL } from '@/shared/config/api-url';
 
 export const metadata: Metadata = {
   title: "Lieux d'exception à Montréal",
@@ -10,8 +11,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 60;
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
 
 interface VenuesResponse {
   data?: PublicVenue[];

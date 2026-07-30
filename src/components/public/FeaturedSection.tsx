@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { EventCard, type EventCardData } from '@/components/events/EventCard';
+import type { MediaImageSource } from '@/shared/types/media.types';
 
 interface RawFeaturedEvent {
   _id?: string;
@@ -9,7 +10,7 @@ interface RawFeaturedEvent {
   startDate?: string;
   location?: { city?: string };
   locationCity?: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   eventType?: string;
   status?: string;
   minPrice?: number;

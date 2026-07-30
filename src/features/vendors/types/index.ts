@@ -1,28 +1,44 @@
 export type VendorCategory =
-  | "catering"
-  | "photography"
-  | "music"
-  | "decoration"
-  | "venue"
-  | "other";
+  | "photographe"
+  | "traiteur"
+  | "decorateur"
+  | "animateur"
+  | "dj"
+  | "sonorisation"
+  | "autre";
 
 export interface Vendor {
-  id: string;
-  name: string;
+  _id: string;
+  id?: string;
+  businessName: string;
   category: VendorCategory;
-  email?: string;
-  phone?: string;
-  website?: string;
-  notes?: string;
+  description?: string;
+  photos: string[];
+  priceRange?: { min?: number; max?: number; currency?: string };
+  serviceArea: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  rating: number;
+  reviewCount: number;
+  isActive: boolean;
+  isPremium: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateVendorInput {
-  name: string;
+  businessName: string;
   category: VendorCategory;
-  email?: string;
-  phone?: string;
-  website?: string;
-  notes?: string;
+  description?: string;
+  priceRange?: { min?: number; max?: number };
+  serviceArea?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+}
+
+export interface VendorCatalogResponse {
+  data: Vendor[];
+  total: number;
+  page: number;
+  limit: number;
 }

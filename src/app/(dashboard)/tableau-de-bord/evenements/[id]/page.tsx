@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { eventsService } from '@/features/events/services/events.service';
 import type { Event } from '@/features/events/types';
+import { eventCreationCopy as copy } from '@/features/events/i18n/event-creation.copy';
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Brouillon',
@@ -43,12 +44,16 @@ export default function EventDashboardPage() {
           </span>
         </div>
         <p className="text-muted text-sm">
-          {new Date(event.startDate).toLocaleDateString('fr-CA', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })}
-          {event.location ? ` · ${event.location}` : ''}
+          {event.startDate
+            ? new Date(event.startDate).toLocaleDateString('fr-CA', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })
+            : copy.dashboard.dateUnknown}
+          {event.location
+            ? ` · ${event.location.name ?? event.location.city ?? event.location.address ?? ''}`
+            : ''}
         </p>
       </div>
 

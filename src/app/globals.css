@@ -107,6 +107,25 @@
     linear-gradient(180deg, #FDFEFF 0%, #F8F9FB 52%, #F4F7F8 100%);
   --gradient-premium-button: linear-gradient(135deg, #1E3D4F 0%, #2A6070 46%, #4A8E9E 100%);
   --gradient-premium-warm: linear-gradient(135deg, rgba(212, 132, 74, 0.18), rgba(196, 165, 88, 0.16));
+
+  /* Épure Événementielle — event creation experience */
+  --event-background: #F9F9F6;
+  --event-surface: #F4F4F1;
+  --event-surface-lowest: #FFFFFF;
+  --event-petrol: #002E38;
+  --event-primary-container: #1A4550;
+  --event-teal: #2F7A7E;
+  --event-orange: #E8965A;
+  --event-gold: #C99A3E;
+  --event-sage: #7C8F6E;
+  --event-ink: #1A1C1B;
+  --event-muted: #41484A;
+  --event-outline: #71787B;
+  --event-outline-subtle: #C1C8CA;
+  --shadow-event-soft: 0 18px 55px rgba(0, 46, 56, 0.07);
+  --shadow-event-panel: 0 30px 100px rgba(0, 46, 56, 0.08);
+  --shadow-event-selected: 0 18px 48px rgba(0, 46, 56, 0.10);
+  --shadow-event-button: 0 12px 30px rgba(0, 46, 56, 0.18);
 }
 
 @theme inline {
@@ -150,6 +169,19 @@
   --color-sage-light: var(--color-sage-light);
   --color-sage-pale: var(--color-sage-pale);
   --color-sage-dark: var(--color-sage-dark);
+  --color-event-background: var(--event-background);
+  --color-event-surface: var(--event-surface);
+  --color-event-surface-lowest: var(--event-surface-lowest);
+  --color-event-petrol: var(--event-petrol);
+  --color-event-primary-container: var(--event-primary-container);
+  --color-event-teal: var(--event-teal);
+  --color-event-orange: var(--event-orange);
+  --color-event-gold: var(--event-gold);
+  --color-event-sage: var(--event-sage);
+  --color-event-ink: var(--event-ink);
+  --color-event-muted: var(--event-muted);
+  --color-event-outline: var(--event-outline);
+  --color-event-outline-subtle: var(--event-outline-subtle);
 
   /* Border radius */
   --radius-sm: var(--radius-sm);
@@ -167,10 +199,15 @@
   --shadow-float: var(--shadow-float);
   --shadow-glow-teal: var(--shadow-glow-teal);
   --shadow-glow-terracotta: var(--shadow-glow-terracotta);
+  --shadow-event-soft: var(--shadow-event-soft);
+  --shadow-event-panel: var(--shadow-event-panel);
+  --shadow-event-selected: var(--shadow-event-selected);
+  --shadow-event-button: var(--shadow-event-button);
 
   /* Fonts */
   --font-serif: var(--font-dm-serif), "DM Serif Display", Georgia, serif;
   --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-event-sans: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
 body {
@@ -1665,5 +1702,64 @@ body::before {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .event-creation {
+    font-family: var(--font-event-sans);
+    background:
+      radial-gradient(circle at 8% 5%, rgba(47, 122, 126, 0.08), transparent 28%),
+      radial-gradient(circle at 92% 18%, rgba(232, 150, 90, 0.07), transparent 24%),
+      var(--event-background);
+  }
+
+  .event-input,
+  .event-textarea {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    background: #F3F3F1;
+    color: var(--event-ink);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .event-input {
+    min-height: 52px;
+    padding: 12px 16px;
+  }
+
+  .event-textarea {
+    min-height: 120px;
+    padding: 15px 16px;
+    resize: vertical;
+  }
+
+  .event-input::placeholder,
+  .event-textarea::placeholder {
+    color: color-mix(in srgb, var(--event-muted) 46%, transparent);
+  }
+
+  .event-input:focus,
+  .event-textarea:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--event-gold) 72%, transparent);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(201, 154, 62, 0.12);
+  }
+
+  .event-input[aria-invalid="true"],
+  .event-textarea[aria-invalid="true"] {
+    border-color: color-mix(in srgb, var(--destructive) 60%, transparent);
+  }
+
+  .event-checkbox {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    accent-color: var(--event-petrol);
   }
 }

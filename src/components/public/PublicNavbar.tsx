@@ -13,10 +13,10 @@ import { cn, getInitials } from '@/shared/lib/utils';
 import type { User } from '@/shared/types';
 
 const NAV_LINKS = [
+  { label: 'Accueil', href: '/' },
   { label: 'Événements', href: '/evenements' },
   { label: 'Prestataires', href: '/prestataires' },
   { label: 'Lieux', href: '/lieux' },
-  { label: 'Comment ça marche', href: '/comment-ca-marche' },
 ] as const;
 
 interface PublicNavbarProps {
@@ -47,7 +47,10 @@ function AuthStateView({
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-  const isActive = pathname === href || (href !== '/evenements' && pathname.startsWith(href));
+  const isActive =
+    href === '/'
+      ? pathname === href
+      : pathname === href || (href !== '/evenements' && pathname.startsWith(href));
   return (
     <Link href={href} className="navbar-link" aria-current={isActive ? 'page' : undefined}>
       {label}

@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { CalendarDays, MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import type { MediaImageSource } from '@/shared/types/media.types';
+import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 interface EventLocation {
   city?: string;
@@ -13,7 +15,7 @@ interface EventLocation {
 interface PublicEventHero {
   _id: string;
   title: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   eventType?: string;
   startDate?: string;
   location?: EventLocation;
@@ -69,7 +71,11 @@ export function EventHero({ event }: EventHeroProps) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={event.coverImage ?? '/placeholder-hero.jpg'}
+        src={
+          event.coverImage
+            ? getOptimizedMediaUrl(event.coverImage, 'cover')
+            : '/placeholder-hero.jpg'
+        }
         alt={event.title}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
       />
