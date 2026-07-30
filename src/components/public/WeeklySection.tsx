@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import type { MediaImageSource } from '@/shared/types/media.types';
+import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 interface WeeklyEvent {
   _id: string;
   title: string;
   startDate?: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   location?: { address?: string; city?: string };
 }
 
@@ -44,7 +46,11 @@ export function WeeklySection({ events }: WeeklySectionProps) {
             <Link key={event._id} href={`/evenements/${event._id}`} className="weekly-item">
               <div className="weekly-img">
                 <Image
-                  src={event.coverImage ?? '/placeholder-event.jpg'}
+                  src={
+                    event.coverImage
+                      ? getOptimizedMediaUrl(event.coverImage, 'thumbnail')
+                      : '/placeholder-event.jpg'
+                  }
                   alt={event.title}
                   width={64}
                   height={64}

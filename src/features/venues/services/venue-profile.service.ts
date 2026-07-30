@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+import api from '@/shared/lib/api';
+import { API_URL } from '@/shared/config/api-url';
 
 export interface VenueProfile {
   _id: string;
@@ -27,6 +28,13 @@ export interface VenueBooking {
   totalPrice?: number;
   currency: string;
   createdAt: string;
+}
+
+export interface VenueCatalogResponse {
+  data: VenueProfile[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 async function authFetch<T>(
@@ -58,6 +66,13 @@ async function authFetch<T>(
 }
 
 export const venueProfileService = {
+  async list(page = 1, limit = 20): Promise<VenueCatalogResponse> {
+    const response = await api.get<VenueCatalogResponse>('/venues', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
   async getMyProfile(token: string): Promise<VenueProfile> {
     return authFetch<VenueProfile>('/venues/me', token);
   },

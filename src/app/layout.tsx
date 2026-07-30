@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { DM_Serif_Display, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/shared/guards/Providers";
 import { Analytics } from "@vercel/analytics/next";
@@ -16,6 +16,12 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Elintys — Plateforme événementielle",
   description: "Gérez vos événements, prestataires, invités et billetterie en un seul endroit.",
@@ -27,7 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr-CA" className={`${dmSerifDisplay.variable} ${plusJakartaSans.variable}`}>
+    <html
+      lang="fr-CA"
+      className={`${dmSerifDisplay.variable} ${plusJakartaSans.variable} ${inter.variable}`}
+    >
       <body className="antialiased">
         <Providers>{children}</Providers>
         <Analytics />

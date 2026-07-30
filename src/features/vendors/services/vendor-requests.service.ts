@@ -10,7 +10,7 @@ export interface VendorRequest {
   message?: string;
   responseMessage?: string;
   respondedAt?: string;
-  externalContact?: { name: string; email: string; phone?: string };
+  externalContact?: { name: string; email?: string; phone?: string; category?: string };
   createdAt: string;
   updatedAt?: string;
 }
@@ -19,7 +19,7 @@ export interface CreateVendorRequestPayload {
   vendorId?: string;
   source?: 'platform' | 'manual';
   message?: string;
-  externalContact?: { name: string; email: string; phone?: string };
+  externalContact?: { name: string; email?: string; phone?: string; category?: string };
 }
 
 export interface RespondVendorRequestPayload {

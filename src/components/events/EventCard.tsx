@@ -4,6 +4,8 @@ import { CalendarDays, MapPin } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 import { FavoriteButton } from '@/components/favorites/FavoriteButton';
+import type { MediaImageSource } from '@/shared/types/media.types';
+import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 export interface EventCardData {
   _id: string;
@@ -11,7 +13,7 @@ export interface EventCardData {
   slug: string;
   startDate: string;
   locationCity: string;
-  coverImage?: string;
+  coverImage?: MediaImageSource;
   eventType: string;
   status: string;
   minPrice?: number;
@@ -40,6 +42,12 @@ export function EventCard({
         : '—';
 
   const href = `/evenements/${event.slug}`;
+  const coverUrl = event.coverImage
+    ? getOptimizedMediaUrl(
+        event.coverImage,
+        variant === 'featured' ? 'cover' : 'card',
+      )
+    : undefined;
 
   if (variant === 'list') {
     return (
@@ -52,8 +60,8 @@ export function EventCard({
         data-testid="event-card"
       >
         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-background">
-          {event.coverImage ? (
-            <Image src={event.coverImage} alt={event.title} fill unoptimized className="object-cover" />
+          {coverUrl ? (
+            <Image src={coverUrl} alt={event.title} fill className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center bg-primary">
               <span className="font-serif text-lg text-white/70" aria-hidden="true">E</span>
@@ -86,8 +94,8 @@ export function EventCard({
         data-testid="event-card"
       >
         <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-background">
-          {event.coverImage ? (
-            <Image src={event.coverImage} alt={event.title} fill unoptimized className="object-cover" />
+          {coverUrl ? (
+            <Image src={coverUrl} alt={event.title} fill className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center bg-primary">
               <span className="font-serif text-xl text-white/70" aria-hidden="true">E</span>
@@ -122,12 +130,11 @@ export function EventCard({
         data-testid="event-card"
       >
         <div className="relative overflow-hidden bg-background" style={{ aspectRatio: '16/9' }}>
-          {event.coverImage ? (
+          {coverUrl ? (
             <Image
-              src={event.coverImage}
+              src={coverUrl}
               alt={event.title}
               fill
-              unoptimized
               className="image-cinematic transition-transform duration-500 group-hover:scale-[1.035]"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
@@ -185,12 +192,11 @@ export function EventCard({
       data-testid="event-card"
     >
       <div className="relative h-44 overflow-hidden bg-background">
-        {event.coverImage ? (
+        {coverUrl ? (
           <Image
-            src={event.coverImage}
+            src={coverUrl}
             alt={event.title}
             fill
-            unoptimized
             className="image-cinematic transition-transform duration-500 group-hover:scale-[1.035]"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />

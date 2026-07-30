@@ -1,3 +1,5 @@
+import { API_URL } from "@/shared/config/api-url";
+
 export interface ApiResponse<T> {
   data: T;
   status: number;
@@ -19,8 +21,6 @@ export class ApiClientError extends Error {
     this.name = "ApiClientError";
   }
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 let refreshPromise: Promise<boolean> | null = null;
 
@@ -97,15 +97,22 @@ async function request<T>(
   config: ApiRequestConfig = {},
   retried = false,
 ): Promise<ApiResponse<T>> {
+  const isFormData =
+    typeof FormData !== "undefined" && body instanceof FormData;
   const response = await fetch(buildUrl(path, config.params), {
     method,
     credentials: "include",
     signal: config.signal,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...config.headers,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body:
+      body === undefined
+        ? undefined
+        : isFormData
+          ? body
+          : JSON.stringify(body),
   });
 
   if (shouldRefresh(path, response.status, retried)) {
