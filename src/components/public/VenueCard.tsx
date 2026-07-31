@@ -9,9 +9,12 @@ export interface PublicVenue {
   photos?: string[];
   rating?: number;
   reviewsCount?: number;
+  reviewCount?: number;
   capacity?: number;
   pricePerHour?: number;
+  pricePerDay?: number;
   location?: { city?: string; address?: string };
+  address?: { city?: string; street?: string };
   isVerified?: boolean;
   features?: string[];
 }
@@ -22,6 +25,7 @@ interface VenueCardProps {
 
 export function VenueCard({ venue }: VenueCardProps) {
   const photo = venue.photos?.[0];
+  const reviewCount = venue.reviewsCount ?? venue.reviewCount;
 
   return (
     <Link href={`/lieux/${venue._id}`} className="venue-card">
@@ -75,9 +79,9 @@ export function VenueCard({ venue }: VenueCardProps) {
           <div className="rating-row">
             <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
             <span className="font-bold">{venue.rating.toFixed(1)}</span>
-            {venue.reviewsCount != null && venue.reviewsCount > 0 && (
+            {reviewCount != null && reviewCount > 0 && (
               <span className="text-xs text-on-surface-variant">
-                ({venue.reviewsCount} avis)
+                ({reviewCount} avis)
               </span>
             )}
           </div>
@@ -91,7 +95,11 @@ export function VenueCard({ venue }: VenueCardProps) {
             {venue.capacity ? `Capacité ${venue.capacity} pers.` : 'Capacité sur demande'}
           </span>
           <span className="text-[17px] font-bold text-on-surface">
-            {venue.pricePerHour ? `${venue.pricePerHour}$/h` : 'Sur devis'}
+            {venue.pricePerHour
+              ? `${venue.pricePerHour}$/h`
+              : venue.pricePerDay
+                ? `${venue.pricePerDay}$/jour`
+                : 'Sur devis'}
           </span>
         </div>
         <div className="venue-card-cta">Réserver</div>

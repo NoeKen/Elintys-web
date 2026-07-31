@@ -5,30 +5,20 @@ import { useRouter } from 'next/navigation';
 import { VenueCard, type PublicVenue } from './VenueCard';
 import { FilterSection } from './FilterSection';
 import { EmptyState } from './EmptyState';
-
-const VENUE_TYPES = [
-  'Salle de conférence',
-  'Espace de réception',
-  'Studio',
-  'Restaurant privatif',
-  'Rooftop',
-  'Salle de spectacle',
-] as const;
-
-const CITIES = ['Grand Montréal', 'Québec', 'Laval', 'Rive-Sud', 'Longueuil'] as const;
-
-const CAPACITIES = [
-  { label: 'Moins de 50', value: '50' },
-  { label: '50 — 200', value: '200' },
-  { label: '200 — 500', value: '500' },
-  { label: 'Plus de 500', value: '1000' },
-] as const;
+import { CatalogErrorState } from './CatalogErrorState';
+import {
+  CITIES,
+  MINIMUM_CAPACITIES,
+  VENUE_TYPES,
+} from '@/features/catalog/catalog-filters';
 
 interface LieuxContentProps {
   venues: PublicVenue[];
   total: number;
   initialType?: string;
   initialCity?: string;
+  initialCapacity?: string;
+  hasError?: boolean;
 }
 
 export function LieuxContent({
@@ -36,18 +26,20 @@ export function LieuxContent({
   total,
   initialType = '',
   initialCity = '',
+  initialCapacity = '',
+  hasError = false,
 }: LieuxContentProps) {
   const router = useRouter();
   const [type, setType] = useState(initialType);
   const [city, setCity] = useState(initialCity);
-  const [capacity, setCapacity] = useState('');
+  const [capacity, setCapacity] = useState(initialCapacity);
 
   const applyFilters = () => {
     const p = new URLSearchParams();
     if (type) p.set('type', type);
     if (city) p.set('city', city);
     if (capacity) p.set('capacity', capacity);
-    router.push(`/lieux?${p.toString()}`);
+    router.push(`/lieux${p.size ? `?${p.toString()}` : ''}`);
   };
 
   const resetFilters = () => {
@@ -62,20 +54,20 @@ export function LieuxContent({
       <aside className="catalog-filters">
         <div className="filter-header">
           <h3 className="text-base font-bold text-on-surface">Filtres</h3>
-          <button className="filter-reset" onClick={resetFilters}>
+          <button type="button" className="filter-reset" onClick={resetFilters}>
             Réinitialiser
           </button>
         </div>
 
         <FilterSection title="TYPE D'ESPACE">
-          {VENUE_TYPES.map((t) => (
-            <label key={t} className="filter-checkbox">
+          {VENUE_TYPES.map((option) => (
+            <label key={option.value} className="filter-checkbox">
               <input
                 type="checkbox"
-                checked={type === t}
-                onChange={(e) => setType(e.target.checked ? t : '')}
+                checked={type === option.value}
+                onChange={(e) => setType(e.target.checked ? option.value : '')}
               />
-              <span>{t}</span>
+              <span>{option.label}</span>
             </label>
           ))}
         </FilterSection>
@@ -89,14 +81,14 @@ export function LieuxContent({
           >
             <option value="">Toutes les zones</option>
             {CITIES.map((c) => (
-              <option key={c}>{c}</option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </FilterSection>
 
         <FilterSection title="CAPACITÉ">
           <div className="flex flex-col gap-1.5">
-            {CAPACITIES.map((cap) => (
+            {MINIMUM_CAPACITIES.map((cap) => (
               <label key={cap.value} className="filter-checkbox">
                 <input
                   type="checkbox"
@@ -109,7 +101,7 @@ export function LieuxContent({
           </div>
         </FilterSection>
 
-        <button className="btn-primary-full" onClick={applyFilters}>
+        <button type="button" className="btn-primary-full" onClick={applyFilters}>
           Appliquer
         </button>
       </aside>
@@ -121,7 +113,9 @@ export function LieuxContent({
           </p>
         </div>
 
-        {venues.length > 0 ? (
+        {hasError ? (
+          <CatalogErrorState retryHref="/lieux" />
+        ) : venues.length > 0 ? (
           <div className="venues-grid">
             {venues.map((venue) => (
               <VenueCard key={venue._id} venue={venue} />

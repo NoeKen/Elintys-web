@@ -9,18 +9,26 @@ const CHIPS = [
   { label: 'Conférence', slug: 'conference' },
   { label: 'Gala', slug: 'gala' },
   { label: 'Concert', slug: 'concert' },
-  { label: 'Atelier', slug: 'atelier' },
-  { label: 'Théâtre', slug: 'theatre' },
+  { label: 'Atelier', slug: 'workshop' },
+  { label: 'Festival', slug: 'festival' },
 ];
 
 const EASE = 'easeOut' as const;
-const PROOF_POINTS = [
-  { value: '500+', label: 'événements et expériences à explorer' },
-  { value: '4 rôles', label: 'organisateurs, prestataires, lieux, participants' },
-  { value: 'QC', label: 'pensé pour le marché québécois' },
-] as const;
 
-export function HeroSection() {
+interface HeroSectionProps {
+  eventCount: number | null;
+}
+
+export function HeroSection({ eventCount }: HeroSectionProps) {
+  const proofPoints = [
+    {
+      value: eventCount === null ? '—' : String(eventCount),
+      label: eventCount === 1 ? 'événement à explorer' : 'événements et expériences à explorer',
+    },
+    { value: '4 rôles', label: 'organisateurs, prestataires, lieux, participants' },
+    { value: 'QC', label: 'pensé pour le marché québécois' },
+  ] as const;
+
   return (
     <section className="hero-section">
       <div className="hero-content">
@@ -96,7 +104,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: EASE, delay: 0.48 }}
         >
-          {PROOF_POINTS.map((point) => (
+          {proofPoints.map((point) => (
             <div key={point.value} className="hero-proof-card">
               <strong>{point.value}</strong>
               <span>{point.label}</span>

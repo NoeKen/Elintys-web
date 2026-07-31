@@ -1,16 +1,13 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
+import { EVENT_CATEGORIES } from '@/features/catalog/catalog-filters';
 
-const CATEGORIES = [
-  { label: 'Musique & Festivals', count: 124, bg: '#4A8E9E', slug: 'musique' },
-  { label: 'Affaires & Réseautage', count: 86, bg: '#1E3D4F', slug: 'affaires' },
-  { label: 'Art & Culture', count: 52, bg: '#3C6478', slug: 'art' },
-  { label: 'Gastronomie', count: 37, bg: '#6B4226', slug: 'gastronomie' },
-  { label: 'Sport & Bien-être', count: 45, bg: '#C8862A', slug: 'sport' },
-  { label: 'Ateliers & Formations', count: 87, bg: '#2A4E7A', slug: 'ateliers' },
-] as const;
+interface CategoriesSectionProps {
+  counts: Partial<Record<(typeof EVENT_CATEGORIES)[number]['value'], number>>;
+  hasError?: boolean;
+}
 
-export function CategoriesSection() {
+export function CategoriesSection({ counts, hasError = false }: CategoriesSectionProps) {
   return (
     <section className="cinematic-section mesh-gradient">
       <div className="container-public">
@@ -22,22 +19,34 @@ export function CategoriesSection() {
             Explorer par passion
           </h2>
         </div>
+        {hasError ? (
+          <p role="alert" className="glass-card p-6 text-center text-sm text-on-surface-variant">
+            Les compteurs par catégorie sont temporairement indisponibles.
+          </p>
+        ) : (
         <div className="categories-grid">
-          {CATEGORIES.map((cat) => (
+          {EVENT_CATEGORIES.map((category) => {
+            const count = counts[category.value] ?? 0;
+
+            return (
             <Link
-              key={cat.slug}
-              href={`/evenements?category=${cat.slug}`}
+              key={category.value}
+              href={`/evenements?category=${category.value}`}
               className="category-tile"
-              style={{ '--category-color': cat.bg } as CSSProperties}
+              style={{ '--category-color': category.color } as CSSProperties}
             >
               <div className="category-tile-overlay" />
               <div className="category-tile-content">
-                <span className="category-tile-title">{cat.label}</span>
-                <span className="category-tile-count">{cat.count} événements</span>
+                <span className="category-tile-title">{category.label}</span>
+                <span className="category-tile-count">
+                  {count} événement{count !== 1 ? 's' : ''}
+                </span>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
+        )}
       </div>
     </section>
   );

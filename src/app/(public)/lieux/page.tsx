@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { SearchBar } from '@/components/public/SearchBar';
 import { LieuxContent } from '@/components/public/LieuxContent';
 import type { PublicVenue } from '@/components/public/VenueCard';
-import { API_URL } from '@/shared/config/api-url';
+import { buildCatalogQuery } from '@/features/catalog/catalog-filters';
+import { fetchCatalogJson } from '@/server/catalog/catalog-api';
 
 export const metadata: Metadata = {
   title: "Lieux d'exception à Montréal",
@@ -25,28 +26,10 @@ export default async function LieuxPage({
 }) {
   const { type, city, capacity, page } = await searchParams;
 
-  const qs = new URLSearchParams({
-    page: page ?? '1',
-    limit: '12',
-    ...(city ? { city } : {}),
-    ...(capacity ? { capacity } : {}),
-  });
-
-  let venues: PublicVenue[] = [];
-  let total = 0;
-
-  try {
-    const res = await fetch(`${API_URL}/venues?${qs.toString()}`, {
-      next: { revalidate: 60 },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as VenuesResponse;
-      venues = data.data ?? data.items ?? [];
-      total = data.total ?? venues.length;
-    }
-  } catch {
-    /* show empty state on error */
-  }
+  const query = buildCatalogQuery({ type, city, capacity, page });
+  const result = await fetchCatalogJson<VenuesResponse>(`/venues?${query.toString()}`);
+  const venues = result.data?.data ?? result.data?.items ?? [];
+  const total = result.data?.total ?? venues.length;
 
   return (
     <>
@@ -67,6 +50,8 @@ export default async function LieuxPage({
         total={total}
         initialType={type ?? ''}
         initialCity={city ?? ''}
+        initialCapacity={capacity ?? ''}
+        hasError={result.error}
       />
     </>
   );
