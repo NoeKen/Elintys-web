@@ -5,24 +5,20 @@ import { useRouter } from 'next/navigation';
 import { VendorCard, type PublicVendor } from './VendorCard';
 import { FilterSection } from './FilterSection';
 import { EmptyState } from './EmptyState';
-
-const CATEGORIES = [
-  'Photographie',
-  'Traiteur',
-  'Musique & DJ',
-  'Décoration',
-  'Animation',
-  'Sonorisation',
-] as const;
-
-const CITIES = ['Grand Montréal', 'Québec', 'Laval', 'Rive-Sud', 'Longueuil'] as const;
-const PRICE_CHIPS = ['$', '$$', '$$$', '$$$$'] as const;
+import { CatalogErrorState } from './CatalogErrorState';
+import {
+  CITIES,
+  PRICE_RANGES,
+  VENDOR_CATEGORIES,
+} from '@/features/catalog/catalog-filters';
 
 interface PrestatairesContentProps {
   vendors: PublicVendor[];
   total: number;
   initialCategory?: string;
   initialCity?: string;
+  initialPrice?: string;
+  hasError?: boolean;
 }
 
 export function PrestatairesContent({
@@ -30,17 +26,20 @@ export function PrestatairesContent({
   total,
   initialCategory = '',
   initialCity = '',
+  initialPrice = '',
+  hasError = false,
 }: PrestatairesContentProps) {
   const router = useRouter();
   const [category, setCategory] = useState(initialCategory);
   const [city, setCity] = useState(initialCity);
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(initialPrice);
 
   const applyFilters = () => {
     const p = new URLSearchParams();
     if (category) p.set('category', category);
     if (city) p.set('city', city);
-    router.push(`/prestataires?${p.toString()}`);
+    if (price) p.set('price', price);
+    router.push(`/prestataires${p.size ? `?${p.toString()}` : ''}`);
   };
 
   const resetFilters = () => {
@@ -55,20 +54,20 @@ export function PrestatairesContent({
       <aside className="catalog-filters">
         <div className="filter-header">
           <h3 className="text-base font-bold text-on-surface">Filtres</h3>
-          <button className="filter-reset" onClick={resetFilters}>
+          <button type="button" className="filter-reset" onClick={resetFilters}>
             Réinitialiser
           </button>
         </div>
 
         <FilterSection title="CATÉGORIE">
-          {CATEGORIES.map((cat) => (
-            <label key={cat} className="filter-checkbox">
+          {VENDOR_CATEGORIES.map((option) => (
+            <label key={option.value} className="filter-checkbox">
               <input
                 type="checkbox"
-                checked={category === cat}
-                onChange={(e) => setCategory(e.target.checked ? cat : '')}
+                checked={category === option.value}
+                onChange={(e) => setCategory(e.target.checked ? option.value : '')}
               />
-              <span>{cat}</span>
+              <span>{option.label}</span>
             </label>
           ))}
         </FilterSection>
@@ -82,15 +81,16 @@ export function PrestatairesContent({
           >
             <option value="">Toutes les zones</option>
             {CITIES.map((c) => (
-              <option key={c}>{c}</option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </FilterSection>
 
         <FilterSection title="GAMME DE PRIX">
           <div className="flex flex-wrap gap-2">
-            {PRICE_CHIPS.map((p) => (
+            {PRICE_RANGES.map((p) => (
               <button
+                type="button"
                 key={p}
                 className={`price-chip${price === p ? ' active' : ''}`}
                 onClick={() => setPrice(price === p ? '' : p)}
@@ -101,7 +101,7 @@ export function PrestatairesContent({
           </div>
         </FilterSection>
 
-        <button className="btn-primary-full" onClick={applyFilters}>
+        <button type="button" className="btn-primary-full" onClick={applyFilters}>
           Appliquer
         </button>
       </aside>
@@ -113,7 +113,9 @@ export function PrestatairesContent({
           </p>
         </div>
 
-        {vendors.length > 0 ? (
+        {hasError ? (
+          <CatalogErrorState retryHref="/prestataires" />
+        ) : vendors.length > 0 ? (
           <div className="vendors-grid">
             {vendors.map((vendor) => (
               <VendorCard key={vendor._id} vendor={vendor} />

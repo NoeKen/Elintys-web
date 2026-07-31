@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { SearchBar } from '@/components/public/SearchBar';
 import { PrestatairesContent } from '@/components/public/PrestatairesContent';
 import type { PublicVendor } from '@/components/public/VendorCard';
-import { API_URL } from '@/shared/config/api-url';
+import { buildCatalogQuery } from '@/features/catalog/catalog-filters';
+import { fetchCatalogJson } from '@/server/catalog/catalog-api';
 
 export const metadata: Metadata = {
   title: 'Prestataires événementiels à Montréal',
@@ -21,32 +22,16 @@ interface VendorsResponse {
 export default async function PrestatairesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; city?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; city?: string; price?: string; page?: string }>;
 }) {
-  const { category, city, page } = await searchParams;
+  const { category, city, price, page } = await searchParams;
 
-  const qs = new URLSearchParams({
-    page: page ?? '1',
-    limit: '12',
-    ...(category ? { category } : {}),
-    ...(city ? { city } : {}),
-  });
-
-  let vendors: PublicVendor[] = [];
-  let total = 0;
-
-  try {
-    const res = await fetch(`${API_URL}/vendors?${qs.toString()}`, {
-      next: { revalidate: 60 },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as VendorsResponse;
-      vendors = data.data ?? data.items ?? [];
-      total = data.total ?? vendors.length;
-    }
-  } catch {
-    /* show empty state on error */
-  }
+  const query = buildCatalogQuery({ category, city, price, page });
+  const result = await fetchCatalogJson<VendorsResponse>(
+    `/vendors?${query.toString()}`,
+  );
+  const vendors = result.data?.data ?? result.data?.items ?? [];
+  const total = result.data?.total ?? vendors.length;
 
   return (
     <>
@@ -66,6 +51,8 @@ export default async function PrestatairesPage({
         total={total}
         initialCategory={category ?? ''}
         initialCity={city ?? ''}
+        initialPrice={price ?? ''}
+        hasError={result.error}
       />
     </>
   );

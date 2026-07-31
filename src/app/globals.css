@@ -1378,6 +1378,17 @@ body::before {
     border-color: var(--color-teal);
     color: white;
   }
+  .catalog-toolbar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 760px) {
+    .catalog-toolbar { grid-template-columns: 1fr; }
+    .catalog-toolbar .premium-button { width: 100%; }
+  }
   .vendors-grid,
   .venues-grid {
     display: grid;

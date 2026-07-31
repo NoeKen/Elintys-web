@@ -11,7 +11,10 @@ export interface PublicVendor {
   photos?: string[];
   rating?: number;
   reviewsCount?: number;
+  reviewCount?: number;
   startingPrice?: number;
+  priceRange?: { min?: number; max?: number; currency?: string };
+  serviceArea?: string;
   isRecommended?: boolean;
   category?: string;
 }
@@ -24,6 +27,8 @@ export function VendorCard({ vendor }: VendorCardProps) {
   const displayName = vendor.businessName ?? vendor.name ?? 'Prestataire';
   const displayDesc = vendor.shortBio ?? vendor.description?.substring(0, 90);
   const photo = vendor.photos?.[0];
+  const reviewCount = vendor.reviewsCount ?? vendor.reviewCount;
+  const startingPrice = vendor.startingPrice ?? vendor.priceRange?.min;
 
   return (
     <Link href={`/prestataires/${vendor._id}`} className="vendor-card">
@@ -77,9 +82,9 @@ export function VendorCard({ vendor }: VendorCardProps) {
           <div className="rating-row">
             <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
             <span className="font-bold">{vendor.rating.toFixed(1)}</span>
-            {vendor.reviewsCount != null && vendor.reviewsCount > 0 && (
+            {reviewCount != null && reviewCount > 0 && (
               <span className="text-xs text-on-surface-variant">
-                ({vendor.reviewsCount} avis)
+                ({reviewCount} avis)
               </span>
             )}
           </div>
@@ -94,7 +99,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
         <div className="vendor-card-footer">
           <span className="text-[13px] text-on-surface-variant">À partir de</span>
           <span className="text-[17px] font-bold text-on-surface">
-            {vendor.startingPrice ? `${vendor.startingPrice}$` : 'Sur devis'}
+            {startingPrice ? `${startingPrice}$` : 'Sur devis'}
           </span>
         </div>
         <div className="vendor-card-cta">Réserver</div>
