@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { cn } from '@/shared/lib/utils';
-import api from '@/shared/lib/api';
-import { useAuth } from '@/shared/hooks/useAuth';
+import { useState } from "react";
+import { cn } from "@/shared/lib/utils";
+import api from "@/shared/lib/api";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { ApiClientError } from "@/shared/lib/api";
+import {
+  getUserFacingError,
+  type UserFacingError,
+} from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 interface TicketType {
   _id: string;
@@ -17,23 +23,28 @@ interface TicketType {
 interface Props {
   ticketType: TicketType;
   eventTitle: string;
+  accessGrant?: string;
   onClose: () => void;
 }
 
-export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
+export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: Props) {
   const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
-  const [guestEmail, setGuestEmail] = useState('');
-  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestName, setGuestName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<UserFacingError | null>(null);
 
   const available = ticketType.quantity - ticketType.sold;
   const totalCAD = ((ticketType.price * quantity) / 100).toFixed(2);
 
   const handlePurchase = async () => {
     if (!user && !guestEmail) {
-      setError('Veuillez entrer votre courriel pour continuer.');
+      setError({
+        message:
+          "Votre adresse courriel est obligatoire pour réserver un billet.",
+        details: [],
+      });
       return;
     }
     setLoading(true);
@@ -41,29 +52,45 @@ export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
 
     try {
       if (ticketType.isFree) {
-        await api.post('/tickets/purchase', {
+        await api.post("/tickets/purchase", {
           ticketTypeId: ticketType._id,
           quantity,
+          accessGrant,
           guestEmail: user ? undefined : guestEmail || undefined,
           guestName: user ? undefined : guestName || undefined,
         });
-        alert(`${quantity} billet${quantity > 1 ? 's' : ''} réservé${quantity > 1 ? 's' : ''} avec succès !`);
+        alert(
+          `${quantity} billet${quantity > 1 ? "s" : ""} réservé${quantity > 1 ? "s" : ""} avec succès !`,
+        );
         onClose();
       } else {
-        const res = await api.post<{ sessionUrl: string }>('/payments/checkout', {
-          ticketTypeId: ticketType._id,
-          quantity,
-          guestEmail: user ? undefined : guestEmail || undefined,
-          guestName: user ? undefined : guestName || undefined,
-        });
+        const res = await api.post<{ sessionUrl: string }>(
+          "/payments/checkout",
+          {
+            ticketTypeId: ticketType._id,
+            quantity,
+            accessGrant,
+            guestEmail: user ? undefined : guestEmail || undefined,
+            guestName: user ? undefined : guestName || undefined,
+          },
+        );
         window.location.href = res.data.sessionUrl;
       }
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } }).response?.status;
-      if (status === 503) {
-        setError("Paiement en ligne bientôt disponible. Contactez l'organisateur pour réserver.");
+      if (err instanceof ApiClientError && err.status === 503) {
+        setError({
+          message:
+            "Le paiement en ligne est temporairement indisponible. Contactez l’organisateur pour réserver.",
+          details: [],
+          requestId: err.requestId,
+        });
       } else {
-        setError('Une erreur est survenue. Veuillez réessayer.');
+        setError(
+          getUserFacingError(err, {
+            fallback:
+              "Impossible de finaliser cette réservation. Vérifiez les informations saisies, puis réessayez.",
+          }),
+        );
       }
     } finally {
       setLoading(false);
@@ -75,26 +102,42 @@ export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
       <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-navy">{ticketType.name}</h2>
-          <button onClick={onClose} aria-label="Fermer" className="text-muted hover:text-navy text-xl leading-none">✕</button>
+          <button
+            onClick={onClose}
+            aria-label="Fermer"
+            className="text-muted hover:text-navy text-xl leading-none"
+          >
+            ✕
+          </button>
         </div>
         <p className="text-sm text-muted mb-4">{eventTitle}</p>
 
         {/* Quantity selector */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-navy mb-2">Quantité</label>
+          <label className="block text-sm font-medium text-navy mb-2">
+            Quantité
+          </label>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               aria-label="Réduire la quantité"
               className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-surface text-navy"
-            >−</button>
-            <span className="w-8 text-center font-semibold text-navy">{quantity}</span>
+            >
+              −
+            </button>
+            <span className="w-8 text-center font-semibold text-navy">
+              {quantity}
+            </span>
             <button
-              onClick={() => setQuantity(q => Math.min(available, q + 1))}
+              onClick={() => setQuantity((q) => Math.min(available, q + 1))}
               aria-label="Augmenter la quantité"
               className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-surface text-navy"
-            >+</button>
-            <span className="text-sm text-muted">({available} disponible{available > 1 ? 's' : ''})</span>
+            >
+              +
+            </button>
+            <span className="text-sm text-muted">
+              ({available} disponible{available > 1 ? "s" : ""})
+            </span>
           </div>
         </div>
 
@@ -102,7 +145,10 @@ export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
         {!user && (
           <div className="mb-4 space-y-2">
             <div>
-              <label htmlFor="guestEmail" className="block text-sm font-medium text-navy mb-1">
+              <label
+                htmlFor="guestEmail"
+                className="block text-sm font-medium text-navy mb-1"
+              >
                 Courriel <span className="text-red-500">*</span>
               </label>
               <input
@@ -110,25 +156,30 @@ export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
                 type="email"
                 placeholder="votre@courriel.com"
                 value={guestEmail}
-                onChange={e => setGuestEmail(e.target.value)}
+                onChange={(e) => setGuestEmail(e.target.value)}
                 className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
               />
             </div>
             <div>
-              <label htmlFor="guestName" className="block text-sm font-medium text-navy mb-1">Prénom et nom</label>
+              <label
+                htmlFor="guestName"
+                className="block text-sm font-medium text-navy mb-1"
+              >
+                Prénom et nom
+              </label>
               <input
                 id="guestName"
                 type="text"
                 placeholder="Marie Tremblay"
                 value={guestName}
-                onChange={e => setGuestName(e.target.value)}
+                onChange={(e) => setGuestName(e.target.value)}
                 className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
               />
             </div>
           </div>
         )}
 
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+        {error && <FormErrorAlert error={error} className="mb-3" />}
 
         {/* Footer */}
         <div className="flex justify-between items-center pt-2 border-t border-border">
@@ -138,19 +189,21 @@ export function PurchaseModal({ ticketType, eventTitle, onClose }: Props) {
             ) : (
               <span className="font-semibold text-navy">{totalCAD} $ CAD</span>
             )}
-            {!ticketType.isFree && <p className="text-xs text-muted">+ 1,49 $ frais de service</p>}
+            {!ticketType.isFree && (
+              <p className="text-xs text-muted">+ 1,49 $ frais de service</p>
+            )}
           </div>
           <button
             onClick={handlePurchase}
             disabled={loading || available === 0}
             className={cn(
-              'px-5 py-2 rounded-lg text-sm font-medium transition-colors',
+              "px-5 py-2 rounded-lg text-sm font-medium transition-colors",
               loading || available === 0
-                ? 'bg-surface text-muted cursor-not-allowed'
-                : 'bg-teal text-white hover:bg-teal/90',
+                ? "bg-surface text-muted cursor-not-allowed"
+                : "bg-teal text-white hover:bg-teal/90",
             )}
           >
-            {loading ? 'Chargement…' : ticketType.isFree ? 'Réserver' : 'Payer'}
+            {loading ? "Chargement…" : ticketType.isFree ? "Réserver" : "Payer"}
           </button>
         </div>
       </div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle } from "lucide-react";
 import { AuthSplitLayout } from "@/features/auth/components/AuthSplitLayout";
 import {
   RegisterStep2RoleSelector,
@@ -15,12 +14,17 @@ import {
   readRegistrationDraft,
 } from "@/lib/auth/registration-draft";
 import { getFirstOnboardingPath } from "@/lib/auth/redirects";
+import {
+  getUserFacingError,
+  type UserFacingError,
+} from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 export default function InscriptionEtape2Page() {
   const router = useRouter();
   const { login } = useAuth();
   const [draftReady, setDraftReady] = useState(false);
-  const [globalError, setGlobalError] = useState<string | null>(null);
+  const [globalError, setGlobalError] = useState<UserFacingError | null>(null);
 
   useEffect(() => {
     const draft = readRegistrationDraft();
@@ -51,7 +55,9 @@ export default function InscriptionEtape2Page() {
       login(session);
 
       const nextPath = getFirstOnboardingPath([profile.role]);
-      router.push(`/verification-email?email=${encodeURIComponent(draft.email)}&next=${encodeURIComponent(nextPath)}`);
+      router.push(
+        `/verification-email?email=${encodeURIComponent(draft.email)}&next=${encodeURIComponent(nextPath)}`,
+      );
     } catch (err: unknown) {
       const authErr = err as { code?: string; message?: string };
       if (authErr?.code === "EMAIL_TAKEN") {
@@ -63,7 +69,12 @@ export default function InscriptionEtape2Page() {
         router.push(`/inscription/etape-1?${params.toString()}`);
         return;
       }
-      setGlobalError(authErr.message ?? "Impossible de créer le compte pour le moment. Veuillez réessayer.");
+      setGlobalError(
+        getUserFacingError(err, {
+          fallback:
+            "Impossible de créer le compte pour le moment. Vérifiez vos informations, puis réessayez.",
+        }),
+      );
     }
   };
 
@@ -77,10 +88,10 @@ export default function InscriptionEtape2Page() {
       backLabel="Retour à l'étape 1"
     >
       {globalError && (
-        <div className="mb-5 flex items-center gap-2 rounded-2xl border border-destructive/20 bg-white/75 px-4 py-3 text-sm text-destructive shadow-card">
-          <AlertCircle size={16} aria-hidden="true" />
-          {globalError}
-        </div>
+        <FormErrorAlert
+          error={globalError}
+          className="mb-5 bg-white/75 shadow-card"
+        />
       )}
       {draftReady && <RegisterStep2RoleSelector onSubmit={handleRegister} />}
     </AuthSplitLayout>

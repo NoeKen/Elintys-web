@@ -46,13 +46,13 @@ describe('eventCreationSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('refuse un domaine privé invalide', () => {
+  it('refuse un domaine autorisé invalide', () => {
     const result = eventCreationSchema.safeParse({
       ...baseValues,
       title: 'Gala Elintys',
       dateIsTentative: true,
-      visibility: 'private',
-      allowedEmailDomain: 'entreprise',
+      accessPolicyType: 'email_domain',
+      allowedDomains: 'entreprise',
     });
     expect(result.success).toBe(false);
   });
@@ -150,31 +150,40 @@ describe('buildStepPayload', () => {
     });
   });
 
-  it('conserve les trois visibilités distinctes et les règles privées', () => {
+  it('persiste séparément visibilité, accès et admission', () => {
     const payload = buildStepPayload(
       5,
       {
         ...baseValues,
         title: 'Gala',
-        visibility: 'private',
-        privateLink: true,
-        accessCode: true,
-        allowedEmailDomain: '@entreprise.ca',
-        manualApproval: true,
+        discoverability: 'public',
+        accessPolicyType: 'email_domain',
+        allowedDomains: '@entreprise.ca, partenaire.org',
+        admissionModes: ['paid_ticket', 'invitation'],
       },
       [],
       { currentStep: 6, completedSteps: [1, 2, 3, 4, 5], skippedSteps: [] },
     );
 
     expect(payload).toMatchObject({
-      visibility: 'private',
-      accessRules: {
-        privateLink: true,
-        accessCode: true,
-        allowedEmailDomain: '@entreprise.ca',
-        manualApproval: true,
+      discoverability: 'public',
+      accessPolicy: {
+        type: 'email_domain',
+        allowedDomains: ['entreprise.ca', 'partenaire.org'],
       },
+      admissionModes: ['paid_ticket', 'invitation'],
     });
+  });
+
+  it('n’envoie jamais un code vide lors de la mise à jour', () => {
+    const payload = buildStepPayload(
+      5,
+      { ...baseValues, accessPolicyType: 'access_code', accessCodeValue: '', admissionModes: ['registration_only'] },
+      [],
+      { currentStep: 6, completedSteps: [1, 2, 3, 4, 5], skippedSteps: [] },
+    );
+    expect(payload).toMatchObject({ accessPolicy: { type: 'access_code' } });
+    expect((payload.accessPolicy as { code?: string }).code).toBeUndefined();
   });
 });
 

@@ -16,6 +16,7 @@ export class ApiClientError extends Error {
   constructor(
     public readonly status: number,
     public readonly payload: unknown,
+    public readonly requestId?: string,
   ) {
     super(`HTTP ${status}`);
     this.name = "ApiClientError";
@@ -37,7 +38,8 @@ export function setRefreshTokenFn(_fn: () => Promise<string | null>) {
 function buildUrl(path: string, params?: ApiRequestConfig["params"]): string {
   const base = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const origin = typeof window === "undefined" ? "http://localhost" : window.location.origin;
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
   const url = new URL(`${base}${normalizedPath}`, origin);
 
   Object.entries(params ?? {}).forEach(([key, value]) => {
@@ -45,7 +47,8 @@ function buildUrl(path: string, params?: ApiRequestConfig["params"]): string {
       value === null ||
       value === undefined ||
       !["string", "number", "boolean"].includes(typeof value)
-    ) return;
+    )
+      return;
     url.searchParams.set(key, String(value));
   });
 
@@ -64,7 +67,27 @@ async function parsePayload(response: Response): Promise<unknown> {
   }
 }
 
-function shouldRefresh(path: string, status: number, retried: boolean): boolean {
+export async function apiErrorFromResponse(
+  response: Response,
+): Promise<ApiClientError> {
+  const payload = await parsePayload(response);
+  const payloadRequestId =
+    payload && typeof payload === "object" && "requestId" in payload
+      ? (payload as { requestId?: unknown }).requestId
+      : undefined;
+  return new ApiClientError(
+    response.status,
+    payload,
+    response.headers.get("x-request-id") ??
+      (typeof payloadRequestId === "string" ? payloadRequestId : undefined),
+  );
+}
+
+function shouldRefresh(
+  path: string,
+  status: number,
+  retried: boolean,
+): boolean {
   return (
     status === 401 &&
     !retried &&
@@ -108,11 +131,7 @@ async function request<T>(
       ...config.headers,
     },
     body:
-      body === undefined
-        ? undefined
-        : isFormData
-          ? body
-          : JSON.stringify(body),
+      body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   });
 
   if (shouldRefresh(path, response.status, retried)) {
@@ -123,7 +142,16 @@ async function request<T>(
   const payload = await parsePayload(response);
 
   if (!response.ok) {
-    throw new ApiClientError(response.status, payload);
+    const payloadRequestId =
+      payload && typeof payload === "object" && "requestId" in payload
+        ? (payload as { requestId?: unknown }).requestId
+        : undefined;
+    throw new ApiClientError(
+      response.status,
+      payload,
+      response.headers.get("x-request-id") ??
+        (typeof payloadRequestId === "string" ? payloadRequestId : undefined),
+    );
   }
 
   return { data: payload as T, status: response.status };
@@ -134,15 +162,27 @@ const api = {
     return request<T>("GET", path, undefined, config);
   },
 
-  post<T>(path: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  post<T>(
+    path: string,
+    data?: unknown,
+    config?: ApiRequestConfig,
+  ): Promise<ApiResponse<T>> {
     return request<T>("POST", path, data, config);
   },
 
-  put<T>(path: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  put<T>(
+    path: string,
+    data?: unknown,
+    config?: ApiRequestConfig,
+  ): Promise<ApiResponse<T>> {
     return request<T>("PUT", path, data, config);
   },
 
-  patch<T>(path: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  patch<T>(
+    path: string,
+    data?: unknown,
+    config?: ApiRequestConfig,
+  ): Promise<ApiResponse<T>> {
     return request<T>("PATCH", path, data, config);
   },
 

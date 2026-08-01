@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,20 +12,20 @@ import {
   LogOut,
   RotateCw,
   UserRound,
-} from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
+} from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 import {
   eventCreationCopy as copy,
   formatEventCreationCopy,
-} from '@/features/events/i18n/event-creation.copy';
+} from "@/features/events/i18n/event-creation.copy";
 import {
   EVENT_STEPS,
   type EventCreationFormValues,
   type EventCreationStep,
   type ProviderNeedState,
-} from '@/features/events/lib/event-creation';
+} from "@/features/events/lib/event-creation";
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const STEP_LABELS = [
   copy.steps.information,
@@ -39,15 +39,17 @@ const STEP_LABELS = [
 interface AutosaveStatusProps {
   status: SaveStatus;
   lastSavedAt?: string;
+  errorMessage?: string;
   onRetry?: () => void;
 }
 
 export function AutosaveStatus({
   status,
   lastSavedAt,
+  errorMessage,
   onRetry,
 }: AutosaveStatusProps) {
-  if (status === 'saving') {
+  if (status === "saving") {
     return (
       <span className="inline-flex items-center gap-2 text-xs font-semibold text-event-muted">
         <LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -56,14 +58,14 @@ export function AutosaveStatus({
     );
   }
 
-  if (status === 'error') {
+  if (status === "error") {
     return (
       <span
         className="inline-flex items-center gap-2 text-xs font-semibold text-destructive"
-        role="alert"
+        role="status"
       >
         <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
-        {copy.saveError}
+        {errorMessage ?? copy.saveError}
         {onRetry && (
           <button
             type="button"
@@ -79,14 +81,14 @@ export function AutosaveStatus({
   }
 
   if (lastSavedAt) {
-    const time = new Intl.DateTimeFormat('fr-CA', {
-      hour: '2-digit',
-      minute: '2-digit',
+    const time = new Intl.DateTimeFormat("fr-CA", {
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(lastSavedAt));
     return (
       <span className="inline-flex items-center gap-2 text-xs font-semibold text-event-muted">
         <Check className="h-3.5 w-3.5 text-event-teal" aria-hidden="true" />
-        {status === 'saved'
+        {status === "saved"
           ? copy.draftSaved
           : formatEventCreationCopy(copy.savedAt, { time })}
       </span>
@@ -113,7 +115,9 @@ export function EventCreationProgress({
         <span>
           {formatEventCreationCopy(copy.stepCounter, { current: step })}
         </span>
-        <span className="hidden text-event-ink sm:inline">{STEP_LABELS[step - 1]}</span>
+        <span className="hidden text-event-ink sm:inline">
+          {STEP_LABELS[step - 1]}
+        </span>
       </div>
       <nav
         className="flex gap-1.5"
@@ -130,18 +134,18 @@ export function EventCreationProgress({
               disabled={!canVisit}
               onClick={() => onStepSelect(item)}
               aria-label={`${item}. ${STEP_LABELS[item - 1]}`}
-              aria-current={item === step ? 'step' : undefined}
+              aria-current={item === step ? "step" : undefined}
               className={cn(
-                'h-1.5 flex-1 overflow-hidden rounded-full bg-event-outline-subtle transition-opacity focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-event-gold',
-                canVisit ? 'cursor-pointer' : 'cursor-default opacity-55',
+                "h-1.5 flex-1 overflow-hidden rounded-full bg-event-outline-subtle transition-opacity focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-event-gold",
+                canVisit ? "cursor-pointer" : "cursor-default opacity-55",
               )}
             >
               <span
                 className={cn(
-                  'block h-full rounded-full bg-event-petrol transition-transform duration-300 motion-reduce:transition-none',
+                  "block h-full rounded-full bg-event-petrol transition-transform duration-300 motion-reduce:transition-none",
                   item <= step || completedSteps.includes(item)
-                    ? 'translate-x-0'
-                    : '-translate-x-full',
+                    ? "translate-x-0"
+                    : "-translate-x-full",
                 )}
               />
             </button>
@@ -157,6 +161,7 @@ interface EventCreationHeaderProps {
   completedSteps: number[];
   saveStatus: SaveStatus;
   lastSavedAt?: string;
+  errorMessage?: string;
   onSaveAndExit: () => void;
   onRetry: () => void;
   onStepSelect: (step: EventCreationStep) => void;
@@ -167,6 +172,7 @@ export function EventCreationHeader({
   completedSteps,
   saveStatus,
   lastSavedAt,
+  errorMessage,
   onSaveAndExit,
   onRetry,
   onStepSelect,
@@ -182,7 +188,7 @@ export function EventCreationHeader({
           <button
             type="button"
             onClick={onSaveAndExit}
-            disabled={saveStatus === 'saving'}
+            disabled={saveStatus === "saving"}
             className="hidden min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-event-ink transition-colors hover:text-event-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-gold disabled:opacity-50 sm:inline-flex"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -204,6 +210,7 @@ export function EventCreationHeader({
             <AutosaveStatus
               status={saveStatus}
               lastSavedAt={lastSavedAt}
+              errorMessage={errorMessage}
               onRetry={onRetry}
             />
           </div>
@@ -229,7 +236,7 @@ export function EventCreationAside({
 }: EventCreationAsideProps) {
   const typeLabel = copy.information.types[values.eventType];
   const venue =
-    values.venueMode === 'later'
+    values.venueMode === "later"
       ? copy.review.noVenue
       : values.venueName || values.venueCity || copy.previewEmpty;
 
@@ -279,7 +286,10 @@ export function EventCreationAside({
             </p>
             <div className="space-y-2 border-t border-event-outline-subtle/70 pt-3 text-xs text-event-muted">
               <p className="flex items-center gap-2">
-                <Clock3 className="h-3.5 w-3.5 text-event-teal" aria-hidden="true" />
+                <Clock3
+                  className="h-3.5 w-3.5 text-event-teal"
+                  aria-hidden="true"
+                />
                 {values.startDate || copy.schedule.dateTentative}
               </p>
               <p>{venue}</p>
@@ -304,7 +314,7 @@ interface StepNavigationProps {
   isUploading?: boolean;
   canGoBack: boolean;
   canSkip: boolean;
-  venueMode: EventCreationFormValues['venueMode'];
+  venueMode: EventCreationFormValues["venueMode"];
   onBack: () => void;
   onContinue: () => void;
   onSkip: () => void;
@@ -326,7 +336,7 @@ export function StepNavigation({
   const primaryLabel =
     step === 6
       ? copy.finish
-      : step === 3 && venueMode === 'later'
+      : step === 3 && venueMode === "later"
         ? copy.venue.continueWithout
         : copy.continue;
 
@@ -372,7 +382,10 @@ export function StepNavigation({
           >
             {isSaving ? (
               <>
-                <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <LoaderCircle
+                  className="h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
                 <span>
                   {isUploading ? copy.identity.uploading : copy.saving}
                 </span>

@@ -1,26 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthToken } from '@/server/auth/use-auth-token';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthToken } from "@/server/auth/use-auth-token";
 import {
   vendorProfileService,
   type VendorRequest,
-} from '@/features/vendors/services/vendor-profile.service';
-import { cn } from '@/shared/lib/utils';
+} from "@/features/vendors/services/vendor-profile.service";
+import { cn } from "@/shared/lib/utils";
+import { getUserFacingError } from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
-const STATUS_LABELS: Record<VendorRequest['status'], string> = {
-  pending: 'En attente',
-  accepted: 'Accepté',
-  declined: 'Refusé',
-  cancelled: 'Annulé',
+const STATUS_LABELS: Record<VendorRequest["status"], string> = {
+  pending: "En attente",
+  accepted: "Accepté",
+  declined: "Refusé",
+  cancelled: "Annulé",
 };
 
-const STATUS_CLASSES: Record<VendorRequest['status'], string> = {
-  pending: 'bg-amber text-white',
-  accepted: 'bg-teal text-white',
-  declined: 'bg-red-500 text-white',
-  cancelled: 'bg-muted text-white',
+const STATUS_CLASSES: Record<VendorRequest["status"], string> = {
+  pending: "bg-amber text-white",
+  accepted: "bg-teal text-white",
+  declined: "bg-red-500 text-white",
+  cancelled: "bg-muted text-white",
 };
 
 interface ReplyState {
@@ -31,38 +33,46 @@ export default function PrestataireDemandesPage() {
   const token = useAuthToken();
   const queryClient = useQueryClient();
   const [openReplyId, setOpenReplyId] = useState<string | null>(null);
-  const [replyState, setReplyState] = useState<ReplyState>({ message: '' });
+  const [replyState, setReplyState] = useState<ReplyState>({ message: "" });
 
-  const { data: requests, isLoading, isError } = useQuery({
-    queryKey: ['vendor-requests-mine'],
+  const {
+    data: requests,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["vendor-requests-mine"],
     queryFn: () => vendorProfileService.getMyRequests(token),
     enabled: !!token,
   });
 
-  const { mutate: respond, isPending: isResponding } = useMutation({
+  const {
+    mutate: respond,
+    isPending: isResponding,
+    error: respondError,
+  } = useMutation({
     mutationFn: ({
       id,
       status,
       message,
     }: {
       id: string;
-      status: 'accepted' | 'declined';
+      status: "accepted" | "declined";
       message?: string;
     }) => vendorProfileService.respondToRequest(token, id, status, message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-requests-mine'] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-requests-mine"] });
       setOpenReplyId(null);
-      setReplyState({ message: '' });
+      setReplyState({ message: "" });
     },
   });
 
-  const handleRespond = (id: string, status: 'accepted' | 'declined') => {
+  const handleRespond = (id: string, status: "accepted" | "declined") => {
     respond({ id, status, message: replyState.message || undefined });
   };
 
   const handleOpenReply = (id: string) => {
     setOpenReplyId(id);
-    setReplyState({ message: '' });
+    setReplyState({ message: "" });
   };
 
   if (isLoading) {
@@ -111,7 +121,7 @@ export default function PrestataireDemandesPage() {
                 </div>
                 <span
                   className={cn(
-                    'shrink-0 rounded-full px-3 py-1 text-xs font-medium',
+                    "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
                     STATUS_CLASSES[req.status],
                   )}
                 >
@@ -119,11 +129,14 @@ export default function PrestataireDemandesPage() {
                 </span>
               </div>
 
-              {req.status === 'pending' && (
+              {req.status === "pending" && (
                 <>
                   {openReplyId === req._id ? (
                     <div className="space-y-3 pt-2 border-t border-border">
-                      <label htmlFor={`reply-msg-${req._id}`} className="block text-sm font-medium text-navy">
+                      <label
+                        htmlFor={`reply-msg-${req._id}`}
+                        className="block text-sm font-medium text-navy"
+                      >
                         Message (optionnel)
                       </label>
                       <textarea
@@ -136,14 +149,22 @@ export default function PrestataireDemandesPage() {
                           setReplyState({ message: e.target.value })
                         }
                       />
+                      {respondError && (
+                        <FormErrorAlert
+                          error={getUserFacingError(respondError, {
+                            fallback:
+                              "Impossible d’enregistrer votre réponse à cette demande. Réessayez.",
+                          })}
+                        />
+                      )}
                       <div className="flex gap-2">
                         <button
                           type="button"
                           disabled={isResponding}
-                          onClick={() => handleRespond(req._id, 'accepted')}
+                          onClick={() => handleRespond(req._id, "accepted")}
                           className={cn(
-                            'rounded-lg px-4 py-2 text-sm font-medium bg-teal text-white',
-                            'disabled:opacity-50',
+                            "rounded-lg px-4 py-2 text-sm font-medium bg-teal text-white",
+                            "disabled:opacity-50",
                           )}
                         >
                           Accepter
@@ -151,10 +172,10 @@ export default function PrestataireDemandesPage() {
                         <button
                           type="button"
                           disabled={isResponding}
-                          onClick={() => handleRespond(req._id, 'declined')}
+                          onClick={() => handleRespond(req._id, "declined")}
                           className={cn(
-                            'rounded-lg px-4 py-2 text-sm font-medium bg-red-500 text-white',
-                            'disabled:opacity-50',
+                            "rounded-lg px-4 py-2 text-sm font-medium bg-red-500 text-white",
+                            "disabled:opacity-50",
                           )}
                         >
                           Refuser

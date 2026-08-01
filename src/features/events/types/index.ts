@@ -21,6 +21,30 @@ export type EventType =
   | 'other';
 export type VenueMode = 'existing' | 'search' | 'later';
 export type ProviderSelectionMode = 'elintys' | 'manual' | 'later';
+export type EventDiscoverability = 'public' | 'unlisted' | 'private';
+export type EventAccessPolicyType =
+  | 'open'
+  | 'registration_required'
+  | 'access_code'
+  | 'email_domain'
+  | 'manual_approval'
+  | 'guest_list'
+  | 'invitation_token';
+export type AdmissionMode =
+  | 'free'
+  | 'registration_only'
+  | 'free_ticket'
+  | 'paid_ticket'
+  | 'invitation';
+
+export type EventAccessPolicy =
+  | { type: 'open' }
+  | { type: 'registration_required'; requiresAuthentication?: boolean }
+  | { type: 'access_code'; code?: string; hasAccessCode?: boolean }
+  | { type: 'email_domain'; allowedDomains: string[]; requiresAuthentication?: boolean }
+  | { type: 'manual_approval'; requiresAuthentication?: boolean }
+  | { type: 'guest_list'; requiresAuthentication?: boolean }
+  | { type: 'invitation_token' };
 
 export interface EventLocation {
   type: EventLocationType;
@@ -73,6 +97,10 @@ export interface Event {
   venueProfile?: string | null;
   visibility?: 'public' | 'private' | 'invite_only';
   accessRules?: EventAccessRules | null;
+  discoverability?: EventDiscoverability;
+  accessPolicy?: EventAccessPolicy;
+  admissionModes?: AdmissionMode[];
+  accessModelVersion?: number;
   capacity?: number;
   providerNeeds?: EventProviderNeed[];
   creationProgress?: EventCreationProgress;
@@ -97,6 +125,9 @@ export interface CreateEventInput {
   venueProfile?: string | null;
   visibility?: 'public' | 'private' | 'invite_only';
   accessRules?: EventAccessRules | null;
+  discoverability?: EventDiscoverability;
+  accessPolicy?: EventAccessPolicy;
+  admissionModes?: AdmissionMode[];
   capacity?: number;
   providerNeeds?: EventProviderNeed[];
   creationProgress?: Omit<EventCreationProgress, 'lastSavedAt'>;

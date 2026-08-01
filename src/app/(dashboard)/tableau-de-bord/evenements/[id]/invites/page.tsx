@@ -1,35 +1,40 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { guestsService, type Guest } from '@/features/guests/services/guests.service';
-import { useAuthToken } from '@/server/auth/use-auth-token';
-import { cn } from '@/shared/lib/utils';
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  guestsService,
+  type Guest,
+} from "@/features/guests/services/guests.service";
+import { useAuthToken } from "@/server/auth/use-auth-token";
+import { cn } from "@/shared/lib/utils";
+import { getUserFacingError } from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 const addSchema = z.object({
-  name: z.string().min(1, 'Requis').max(100),
-  email: z.string().email('Courriel invalide').optional().or(z.literal('')),
+  name: z.string().min(1, "Requis").max(100),
+  email: z.string().email("Courriel invalide").optional().or(z.literal("")),
   note: z.string().max(500).optional(),
 });
 
 type AddFormValues = z.infer<typeof addSchema>;
 
-const STATUS_LABELS: Record<Guest['status'], string> = {
-  invited: 'Invité',
-  confirmed: 'Confirmé',
-  declined: 'Refusé',
-  present: 'Présent',
+const STATUS_LABELS: Record<Guest["status"], string> = {
+  invited: "Invité",
+  confirmed: "Confirmé",
+  declined: "Refusé",
+  present: "Présent",
 };
 
-const STATUS_CLASSES: Record<Guest['status'], string> = {
-  invited: 'bg-surface border border-border text-muted',
-  confirmed: 'bg-teal text-white',
-  declined: 'bg-red-100 text-red-600',
-  present: 'bg-navy text-white',
+const STATUS_CLASSES: Record<Guest["status"], string> = {
+  invited: "bg-surface border border-border text-muted",
+  confirmed: "bg-teal text-white",
+  declined: "bg-red-100 text-red-600",
+  present: "bg-navy text-white",
 };
 
 export default function GuestsPage() {
@@ -39,7 +44,7 @@ export default function GuestsPage() {
   const [showForm, setShowForm] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['guests', id],
+    queryKey: ["guests", id],
     queryFn: () => guestsService.list(token, id),
     staleTime: 30_000,
   });
@@ -52,24 +57,29 @@ export default function GuestsPage() {
         note: values.note || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests', id] });
+      queryClient.invalidateQueries({ queryKey: ["guests", id] });
       setShowForm(false);
       reset();
     },
   });
 
   const statusMutation = useMutation({
-    mutationFn: ({ guestId, status }: { guestId: string; status: Guest['status'] }) =>
-      guestsService.updateStatus(token, id, guestId, status),
+    mutationFn: ({
+      guestId,
+      status,
+    }: {
+      guestId: string;
+      status: Guest["status"];
+    }) => guestsService.updateStatus(token, id, guestId, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests', id] });
+      queryClient.invalidateQueries({ queryKey: ["guests", id] });
     },
   });
 
   const removeMutation = useMutation({
     mutationFn: (guestId: string) => guestsService.remove(token, id, guestId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests', id] });
+      queryClient.invalidateQueries({ queryKey: ["guests", id] });
     },
   });
 
@@ -80,15 +90,21 @@ export default function GuestsPage() {
     formState: { errors, isSubmitting },
   } = useForm<AddFormValues>({
     resolver: zodResolver(addSchema),
-    defaultValues: { name: '', email: '', note: '' },
+    defaultValues: { name: "", email: "", note: "" },
   });
 
   const onSubmit = (values: AddFormValues) => {
     addMutation.mutate(values);
   };
 
-  if (isLoading) return <div className="p-8 text-muted animate-pulse">Chargement…</div>;
-  if (isError) return <div className="p-8 text-red-500">Erreur lors du chargement des invités.</div>;
+  if (isLoading)
+    return <div className="p-8 text-muted animate-pulse">Chargement…</div>;
+  if (isError)
+    return (
+      <div className="p-8 text-red-500">
+        Erreur lors du chargement des invités.
+      </div>
+    );
 
   const guests = data?.data ?? [];
 
@@ -98,15 +114,15 @@ export default function GuestsPage() {
         <h1 className="font-serif text-2xl font-bold text-navy">Invités</h1>
         <button
           type="button"
-          onClick={() => setShowForm(prev => !prev)}
+          onClick={() => setShowForm((prev) => !prev)}
           className={cn(
-            'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+            "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
             showForm
-              ? 'bg-surface border border-border text-muted'
-              : 'bg-teal text-white hover:opacity-90',
+              ? "bg-surface border border-border text-muted"
+              : "bg-teal text-white hover:opacity-90",
           )}
         >
-          {showForm ? 'Annuler' : 'Ajouter un invité'}
+          {showForm ? "Annuler" : "Ajouter un invité"}
         </button>
       </div>
 
@@ -116,13 +132,16 @@ export default function GuestsPage() {
           className="mb-6 border border-border rounded-xl p-5 bg-surface space-y-4"
         >
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-navy mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-navy mb-1"
+            >
               Nom <span className="text-red-500">*</span>
             </label>
             <input
               id="name"
               type="text"
-              {...register('name')}
+              {...register("name")}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
               placeholder="Prénom Nom"
             />
@@ -132,28 +151,36 @@ export default function GuestsPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-navy mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-navy mb-1"
+            >
               Courriel
             </label>
             <input
               id="email"
               type="email"
-              {...register('email')}
+              {...register("email")}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
               placeholder="exemple@courriel.com"
             />
             {errors.email && (
-              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+              <p className="mt-1 text-xs text-red-500">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="note" className="block text-sm font-medium text-navy mb-1">
+            <label
+              htmlFor="note"
+              className="block text-sm font-medium text-navy mb-1"
+            >
               Note
             </label>
             <textarea
               id="note"
-              {...register('note')}
+              {...register("note")}
               rows={2}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal resize-none"
               placeholder="Note optionnelle…"
@@ -168,20 +195,27 @@ export default function GuestsPage() {
             disabled={isSubmitting || addMutation.isPending}
             className="rounded-lg bg-teal text-white px-5 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {addMutation.isPending ? 'Ajout…' : 'Ajouter'}
+            {addMutation.isPending ? "Ajout…" : "Ajouter"}
           </button>
 
           {addMutation.isError && (
-            <p className="text-xs text-red-500">Erreur lors de l&apos;ajout. Veuillez réessayer.</p>
+            <FormErrorAlert
+              error={getUserFacingError(addMutation.error, {
+                fallback:
+                  "Impossible d’ajouter cet invité. Vérifiez son nom et son courriel.",
+              })}
+            />
           )}
         </form>
       )}
 
       {guests.length === 0 ? (
-        <p className="text-muted text-sm text-center py-12">Aucun invité pour le moment.</p>
+        <p className="text-muted text-sm text-center py-12">
+          Aucun invité pour le moment.
+        </p>
       ) : (
         <ul className="space-y-3">
-          {guests.map(guest => (
+          {guests.map((guest) => (
             <li
               key={guest._id}
               className="border border-border rounded-xl p-4 bg-white flex flex-col sm:flex-row sm:items-center gap-3"
@@ -192,14 +226,16 @@ export default function GuestsPage() {
                   <p className="text-sm text-muted truncate">{guest.email}</p>
                 )}
                 {guest.note && (
-                  <p className="text-xs text-muted mt-0.5 line-clamp-2">{guest.note}</p>
+                  <p className="text-xs text-muted mt-0.5 line-clamp-2">
+                    {guest.note}
+                  </p>
                 )}
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 <span
                   className={cn(
-                    'text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap',
+                    "text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap",
                     STATUS_CLASSES[guest.status],
                   )}
                 >
@@ -209,10 +245,10 @@ export default function GuestsPage() {
                 <select
                   aria-label={`Changer le statut de ${guest.name}`}
                   value={guest.status}
-                  onChange={e =>
+                  onChange={(e) =>
                     statusMutation.mutate({
                       guestId: guest._id,
-                      status: e.target.value as Guest['status'],
+                      status: e.target.value as Guest["status"],
                     })
                   }
                   disabled={statusMutation.isPending}

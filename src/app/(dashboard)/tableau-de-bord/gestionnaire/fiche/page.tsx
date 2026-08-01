@@ -1,20 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useForm, type SubmitHandler, type Resolver } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cn } from '@/shared/lib/utils';
-import { useAuthToken } from '@/server/auth/use-auth-token';
-import { venueProfileService } from '@/features/venues/services/venue-profile.service';
+import { useEffect, useState } from "react";
+import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/shared/lib/utils";
+import { useAuthToken } from "@/server/auth/use-auth-token";
+import { venueProfileService } from "@/features/venues/services/venue-profile.service";
+import { getUserFacingError } from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 const schema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(3000).optional(),
   capacity: z.coerce.number().int().min(1),
   pricePerDay: z.coerce.number().min(0).optional(),
-  contactEmail: z.string().email().optional().or(z.literal('')),
+  contactEmail: z.string().email().optional().or(z.literal("")),
   contactPhone: z.string().max(20).optional(),
   street: z.string().min(1).max(200),
   city: z.string().min(1).max(100),
@@ -41,10 +43,14 @@ function FieldError({ message }: { message?: string }) {
 export default function GestionnaireFichePage() {
   const token = useAuthToken();
   const queryClient = useQueryClient();
-  const [successMsg, setSuccessMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const { data: profile, isLoading, isError } = useQuery({
-    queryKey: ['venue-profile-me'],
+  const {
+    data: profile,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["venue-profile-me"],
     queryFn: () => venueProfileService.getMyProfile(token),
     enabled: Boolean(token),
   });
@@ -54,20 +60,22 @@ export default function GestionnaireFichePage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues> });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema) as Resolver<FormValues>,
+  });
 
   useEffect(() => {
     if (profile) {
       reset({
         name: profile.name,
-        description: profile.description ?? '',
+        description: profile.description ?? "",
         capacity: profile.capacity,
         pricePerDay: profile.pricePerDay,
-        contactEmail: profile.contactEmail ?? '',
-        contactPhone: profile.contactPhone ?? '',
+        contactEmail: profile.contactEmail ?? "",
+        contactPhone: profile.contactPhone ?? "",
         street: profile.address.street,
         city: profile.address.city,
-        postalCode: profile.address.postalCode ?? '',
+        postalCode: profile.address.postalCode ?? "",
       });
     }
   }, [profile, reset]);
@@ -84,28 +92,28 @@ export default function GestionnaireFichePage() {
         address: {
           street: data.street,
           city: data.city,
-          province: 'QC',
+          province: "QC",
           postalCode: data.postalCode || undefined,
         },
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['venue-profile-me'] });
-      setSuccessMsg('Fiche mise a jour avec succes.');
-      setTimeout(() => setSuccessMsg(''), 4000);
+      void queryClient.invalidateQueries({ queryKey: ["venue-profile-me"] });
+      setSuccessMsg("Fiche mise a jour avec succes.");
+      setTimeout(() => setSuccessMsg(""), 4000);
     },
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    setSuccessMsg('');
+    setSuccessMsg("");
     mutate(data);
   };
 
   const inputClass = cn(
-    'w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-navy placeholder:text-muted',
-    'focus:outline-none focus:ring-2 focus:ring-teal',
+    "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-navy placeholder:text-muted",
+    "focus:outline-none focus:ring-2 focus:ring-teal",
   );
 
-  const labelClass = 'block mb-1 text-sm font-medium text-navy';
+  const labelClass = "block mb-1 text-sm font-medium text-navy";
 
   if (isLoading) {
     return (
@@ -128,9 +136,12 @@ export default function GestionnaireFichePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
       <div>
-        <h1 className="font-serif text-2xl font-bold text-navy">Ma fiche lieu</h1>
+        <h1 className="font-serif text-2xl font-bold text-navy">
+          Ma fiche lieu
+        </h1>
         <p className="mt-1 text-sm text-muted">
-          Mettez a jour la presentation de votre lieu, ses capacites et ses services.
+          Mettez a jour la presentation de votre lieu, ses capacites et ses
+          services.
         </p>
       </div>
 
@@ -146,7 +157,7 @@ export default function GestionnaireFichePage() {
           <input
             id="name"
             type="text"
-            {...register('name')}
+            {...register("name")}
             className={inputClass}
             placeholder="Salle Pleyel, Le Balthazar..."
           />
@@ -160,8 +171,8 @@ export default function GestionnaireFichePage() {
           <textarea
             id="description"
             rows={5}
-            {...register('description')}
-            className={cn(inputClass, 'resize-none')}
+            {...register("description")}
+            className={cn(inputClass, "resize-none")}
             placeholder="Decrivez votre lieu (histoire, ambiance, services...)..."
           />
           <FieldError message={errors.description?.message} />
@@ -176,7 +187,7 @@ export default function GestionnaireFichePage() {
               id="capacity"
               type="number"
               min={1}
-              {...register('capacity')}
+              {...register("capacity")}
               className={inputClass}
               placeholder="200"
             />
@@ -192,7 +203,7 @@ export default function GestionnaireFichePage() {
               type="number"
               min={0}
               step="0.01"
-              {...register('pricePerDay')}
+              {...register("pricePerDay")}
               className={inputClass}
               placeholder="1500"
             />
@@ -208,7 +219,7 @@ export default function GestionnaireFichePage() {
             <input
               id="contactEmail"
               type="email"
-              {...register('contactEmail')}
+              {...register("contactEmail")}
               className={inputClass}
               placeholder="contact@lieu.ca"
             />
@@ -222,7 +233,7 @@ export default function GestionnaireFichePage() {
             <input
               id="contactPhone"
               type="tel"
-              {...register('contactPhone')}
+              {...register("contactPhone")}
               className={inputClass}
               placeholder="514-555-0100"
             />
@@ -241,7 +252,7 @@ export default function GestionnaireFichePage() {
           <input
             id="street"
             type="text"
-            {...register('street')}
+            {...register("street")}
             className={inputClass}
             placeholder="123, rue Sainte-Catherine"
           />
@@ -256,7 +267,7 @@ export default function GestionnaireFichePage() {
             <input
               id="city"
               type="text"
-              {...register('city')}
+              {...register("city")}
               className={inputClass}
               placeholder="Montreal"
             />
@@ -270,7 +281,7 @@ export default function GestionnaireFichePage() {
             <input
               id="postalCode"
               type="text"
-              {...register('postalCode')}
+              {...register("postalCode")}
               className={inputClass}
               placeholder="H2X 1Y5"
             />
@@ -278,8 +289,13 @@ export default function GestionnaireFichePage() {
           </div>
         </div>
 
-        {error instanceof Error && (
-          <p className="text-sm text-red-500">{error.message}</p>
+        {error && (
+          <FormErrorAlert
+            error={getUserFacingError(error, {
+              fallback:
+                "Impossible d’enregistrer la fiche du lieu. Vérifiez les champs, puis réessayez.",
+            })}
+          />
         )}
 
         {successMsg && (
@@ -291,7 +307,7 @@ export default function GestionnaireFichePage() {
           disabled={isPending || isSubmitting}
           className="w-full rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {isPending ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          {isPending ? "Enregistrement..." : "Enregistrer les modifications"}
         </button>
       </form>
     </div>

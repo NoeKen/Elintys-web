@@ -59,6 +59,7 @@ import {
 import { vendorsService } from '@/features/vendors/services/vendors.service';
 import type { MediaImage, MediaImageSource } from '@/shared/types/media.types';
 import type { EventMediaState } from '@/features/events/services/event-media.service';
+import type { EventPublishReadiness } from '@/features/events/services/events.service';
 import { EventMediaManager } from './EventMediaManager';
 
 const EVENT_TYPE_ICONS: Record<
@@ -1153,7 +1154,9 @@ export function IdentityAccessStep({
   onCoverPreviewChange,
   onUploadingChange,
 }: IdentityAccessStepProps) {
-  const visibility = form.watch('visibility');
+  const discoverability = form.watch('discoverability');
+  const accessPolicyType = form.watch('accessPolicyType');
+  const admissionModes = form.watch('admissionModes');
   const visibilityOptions = [
     {
       value: 'public' as const,
@@ -1161,16 +1164,32 @@ export function IdentityAccessStep({
       content: copy.identity.public,
     },
     {
+      value: 'unlisted' as const,
+      Icon: UsersRound,
+      content: copy.identity.unlisted,
+    },
+    {
       value: 'private' as const,
       Icon: ShieldCheck,
       content: copy.identity.private,
     },
-    {
-      value: 'invite_only' as const,
-      Icon: UsersRound,
-      content: copy.identity.inviteOnly,
-    },
   ];
+  const accessOptions = [
+    'open',
+    'registration_required',
+    'access_code',
+    'email_domain',
+    'manual_approval',
+    'guest_list',
+    'invitation_token',
+  ] as const;
+  const admissionOptions = [
+    'free',
+    'registration_only',
+    'free_ticket',
+    'paid_ticket',
+    'invitation',
+  ] as const;
 
   return (
     <section>
@@ -1203,7 +1222,7 @@ export function IdentityAccessStep({
 
       <fieldset className="mt-10">
         <legend className="font-serif text-2xl text-event-petrol">
-          {copy.identity.visibility}
+          {copy.identity.visibilityQuestion}
         </legend>
         <p className="mt-2 text-sm text-event-muted">
           {copy.identity.visibilityHint}
@@ -1214,7 +1233,7 @@ export function IdentityAccessStep({
               key={value}
               className={cn(
                 'flex min-h-64 cursor-pointer flex-col rounded-3xl border p-5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
-                visibility === value
+                discoverability === value
                   ? 'border-event-petrol bg-event-petrol text-white shadow-event-selected'
                   : 'border-transparent bg-event-surface text-event-ink',
               )}
@@ -1222,13 +1241,13 @@ export function IdentityAccessStep({
               <input
                 type="radio"
                 value={value}
-                {...form.register('visibility')}
+                {...form.register('discoverability')}
                 className="sr-only"
               />
               <Icon
                 className={cn(
                   'h-6 w-6',
-                  visibility === value ? 'text-event-gold' : 'text-event-teal',
+                  discoverability === value ? 'text-event-gold' : 'text-event-teal',
                 )}
                 aria-hidden="true"
               />
@@ -1236,7 +1255,7 @@ export function IdentityAccessStep({
               <span
                 className={cn(
                   'mt-2 text-sm leading-6',
-                  visibility === value ? 'text-white/75' : 'text-event-muted',
+                  discoverability === value ? 'text-white/75' : 'text-event-muted',
                 )}
               >
                 {content.description}
@@ -1244,7 +1263,7 @@ export function IdentityAccessStep({
               <span
                 className={cn(
                   'mt-auto pt-5 text-xs leading-5',
-                  visibility === value ? 'text-white/65' : 'text-event-muted',
+                  discoverability === value ? 'text-white/65' : 'text-event-muted',
                 )}
               >
                 {content.help}
@@ -1254,58 +1273,85 @@ export function IdentityAccessStep({
         </div>
       </fieldset>
 
-      {visibility === 'private' && (
-        <fieldset className="mt-6 rounded-3xl bg-event-surface p-5 sm:p-7">
-          <legend className="px-1 font-semibold text-event-ink">
-            {copy.identity.privateRules}
-          </legend>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {[
-              ['privateLink', copy.identity.privateLink],
-              ['accessCode', copy.identity.accessCode],
-              ['manualApproval', copy.identity.manualApproval],
-            ].map(([field, label]) => (
-              <label
-                key={field}
-                className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl bg-white px-4 text-sm font-semibold text-event-ink"
-              >
-                <input
-                  type="checkbox"
-                  {...form.register(
-                    field as 'privateLink' | 'accessCode' | 'manualApproval',
-                  )}
-                  className="event-checkbox"
-                />
-                <span>
-                  {label}
-                  {field === 'accessCode' && (
-                    <span className="block text-[11px] font-normal text-event-muted">
-                      {copy.identity.accessCodeHint}
-                    </span>
-                  )}
-                </span>
-              </label>
-            ))}
-            <div className="sm:col-span-2">
-              <Label htmlFor="allowed-email-domain" optional>
-                {copy.identity.emailDomain}
-              </Label>
-              <input
-                id="allowed-email-domain"
-                {...form.register('allowedEmailDomain')}
-                className="event-input"
-                placeholder={copy.identity.emailDomainPlaceholder}
-                aria-invalid={Boolean(
-                  form.formState.errors.allowedEmailDomain,
-                )}
-              />
-              <FieldError
-                message={form.formState.errors.allowedEmailDomain?.message}
-              />
-            </div>
+      <fieldset className="mt-8 rounded-3xl border border-event-outline-subtle/70 bg-white/70 p-5 shadow-event-soft sm:p-7">
+        <legend className="px-1 font-serif text-2xl text-event-petrol">
+          {copy.identity.accessQuestion}
+        </legend>
+        <p className="mt-2 text-sm text-event-muted">{copy.identity.accessHint}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {accessOptions.map((value) => (
+            <label
+              key={value}
+              className={cn(
+                'flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 text-sm font-semibold transition',
+                accessPolicyType === value
+                  ? 'border-event-gold bg-event-petrol text-white shadow-event-selected'
+                  : 'border-event-outline-subtle bg-event-surface text-event-ink',
+              )}
+            >
+              <input type="radio" value={value} {...form.register('accessPolicyType')} className="sr-only" />
+              <span className={cn('h-2.5 w-2.5 rounded-full', accessPolicyType === value ? 'bg-event-gold' : 'bg-event-teal/40')} />
+              {copy.identity.accessOptions[value]}
+            </label>
+          ))}
+        </div>
+
+        {accessPolicyType === 'access_code' && (
+          <div className="mt-5">
+            <Label htmlFor="event-access-code">{copy.identity.accessCode}</Label>
+            <input
+              id="event-access-code"
+              type="password"
+              autoComplete="new-password"
+              {...form.register('accessCodeValue')}
+              className="event-input"
+              placeholder={copy.identity.accessCodePlaceholder}
+            />
+            <p className="mt-2 text-xs text-event-muted">{copy.identity.accessCodeHint}</p>
+            <FieldError message={form.formState.errors.accessCodeValue?.message} />
           </div>
-        </fieldset>
-      )}
+        )}
+
+        {accessPolicyType === 'email_domain' && (
+          <div className="mt-5">
+            <Label htmlFor="allowed-domains">{copy.identity.emailDomain}</Label>
+            <input
+              id="allowed-domains"
+              {...form.register('allowedDomains')}
+              className="event-input"
+              placeholder={copy.identity.emailDomainPlaceholder}
+              aria-invalid={Boolean(form.formState.errors.allowedDomains)}
+            />
+            <p className="mt-2 text-xs text-event-muted">{copy.identity.emailDomainHint}</p>
+            <FieldError message={form.formState.errors.allowedDomains?.message} />
+          </div>
+        )}
+      </fieldset>
+
+      <fieldset className="mt-8 rounded-3xl bg-event-surface p-5 sm:p-7">
+        <legend className="px-1 font-serif text-2xl text-event-petrol">
+          {copy.identity.admissionQuestion}
+        </legend>
+        <p className="mt-2 text-sm text-event-muted">{copy.identity.admissionHint}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {admissionOptions.map((value) => (
+            <label key={value} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-white px-4 text-sm font-semibold text-event-ink">
+              <input
+                type="checkbox"
+                value={value}
+                {...form.register('admissionModes')}
+                className="event-checkbox"
+              />
+              <span>{copy.identity.admissionOptions[value]}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-4 rounded-2xl bg-event-teal/10 px-4 py-3 text-xs text-event-petrol">
+          {copy.identity.admissionExample}
+        </p>
+        <FieldError message={form.formState.errors.admissionModes?.message} />
+        <span className="sr-only">{admissionModes.join(', ')}</span>
+      </fieldset>
     </section>
   );
 }
@@ -1315,6 +1361,8 @@ interface ReviewStepProps {
   providerNeeds: ProviderNeedState[];
   coverPreview?: string;
   onEdit: (step: EventCreationStep) => void;
+  readiness?: EventPublishReadiness;
+  readinessLoading?: boolean;
 }
 
 export function ReviewStep({
@@ -1322,17 +1370,18 @@ export function ReviewStep({
   providerNeeds,
   coverPreview,
   onEdit,
+  readiness,
+  readinessLoading,
 }: ReviewStepProps) {
   const venue =
     values.venueMode === 'later'
       ? copy.review.noVenue
       : values.venueName || copy.review.noVenue;
-  const access =
-    values.visibility === 'public'
-      ? copy.identity.public.label
-      : values.visibility === 'private'
-        ? copy.identity.private.label
-        : copy.identity.inviteOnly.label;
+  const visibility = copy.identity.discoverabilityLabels[values.discoverability];
+  const access = copy.identity.accessOptions[values.accessPolicyType];
+  const admission = values.admissionModes
+    .map((mode) => copy.identity.admissionOptions[mode])
+    .join(' + ');
   const cards = [
     {
       title: copy.review.information,
@@ -1364,7 +1413,9 @@ export function ReviewStep({
       step: 5 as const,
       body: coverPreview ? copy.identity.cover : copy.review.noCover,
     },
+    { title: copy.review.visibility, step: 5 as const, body: visibility },
     { title: copy.review.access, step: 5 as const, body: access },
+    { title: copy.review.admission, step: 5 as const, body: admission },
   ];
 
   return (
@@ -1377,6 +1428,27 @@ export function ReviewStep({
 
       <div className="rounded-3xl bg-event-surface p-5 sm:p-7">
         <h2 className="font-semibold text-event-ink">{copy.review.checklist}</h2>
+        <div className={cn(
+          'mt-4 rounded-2xl border px-4 py-4 text-sm',
+          readiness?.publishable
+            ? 'border-event-teal/30 bg-event-teal/10 text-event-petrol'
+            : 'border-event-gold/40 bg-white text-event-ink',
+        )}>
+          <p className="font-semibold">
+            {readinessLoading
+              ? copy.review.readinessLoading
+              : readiness?.publishable
+                ? copy.review.publishReady
+                : copy.review.publishNotReady}
+          </p>
+          {readiness && readiness.errors.length > 0 && (
+            <ul className="mt-3 space-y-1.5">
+              {readiness.errors.map(({ code, field }) => (
+                <li key={`${code}:${field}`}>• {copy.review.readinessErrors[code as keyof typeof copy.review.readinessErrors] ?? code}</li>
+              ))}
+            </ul>
+          )}
+        </div>
         <div className="mt-5 flex flex-wrap gap-3">
           {[
             copy.review.essential,

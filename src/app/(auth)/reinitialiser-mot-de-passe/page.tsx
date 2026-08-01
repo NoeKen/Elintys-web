@@ -7,12 +7,24 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { Lock, AlertTriangle, BadgeCheck, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import {
+  Lock,
+  AlertTriangle,
+  BadgeCheck,
+  CheckCircle2,
+  Circle,
+  Loader2,
+} from "lucide-react";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { PasswordStrengthBar } from "@/shared/ui/PasswordStrengthBar";
 import { authService } from "@/features/auth/client/auth.service";
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/shared/lib/utils";
+import {
+  getUserFacingError,
+  type UserFacingError,
+} from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 const schema = z
   .object({
@@ -32,7 +44,10 @@ type FormData = z.infer<typeof schema>;
 
 const fade = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.25, ease: "easeOut" as const } },
+  show: {
+    opacity: 1,
+    transition: { duration: 0.25, ease: "easeOut" as const },
+  },
   exit: { opacity: 0, transition: { duration: 0.15 } },
 };
 
@@ -41,9 +56,10 @@ function ReinitialiserContent() {
   const router = useRouter();
   const token = searchParams.get("token");
 
-  const [pageState, setPageState] = useState<"idle" | "success" | "invalid-token">(
-    token ? "idle" : "invalid-token"
-  );
+  const [pageState, setPageState] = useState<
+    "idle" | "success" | "invalid-token"
+  >(token ? "idle" : "invalid-token");
+  const [submitError, setSubmitError] = useState<UserFacingError | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -71,6 +87,7 @@ function ReinitialiserContent() {
   const allChecksMet = checks.every((c) => c.met) && passwordsMatch;
 
   const onSubmit = async (data: FormData) => {
+    setSubmitError(null);
     try {
       await authService.resetPassword(token!, data.password);
       setPageState("success");
@@ -78,6 +95,13 @@ function ReinitialiserContent() {
       const authErr = err as { code?: string };
       if (authErr?.code === "TOKEN_EXPIRED") {
         setPageState("invalid-token");
+      } else {
+        setSubmitError(
+          getUserFacingError(err, {
+            fallback:
+              "Impossible de modifier le mot de passe. Demandez un nouveau lien, puis réessayez.",
+          }),
+        );
       }
     }
   };
@@ -108,10 +132,15 @@ function ReinitialiserContent() {
                 Nouveau mot de passe
               </h1>
               <p className="text-sm text-on-surface-variant text-center mb-8">
-                Veuillez définir un mot de passe sécurisé pour votre compte Elintys.
+                Veuillez définir un mot de passe sécurisé pour votre compte
+                Elintys.
               </p>
 
-              <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+                className="space-y-6"
+              >
                 {/* Nouveau mot de passe */}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
@@ -128,16 +157,27 @@ function ReinitialiserContent() {
                   {/* Checklist */}
                   <div className="mt-2 space-y-1.5">
                     {checks.map((check) => (
-                      <div key={check.label} className="flex items-center gap-2">
+                      <div
+                        key={check.label}
+                        className="flex items-center gap-2"
+                      >
                         {check.met ? (
-                          <CheckCircle2 size={16} className="text-accent shrink-0" />
+                          <CheckCircle2
+                            size={16}
+                            className="text-accent shrink-0"
+                          />
                         ) : (
-                          <Circle size={16} className="text-outline-variant shrink-0" />
+                          <Circle
+                            size={16}
+                            className="text-outline-variant shrink-0"
+                          />
                         )}
                         <span
                           className={cn(
                             "text-[13px]",
-                            check.met ? "text-on-surface" : "text-on-surface-variant"
+                            check.met
+                              ? "text-on-surface"
+                              : "text-on-surface-variant",
                           )}
                         >
                           {check.label}
@@ -161,13 +201,15 @@ function ReinitialiserContent() {
                   />
                 </div>
 
+                {submitError && <FormErrorAlert error={submitError} />}
+
                 <button
                   type="submit"
                   disabled={!allChecksMet || isSubmitting}
                   className={cn(
                     "w-full h-12 rounded-md bg-accent text-white text-sm font-semibold",
                     "flex items-center justify-center gap-2 transition-opacity",
-                    "hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    "hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
                   )}
                 >
                   {isSubmitting ? (
@@ -200,15 +242,15 @@ function ReinitialiserContent() {
                 Lien invalide ou expiré
               </h1>
               <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">
-                Ce lien de réinitialisation n&apos;est plus valide. Veuillez en faire une nouvelle
-                demande.
+                Ce lien de réinitialisation n&apos;est plus valide. Veuillez en
+                faire une nouvelle demande.
               </p>
               <Link
                 href={ROUTES.AUTH.FORGOT_PASSWORD}
                 className={cn(
                   "inline-flex items-center justify-center w-full h-12 rounded-md",
                   "bg-accent text-white text-sm font-semibold",
-                  "hover:opacity-90 transition-opacity"
+                  "hover:opacity-90 transition-opacity",
                 )}
               >
                 Demander un nouveau lien
@@ -233,15 +275,15 @@ function ReinitialiserContent() {
                 Mot de passe réinitialisé !
               </h1>
               <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">
-                Votre compte a été sécurisé avec succès. Vous pouvez maintenant vous connecter avec
-                vos nouveaux identifiants.
+                Votre compte a été sécurisé avec succès. Vous pouvez maintenant
+                vous connecter avec vos nouveaux identifiants.
               </p>
               <Link
                 href={ROUTES.AUTH.LOGIN}
                 className={cn(
                   "inline-flex items-center justify-center w-full h-12 rounded-md",
                   "border-[1.5px] border-accent text-accent text-sm font-semibold",
-                  "hover:bg-accent-light transition-colors mb-6"
+                  "hover:bg-accent-light transition-colors mb-6",
                 )}
               >
                 Se connecter
@@ -258,17 +300,21 @@ function ReinitialiserContent() {
       <div className="mt-8 text-center space-y-2">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <span className="font-serif text-lg text-accent">Elintys</span>
-          {["À propos", "Confidentialité", "Conditions", "Support", "Blog"].map((link) => (
-            <a
-              key={link}
-              href="#"
-              className="text-xs text-on-surface-variant hover:text-on-surface transition-colors"
-            >
-              {link}
-            </a>
-          ))}
+          {["À propos", "Confidentialité", "Conditions", "Support", "Blog"].map(
+            (link) => (
+              <a
+                key={link}
+                href="#"
+                className="text-xs text-on-surface-variant hover:text-on-surface transition-colors"
+              >
+                {link}
+              </a>
+            ),
+          )}
         </div>
-        <p className="text-xs text-on-surface-variant">© 2024 Elintys. Tous droits réservés.</p>
+        <p className="text-xs text-on-surface-variant">
+          © 2024 Elintys. Tous droits réservés.
+        </p>
       </div>
     </div>
   );

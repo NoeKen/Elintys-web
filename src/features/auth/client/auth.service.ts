@@ -30,7 +30,9 @@ interface AuthApiResponse {
 }
 
 function normalizeUser(apiUser: ApiUser): User {
-  const [firstName = "", ...lastNameParts] = (apiUser.fullName ?? "").trim().split(/\s+/);
+  const [firstName = "", ...lastNameParts] = (apiUser.fullName ?? "")
+    .trim()
+    .split(/\s+/);
   const roles = (apiUser.roles ?? [])
     .map((role) => USER_ROLES.find((userRole) => userRole === role))
     .filter((role): role is UserRole => Boolean(role));
@@ -61,10 +63,14 @@ function buildSession(user: ApiUser): AuthSession {
 function getApiMessage(error: unknown): string | undefined {
   if (!(error instanceof ApiClientError)) return undefined;
   const payload = error.payload;
-  if (!payload || typeof payload !== "object" || !("message" in payload)) return undefined;
+  if (!payload || typeof payload !== "object" || !("message" in payload))
+    return undefined;
   const message = (payload as { message?: unknown }).message;
   if (typeof message === "string") return message;
-  if (Array.isArray(message)) return message.filter((item): item is string => typeof item === "string").join(" ");
+  if (Array.isArray(message))
+    return message
+      .filter((item): item is string => typeof item === "string")
+      .join(" ");
   return undefined;
 }
 
@@ -89,7 +95,8 @@ export interface RegisterData {
   roles: UserRole[];
 }
 
-export type OnboardingRole = "organisateur" | "prestataire" | "gestionnaire_salle";
+export type OnboardingRole =
+  "organisateur" | "prestataire" | "gestionnaire_salle";
 export type OnboardingPayload = Record<string, string | string[] | number>;
 
 export const authService = {
@@ -142,13 +149,15 @@ export const authService = {
     await api.post("/auth/resend-verification", { email });
   },
 
-  async saveOnboarding(role: OnboardingRole, payload: OnboardingPayload): Promise<AuthSession> {
-    try {
-      const response = await api.patch<AuthApiResponse>(`/auth/onboarding/${role}`, payload);
-      return buildSession(response.data.user);
-    } catch (error) {
-      throw toAuthError(error);
-    }
+  async saveOnboarding(
+    role: OnboardingRole,
+    payload: OnboardingPayload,
+  ): Promise<AuthSession> {
+    const response = await api.patch<AuthApiResponse>(
+      `/auth/onboarding/${role}`,
+      payload,
+    );
+    return buildSession(response.data.user);
   },
 
   async logout(): Promise<void> {

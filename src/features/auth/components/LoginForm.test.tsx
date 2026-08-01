@@ -49,11 +49,16 @@ describe("LoginForm", () => {
   it("affiche une erreur de validation si l'email est invalide", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
-    await user.type(screen.getByPlaceholderText("nom@exemple.com"), "not-an-email");
+    await user.type(
+      screen.getByPlaceholderText("nom@exemple.com"),
+      "not-an-email",
+    );
     await user.type(screen.getByPlaceholderText("••••••••"), "password123");
     await user.click(screen.getByRole("button", { name: /se connecter/i }));
 
-    expect(await screen.findByText("Adresse email invalide")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Adresse email invalide"),
+    ).toBeInTheDocument();
     expect(authServiceLoginMock).not.toHaveBeenCalled();
   });
 
@@ -90,7 +95,9 @@ describe("LoginForm", () => {
     const { submit } = fillAndSubmit("user@example.com", "wrongpass");
     await submit();
 
-    expect(await screen.findByText("Email ou mot de passe incorrect.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Adresse courriel ou mot de passe incorrect."),
+    ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
   });
 
@@ -101,7 +108,9 @@ describe("LoginForm", () => {
     await submit();
 
     expect(
-      await screen.findByText("Une erreur est survenue. Veuillez réessayer."),
+      await screen.findByText(
+        "Impossible de vous connecter pour le moment. Réessayez dans quelques instants.",
+      ),
     ).toBeInTheDocument();
   });
 });

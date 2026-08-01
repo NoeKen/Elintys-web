@@ -2,6 +2,12 @@ import api from "@/shared/lib/api";
 import type { PaginatedResponse } from "@/shared/types";
 import type { Event, CreateEventInput, UpdateEventInput } from "../types";
 
+export interface EventPublishReadiness {
+  publishable: boolean;
+  errors: Array<{ code: string; field: string }>;
+  warnings: string[];
+}
+
 export const eventsService = {
   async list(page = 1, perPage = 20): Promise<PaginatedResponse<Event>> {
     const res = await api.get<PaginatedResponse<Event>>("/events", { params: { page, perPage } });
@@ -34,6 +40,11 @@ export const eventsService = {
 
   async getMyEvents(params?: { page?: number; limit?: number; status?: string }): Promise<PaginatedResponse<Event>> {
     const res = await api.get<PaginatedResponse<Event>>('/events/my', { params });
+    return res.data;
+  },
+
+  async getPublishReadiness(id: string): Promise<EventPublishReadiness> {
+    const res = await api.get<EventPublishReadiness>(`/events/${id}/publish-readiness`);
     return res.data;
   },
 };

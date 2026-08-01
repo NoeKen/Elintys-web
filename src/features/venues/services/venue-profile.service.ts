@@ -1,11 +1,16 @@
-import api from '@/shared/lib/api';
-import { API_URL } from '@/shared/config/api-url';
+import api, { apiErrorFromResponse } from "@/shared/lib/api";
+import { API_URL } from "@/shared/config/api-url";
 
 export interface VenueProfile {
   _id: string;
   name: string;
   description?: string;
-  address: { street: string; city: string; province: string; postalCode?: string };
+  address: {
+    street: string;
+    city: string;
+    province: string;
+    postalCode?: string;
+  };
   capacity: number;
   photos: string[];
   amenities: string[];
@@ -21,7 +26,7 @@ export interface VenueBooking {
   _id: string;
   event: { _id: string; title: string; startDate: string };
   organizer: { _id: string; firstName: string; lastName: string };
-  status: 'pending' | 'confirmed' | 'refused' | 'cancelled';
+  status: "pending" | "confirmed" | "refused" | "cancelled";
   bookingStart: string;
   bookingEnd: string;
   message?: string;
@@ -43,19 +48,20 @@ async function authFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const authHeader: Record<string, string> = {};
-  if (token && token !== 'cookie-session') authHeader.Authorization = `Bearer ${token}`;
+  if (token && token !== "cookie-session")
+    authHeader.Authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeader,
       ...options?.headers,
     },
   });
 
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    throw await apiErrorFromResponse(res);
   }
 
   if (res.status === 204) {
@@ -67,36 +73,46 @@ async function authFetch<T>(
 
 export const venueProfileService = {
   async list(page = 1, limit = 20): Promise<VenueCatalogResponse> {
-    const response = await api.get<VenueCatalogResponse>('/venues', {
+    const response = await api.get<VenueCatalogResponse>("/venues", {
       params: { page, limit },
     });
     return response.data;
   },
 
   async getMyProfile(token: string): Promise<VenueProfile> {
-    return authFetch<VenueProfile>('/venues/me', token);
+    return authFetch<VenueProfile>("/venues/me", token);
   },
 
-  async updateProfile(token: string, data: Partial<VenueProfile>): Promise<VenueProfile> {
-    return authFetch<VenueProfile>('/venues/me', token, {
-      method: 'PUT',
+  async updateProfile(
+    token: string,
+    data: Partial<VenueProfile>,
+  ): Promise<VenueProfile> {
+    return authFetch<VenueProfile>("/venues/me", token, {
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
   async getMyBookings(token: string): Promise<VenueBooking[]> {
-    return authFetch<VenueBooking[]>('/venues/bookings/my', token);
+    return authFetch<VenueBooking[]>("/venues/bookings/my", token);
   },
 
   async respondToBooking(
     token: string,
     bookingId: string,
-    status: 'confirmed' | 'refused',
+    status: "confirmed" | "refused",
     message?: string,
   ): Promise<VenueBooking> {
-    return authFetch<VenueBooking>(`/venues/bookings/${bookingId}/respond`, token, {
-      method: 'PUT',
-      body: JSON.stringify({ status, ...(message !== undefined && { message }) }),
-    });
+    return authFetch<VenueBooking>(
+      `/venues/bookings/${bookingId}/respond`,
+      token,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          status,
+          ...(message !== undefined && { message }),
+        }),
+      },
+    );
   },
 };

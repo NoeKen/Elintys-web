@@ -5,9 +5,13 @@ import type {
   Event,
   EventLocationType,
   EventType,
+  EventDiscoverability,
+  EventAccessPolicyType,
+  AdmissionMode,
   ProviderSelectionMode,
   UpdateEventInput,
   VenueMode,
+  EventAccessPolicy,
 } from '../types';
 
 export const EVENT_STEPS = [1, 2, 3, 4, 5, 6] as const;
@@ -94,11 +98,26 @@ export const eventCreationSchema = z
     venueSearchCapacity: z.string(),
     venueSearchBudget: z.string(),
     description: z.string().trim().max(5000),
-    visibility: z.enum(['public', 'private', 'invite_only']),
-    privateLink: z.boolean(),
-    accessCode: z.boolean(),
-    allowedEmailDomain: z.string().trim().max(200),
-    manualApproval: z.boolean(),
+    discoverability: z.enum(['public', 'unlisted', 'private']),
+    accessPolicyType: z.enum([
+      'open',
+      'registration_required',
+      'access_code',
+      'email_domain',
+      'manual_approval',
+      'guest_list',
+      'invitation_token',
+    ]),
+    accessCodeValue: z.string().max(128),
+    hasPersistedAccessCode: z.boolean(),
+    allowedDomains: z.string().trim().max(1000),
+    admissionModes: z.array(z.enum([
+      'free',
+      'registration_only',
+      'free_ticket',
+      'paid_ticket',
+      'invitation',
+    ])).min(1, copy.validation.admissionRequired),
   })
   .superRefine((values, context) => {
     if (!values.dateIsTentative && (!values.startDate || !values.startTime)) {
@@ -163,19 +182,61 @@ export const eventCreationSchema = z
     }
 
     if (
-      values.visibility === 'private' &&
-      values.allowedEmailDomain &&
-      !/^@?[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(values.allowedEmailDomain)
+      values.accessPolicyType === 'email_domain' &&
+      (!values.allowedDomains || values.allowedDomains.split(',').some(
+        (domain) => !/^@?[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(domain.trim()),
+      ))
     ) {
       context.addIssue({
         code: 'custom',
-        path: ['allowedEmailDomain'],
+        path: ['allowedDomains'],
         message: copy.validation.domainInvalid,
       });
+    }
+    if (
+      values.accessPolicyType === 'access_code' &&
+      !values.hasPersistedAccessCode &&
+      values.accessCodeValue.length < 6
+    ) {
+      context.addIssue({ code: 'custom', path: ['accessCodeValue'], message: copy.validation.accessCodeMin });
+    }
+    if (values.accessPolicyType === 'access_code' && values.accessCodeValue.length > 0 && values.accessCodeValue.length < 6) {
+      context.addIssue({ code: 'custom', path: ['accessCodeValue'], message: copy.validation.accessCodeMin });
+    }
+    if (values.accessPolicyType === 'invitation_token' && !values.admissionModes.includes('invitation')) {
+      context.addIssue({ code: 'custom', path: ['admissionModes'], message: copy.validation.invitationAdmissionRequired });
+    }
+    if (values.discoverability === 'private' && values.accessPolicyType === 'open') {
+      context.addIssue({ code: 'custom', path: ['accessPolicyType'], message: copy.validation.privateRestrictionRequired });
     }
   });
 
 export type EventCreationFormValues = z.infer<typeof eventCreationSchema>;
+
+export function normalizeLegacyEventAccess(event?: Event): {
+  discoverability: EventDiscoverability;
+  accessPolicyType: EventAccessPolicyType;
+  allowedDomains: string;
+  admissionModes: AdmissionMode[];
+} {
+  if (event?.discoverability && event.accessPolicy && event.admissionModes?.length) {
+    return {
+      discoverability: event.discoverability,
+      accessPolicyType: event.accessPolicy.type,
+      allowedDomains: event.accessPolicy.type === 'email_domain' ? event.accessPolicy.allowedDomains.join(', ') : '',
+      admissionModes: event.admissionModes,
+    };
+  }
+  if (event?.visibility === 'invite_only') {
+    return { discoverability: 'unlisted', accessPolicyType: 'invitation_token', allowedDomains: '', admissionModes: ['invitation'] };
+  }
+  if (event?.visibility === 'private') {
+    if (event.accessRules?.manualApproval) return { discoverability: 'private', accessPolicyType: 'manual_approval', allowedDomains: '', admissionModes: ['registration_only'] };
+    if (event.accessRules?.allowedEmailDomain) return { discoverability: 'unlisted', accessPolicyType: 'email_domain', allowedDomains: event.accessRules.allowedEmailDomain, admissionModes: ['registration_only'] };
+    return { discoverability: 'private', accessPolicyType: 'registration_required', allowedDomains: '', admissionModes: ['registration_only'] };
+  }
+  return { discoverability: 'public', accessPolicyType: 'open', allowedDomains: '', admissionModes: ['registration_only'] };
+}
 
 export interface ProviderNeedState {
   category: ProviderCategory;
@@ -198,6 +259,7 @@ export function getDefaultEventCreationValues(
   const hasManualVenue = Boolean(
     event?.location?.name || event?.location?.address,
   );
+  const access = normalizeLegacyEventAccess(event);
 
   return {
     title: event?.title ?? '',
@@ -232,11 +294,12 @@ export function getDefaultEventCreationValues(
       event?.capacity && event.capacity > 0 ? String(event.capacity) : '',
     venueSearchBudget: '',
     description: event?.description ?? '',
-    visibility: event?.visibility ?? 'public',
-    privateLink: event?.accessRules?.privateLink ?? false,
-    accessCode: event?.accessRules?.accessCode ?? false,
-    allowedEmailDomain: event?.accessRules?.allowedEmailDomain ?? '',
-    manualApproval: event?.accessRules?.manualApproval ?? false,
+    discoverability: access.discoverability,
+    accessPolicyType: access.accessPolicyType,
+    accessCodeValue: '',
+    hasPersistedAccessCode: event?.accessPolicy?.type === 'access_code' && Boolean(event.accessPolicy.hasAccessCode),
+    allowedDomains: access.allowedDomains,
+    admissionModes: access.admissionModes,
   };
 }
 
@@ -327,16 +390,9 @@ export function buildStepPayload(
   if (step === 5) {
     return {
       description: cleanOptional(values.description),
-      visibility: values.visibility,
-      accessRules:
-        values.visibility === 'private'
-          ? {
-              privateLink: values.privateLink,
-              accessCode: values.accessCode,
-              allowedEmailDomain: cleanOptional(values.allowedEmailDomain),
-              manualApproval: values.manualApproval,
-            }
-          : null,
+      discoverability: values.discoverability,
+      accessPolicy: buildAccessPolicy(values),
+      admissionModes: values.admissionModes,
       creationProgress,
     };
   }
@@ -379,11 +435,11 @@ export function getStepFieldNames(
   if (step === 5) {
     return [
       'description',
-      'visibility',
-      'privateLink',
-      'accessCode',
-      'allowedEmailDomain',
-      'manualApproval',
+      'discoverability',
+      'accessPolicyType',
+      'accessCodeValue',
+      'allowedDomains',
+      'admissionModes',
     ];
   }
   return [];
@@ -396,6 +452,29 @@ export function getCompletionPercent(event: Event): number {
     (step) => completed.has(step) || skipped.has(step),
   ).length;
   return Math.round((completedCount / EVENT_STEPS.length) * 100);
+}
+
+function buildAccessPolicy(values: EventCreationFormValues): EventAccessPolicy {
+  switch (values.accessPolicyType) {
+    case 'registration_required':
+      return { type: 'registration_required', requiresAuthentication: true };
+    case 'access_code':
+      return { type: 'access_code', ...(values.accessCodeValue ? { code: values.accessCodeValue } : {}) };
+    case 'email_domain':
+      return {
+        type: 'email_domain',
+        requiresAuthentication: true,
+        allowedDomains: values.allowedDomains.split(',').map((domain) => domain.trim().replace(/^@/, '').toLowerCase()).filter(Boolean),
+      };
+    case 'manual_approval':
+      return { type: 'manual_approval', requiresAuthentication: true };
+    case 'guest_list':
+      return { type: 'guest_list', requiresAuthentication: true };
+    case 'invitation_token':
+      return { type: 'invitation_token' };
+    default:
+      return { type: 'open' };
+  }
 }
 
 export function getNextStep(event: Event): EventCreationStep {

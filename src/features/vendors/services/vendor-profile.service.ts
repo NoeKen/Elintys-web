@@ -1,4 +1,5 @@
-import { API_URL } from '@/shared/config/api-url';
+import { API_URL } from "@/shared/config/api-url";
+import { apiErrorFromResponse } from "@/shared/lib/api";
 
 export interface VendorProfile {
   _id: string;
@@ -18,9 +19,9 @@ export interface VendorRequest {
   _id: string;
   event: { _id: string; title: string; startDate: string };
   organizer: { _id: string; firstName: string; lastName: string };
-  status: 'pending' | 'accepted' | 'declined' | 'cancelled';
+  status: "pending" | "accepted" | "declined" | "cancelled";
   message?: string;
-  source: 'platform' | 'manual' | 'external';
+  source: "platform" | "manual" | "external";
   createdAt: string;
 }
 
@@ -30,19 +31,20 @@ async function authFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const authHeader: Record<string, string> = {};
-  if (token && token !== 'cookie-session') authHeader.Authorization = `Bearer ${token}`;
+  if (token && token !== "cookie-session")
+    authHeader.Authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeader,
       ...options?.headers,
     },
   });
 
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    throw await apiErrorFromResponse(res);
   }
 
   if (res.status === 204) {
@@ -54,29 +56,39 @@ async function authFetch<T>(
 
 export const vendorProfileService = {
   async getMyProfile(token: string): Promise<VendorProfile> {
-    return authFetch<VendorProfile>('/vendors/me', token);
+    return authFetch<VendorProfile>("/vendors/me", token);
   },
 
-  async updateProfile(token: string, data: Partial<VendorProfile>): Promise<VendorProfile> {
-    return authFetch<VendorProfile>('/vendors/me', token, {
-      method: 'PUT',
+  async updateProfile(
+    token: string,
+    data: Partial<VendorProfile>,
+  ): Promise<VendorProfile> {
+    return authFetch<VendorProfile>("/vendors/me", token, {
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
   async getMyRequests(token: string): Promise<VendorRequest[]> {
-    return authFetch<VendorRequest[]>('/vendors/requests/my', token);
+    return authFetch<VendorRequest[]>("/vendors/requests/my", token);
   },
 
   async respondToRequest(
     token: string,
     requestId: string,
-    status: 'accepted' | 'declined',
+    status: "accepted" | "declined",
     message?: string,
   ): Promise<VendorRequest> {
-    return authFetch<VendorRequest>(`/vendors/requests/${requestId}/respond`, token, {
-      method: 'PUT',
-      body: JSON.stringify({ status, ...(message !== undefined && { message }) }),
-    });
+    return authFetch<VendorRequest>(
+      `/vendors/requests/${requestId}/respond`,
+      token,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          status,
+          ...(message !== undefined && { message }),
+        }),
+      },
+    );
   },
 };

@@ -7,6 +7,8 @@ import { PurchaseModal } from '@/components/tickets/PurchaseModal';
 import { cn } from '@/shared/lib/utils';
 import type { MediaImageSource } from '@/shared/types/media.types';
 import { getOptimizedMediaUrl } from '@/shared/lib/media';
+import api from '@/shared/lib/api';
+import { eventCreationCopy as copy } from '@/features/events/i18n/event-creation.copy';
 
 interface TicketType {
   _id: string;
@@ -35,6 +37,13 @@ interface Event {
   location?: EventLocation;
   slug?: string;
   status: string;
+  discoverability: 'public' | 'unlisted' | 'private';
+  accessPolicy: {
+    type: 'open' | 'registration_required' | 'access_code' | 'email_domain' | 'manual_approval' | 'guest_list' | 'invitation_token';
+    hasAccessCode?: boolean;
+    allowedDomains?: string[];
+  };
+  admissionModes: Array<'free' | 'registration_only' | 'free_ticket' | 'paid_ticket' | 'invitation'>;
 }
 
 interface Props {
@@ -44,6 +53,11 @@ interface Props {
 
 export function EventPageClient({ event, ticketTypes }: Props) {
   const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
+  const [accessCode, setAccessCode] = useState('');
+  const [accessGrant, setAccessGrant] = useState<string>();
+  const [policyAuthorized, setPolicyAuthorized] = useState(false);
+  const [accessFeedback, setAccessFeedback] = useState<string>();
+  const [accessLoading, setAccessLoading] = useState(false);
   const coverUrl = event.coverImage
     ? getOptimizedMediaUrl(event.coverImage, 'cover')
     : undefined;
@@ -51,6 +65,45 @@ export function EventPageClient({ event, ticketTypes }: Props) {
   const startDate = new Date(event.startDate).toLocaleDateString('fr-CA', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
+  const policyType = event.accessPolicy?.type ?? 'open';
+  const ticketAccessAllowed = policyType === 'open'
+    || policyType === 'registration_required'
+    || Boolean(accessGrant)
+    || policyAuthorized;
+
+  const handleAccessAction = async () => {
+    setAccessLoading(true);
+    setAccessFeedback(undefined);
+    try {
+      if (policyType === 'access_code') {
+        const response = await api.post<{ authorized: true; accessGrant: string }>(
+          `/events/${event._id}/access/code/verify`,
+          { code: accessCode },
+        );
+        setAccessGrant(response.data.accessGrant);
+        setAccessFeedback(copy.identity.codeVerified);
+      } else if (policyType === 'email_domain') {
+        const response = await api.post<{ authorized: boolean; reason: string }>(
+          `/events/${event._id}/access/domain/check`,
+          {},
+        );
+        if (response.data.authorized) {
+          setPolicyAuthorized(true);
+          setAccessFeedback(copy.identity.domainVerified);
+        } else {
+          setPolicyAuthorized(false);
+          setAccessFeedback(copy.identity.domainDenied);
+        }
+      } else if (policyType === 'manual_approval') {
+        await api.post(`/events/${event._id}/access/request`, {});
+        setAccessFeedback(copy.identity.requestSent);
+      }
+    } catch {
+      setAccessFeedback(copy.identity.accessActionError);
+    } finally {
+      setAccessLoading(false);
+    }
+  };
 
   return (
     <main className="public-detail-shell mesh-gradient">
@@ -95,6 +148,52 @@ export function EventPageClient({ event, ticketTypes }: Props) {
               </p>
             )}
 
+            <section className="premium-card mb-6 p-5 sm:p-6">
+              <p className="section-eyebrow mb-3">{copy.identity.publicAccessTitle}</p>
+              <h2 className="font-serif text-2xl text-on-surface">
+                {copy.identity.publicAccessDescriptions[policyType]}
+              </h2>
+
+              {policyType === 'access_code' && !accessGrant && (
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <label className="sr-only" htmlFor="public-event-access-code">{copy.identity.accessCode}</label>
+                  <input
+                    id="public-event-access-code"
+                    type="password"
+                    value={accessCode}
+                    onChange={(event) => setAccessCode(event.target.value)}
+                    className="event-input flex-1"
+                    placeholder={copy.identity.accessCodePlaceholder}
+                  />
+                  <button type="button" onClick={handleAccessAction} disabled={accessLoading || accessCode.length < 6} className="premium-button px-6 py-3 disabled:opacity-50">
+                    {copy.identity.publicCtas.enterCode}
+                  </button>
+                </div>
+              )}
+
+              {policyType === 'email_domain' && (
+                <button type="button" onClick={handleAccessAction} disabled={accessLoading} className="premium-button mt-5 px-6 py-3 disabled:opacity-50">
+                  {copy.identity.publicCtas.verifyEmail}
+                </button>
+              )}
+
+              {policyType === 'manual_approval' && (
+                <button type="button" onClick={handleAccessAction} disabled={accessLoading} className="premium-button mt-5 px-6 py-3 disabled:opacity-50">
+                  {copy.identity.publicCtas.request}
+                </button>
+              )}
+
+              {policyType === 'registration_required' && (
+                <a href="/inscription/etape-1" className="premium-button mt-5 inline-flex px-6 py-3">{copy.identity.publicCtas.register}</a>
+              )}
+
+              {policyType === 'invitation_token' && (
+                <a href="/invitation" className="premium-button mt-5 inline-flex px-6 py-3">{copy.identity.publicCtas.useInvitation}</a>
+              )}
+
+              {accessFeedback && <p className="mt-4 text-sm font-medium text-event-petrol" role="status">{accessFeedback}</p>}
+            </section>
+
             <section className="premium-card p-5 sm:p-6">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
@@ -134,10 +233,10 @@ export function EventPageClient({ event, ticketTypes }: Props) {
                           <button
                             type="button"
                             onClick={() => setSelectedTicket(tt)}
-                            disabled={available === 0}
+                            disabled={available === 0 || !ticketAccessAllowed}
                             className={cn(
                               'mt-3 min-h-10 rounded-full px-5 text-sm font-bold transition duration-300',
-                              available === 0
+                              available === 0 || !ticketAccessAllowed
                                 ? 'cursor-not-allowed border border-outline-variant bg-surface-low text-on-surface-variant'
                                 : 'premium-button px-5 py-2',
                             )}
@@ -159,6 +258,7 @@ export function EventPageClient({ event, ticketTypes }: Props) {
         <PurchaseModal
           ticketType={selectedTicket}
           eventTitle={event.title}
+          accessGrant={accessGrant}
           onClose={() => setSelectedTicket(null)}
         />
       )}

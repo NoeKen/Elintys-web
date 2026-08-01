@@ -1,19 +1,24 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useQueryClient } from '@tanstack/react-query';
-import { slideInRight } from '@/lib/animations';
-import { ApiClientError } from '@/shared/lib/api';
-import { eventsService } from '@/features/events/services/events.service';
-import type { EventMediaState } from '@/features/events/services/event-media.service';
-import { vendorRequestsService } from '@/features/vendors/services/vendor-requests.service';
-import { invitationsService } from '@/features/invitations/services/invitations.service';
-import type { Event } from '@/features/events/types';
-import { getMediaUrl } from '@/shared/lib/media';
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { slideInRight } from "@/lib/animations";
+import { ApiClientError } from "@/shared/lib/api";
+import {
+  getUserFacingError,
+  type UserFacingError,
+} from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+import { eventsService } from "@/features/events/services/events.service";
+import type { EventMediaState } from "@/features/events/services/event-media.service";
+import { vendorRequestsService } from "@/features/vendors/services/vendor-requests.service";
+import { invitationsService } from "@/features/invitations/services/invitations.service";
+import type { Event } from "@/features/events/types";
+import { getMediaUrl } from "@/shared/lib/media";
 import {
   buildStepPayload,
   eventCreationSchema,
@@ -25,13 +30,13 @@ import {
   type ManualProviderDraft,
   type ProviderCategory,
   type ProviderNeedState,
-} from '@/features/events/lib/event-creation';
+} from "@/features/events/lib/event-creation";
 import {
   EventCreationAside,
   EventCreationHeader,
   StepNavigation,
   type SaveStatus,
-} from './EventCreationChrome';
+} from "./EventCreationChrome";
 import {
   IdentityAccessStep,
   InformationStep,
@@ -41,7 +46,7 @@ import {
   VenueStep,
   type ManualProviderMap,
   type SelectedVendorMap,
-} from './EventCreationSteps';
+} from "./EventCreationSteps";
 
 interface EventCreationWizardProps {
   initialEvent?: Event;
@@ -68,7 +73,8 @@ export function EventCreationWizard({
   const [skippedSteps, setSkippedSteps] = useState<number[]>(
     initialEvent?.creationProgress?.skippedSteps ?? [],
   );
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveError, setSaveError] = useState<UserFacingError | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | undefined>(
     initialEvent?.creationProgress?.lastSavedAt,
   );
@@ -79,9 +85,10 @@ export function EventCreationWizard({
     })),
   );
   const [manualProviders, setManualProviders] = useState<ManualProviderMap>({});
-  const [selectedVendors, setSelectedVendors] =
-    useState<SelectedVendorMap>({});
-  const [persistedConnections, setPersistedConnections] = useState<string[]>([]);
+  const [selectedVendors, setSelectedVendors] = useState<SelectedVendorMap>({});
+  const [persistedConnections, setPersistedConnections] = useState<string[]>(
+    [],
+  );
   const [coverPreview, setCoverPreview] = useState<string | undefined>(
     getMediaUrl(initialEvent?.coverImage),
   );
@@ -91,19 +98,28 @@ export function EventCreationWizard({
   const form = useForm<EventCreationFormValues>({
     resolver: zodResolver(eventCreationSchema),
     defaultValues: getDefaultEventCreationValues(initialEvent),
-    mode: 'onTouched',
+    mode: "onTouched",
   });
   const values = form.watch();
   const canGoBack = step > 1;
+  const readinessQuery = useQuery({
+    queryKey: ["event-publish-readiness", event?._id],
+    queryFn: () => eventsService.getPublishReadiness(event!._id),
+    enabled: step === 6 && Boolean(event?._id),
+    staleTime: 15_000,
+  });
 
   const goToStep = (nextStep: EventCreationStep, eventId?: string) => {
     setStep(nextStep);
     const resolvedEventId = eventId ?? event?._id;
     const basePath = resolvedEventId
       ? `/tableau-de-bord/evenements/${resolvedEventId}/configuration`
-      : '/evenements/creer';
+      : "/evenements/creer";
     router.replace(`${basePath}?etape=${nextStep}`, { scroll: false });
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
   };
 
   const persistProviderConnections = async (eventId: string) => {
@@ -111,11 +127,11 @@ export function EventCreationWizard({
       const connectionKey = `${need.category}:${need.mode}`;
       if (persistedConnections.includes(connectionKey)) continue;
 
-      if (need.mode === 'manual') {
+      if (need.mode === "manual") {
         const draft = manualProviders[need.category];
         if (!draft?.name.trim()) continue;
         await vendorRequestsService.create(eventId, {
-          source: 'manual',
+          source: "manual",
           externalContact: {
             name: draft.name.trim(),
             category: need.category,
@@ -128,7 +144,7 @@ export function EventCreationWizard({
             await invitationsService.create({
               email: draft.email.trim(),
               name: draft.name.trim(),
-              type: 'vendor',
+              type: "vendor",
               category: need.category,
               eventId,
             });
@@ -140,10 +156,10 @@ export function EventCreationWizard({
         }
       }
 
-      if (need.mode === 'elintys' && selectedVendors[need.category]) {
+      if (need.mode === "elintys" && selectedVendors[need.category]) {
         await vendorRequestsService.create(eventId, {
           vendorId: selectedVendors[need.category],
-          source: 'platform',
+          source: "platform",
         });
       }
 
@@ -164,34 +180,33 @@ export function EventCreationWizard({
 
     const fields = getStepFieldNames(step, form.getValues());
     const isValid =
-      fields.length === 0 ? true : await form.trigger(fields, { shouldFocus: true });
+      fields.length === 0
+        ? true
+        : await form.trigger(fields, { shouldFocus: true });
     if (!isValid) return;
 
-    setSaveStatus('saving');
+    setSaveStatus("saving");
+    setSaveError(null);
     try {
-      const nextStep = targetStep ?? (Math.min(step + 1, 6) as EventCreationStep);
+      const nextStep =
+        targetStep ?? (Math.min(step + 1, 6) as EventCreationStep);
       const nextCompleted = skip
         ? completedSteps.filter((item) => item !== step)
         : [...new Set([...completedSteps, step])];
       const nextSkipped = skip
         ? [...new Set([...skippedSteps, step])]
         : skippedSteps.filter((item) => item !== step);
-      const payload = buildStepPayload(
-        step,
-        form.getValues(),
-        providerNeeds,
-        {
-          currentStep: exit ? step : nextStep,
-          completedSteps: nextCompleted,
-          skippedSteps: nextSkipped,
-        },
-      );
+      const payload = buildStepPayload(step, form.getValues(), providerNeeds, {
+        currentStep: exit ? step : nextStep,
+        completedSteps: nextCompleted,
+        skippedSteps: nextSkipped,
+      });
 
       let savedEvent: Event;
       if (!event) {
         savedEvent = await eventsService.create({
           ...payload,
-          title: form.getValues('title').trim(),
+          title: form.getValues("title").trim(),
         });
       } else {
         if (step === 4) await persistProviderConnections(event._id);
@@ -207,12 +222,12 @@ export function EventCreationWizard({
       setLastSavedAt(
         savedEvent.creationProgress?.lastSavedAt ?? new Date().toISOString(),
       );
-      setSaveStatus('saved');
+      setSaveStatus("saved");
       form.reset(form.getValues());
-      await queryClient.invalidateQueries({ queryKey: ['my-events'] });
+      await queryClient.invalidateQueries({ queryKey: ["my-events"] });
 
       if (exit) {
-        router.push('/tableau-de-bord');
+        router.push("/tableau-de-bord");
         return;
       }
 
@@ -222,8 +237,14 @@ export function EventCreationWizard({
       }
 
       goToStep(nextStep, savedEvent._id);
-    } catch {
-      setSaveStatus('error');
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveError(
+        getUserFacingError(error, {
+          fallback:
+            "Impossible d’enregistrer cette étape. Vérifiez les champs indiqués, puis réessayez.",
+        }),
+      );
     }
   };
 
@@ -235,7 +256,7 @@ export function EventCreationWizard({
   };
 
   const handleCoverPreviewChange = (value?: string) => {
-    if (coverPreview?.startsWith('blob:')) URL.revokeObjectURL(coverPreview);
+    if (coverPreview?.startsWith("blob:")) URL.revokeObjectURL(coverPreview);
     setCoverPreview(value);
   };
 
@@ -286,6 +307,8 @@ export function EventCreationWizard({
         values={form.getValues()}
         providerNeeds={providerNeeds}
         coverPreview={coverPreview}
+        readiness={readinessQuery.data}
+        readinessLoading={readinessQuery.isLoading}
         onEdit={goToStep}
       />
     );
@@ -296,8 +319,9 @@ export function EventCreationWizard({
       <EventCreationHeader
         step={step}
         completedSteps={[...new Set([...completedSteps, ...skippedSteps])]}
-        saveStatus={mediaUploading ? 'saving' : saveStatus}
+        saveStatus={mediaUploading ? "saving" : saveStatus}
         lastSavedAt={lastSavedAt}
+        errorMessage={saveError?.message}
         onSaveAndExit={() => void saveCurrentStep({ exit: true })}
         onRetry={() => void retryRef.current()}
         onStepSelect={goToStep}
@@ -310,13 +334,14 @@ export function EventCreationWizard({
               <motion.div
                 key={step}
                 variants={prefersReducedMotion ? undefined : slideInRight}
-                initial={prefersReducedMotion ? false : 'hidden'}
+                initial={prefersReducedMotion ? false : "hidden"}
                 animate="visible"
                 exit="exit"
               >
                 {renderCurrentStep()}
               </motion.div>
             </AnimatePresence>
+            {saveError && <FormErrorAlert error={saveError} className="mt-6" />}
           </div>
         </main>
         <EventCreationAside
@@ -328,7 +353,7 @@ export function EventCreationWizard({
 
       <StepNavigation
         step={step}
-        isSaving={saveStatus === 'saving' || mediaUploading}
+        isSaving={saveStatus === "saving" || mediaUploading}
         isUploading={mediaUploading}
         canGoBack={canGoBack}
         canSkip={step === 4}

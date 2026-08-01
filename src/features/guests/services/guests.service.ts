@@ -1,10 +1,11 @@
-import { API_URL } from '@/shared/config/api-url';
+import { API_URL } from "@/shared/config/api-url";
+import { apiErrorFromResponse } from "@/shared/lib/api";
 
 export interface Guest {
   _id: string;
   name: string;
   email?: string;
-  status: 'invited' | 'confirmed' | 'declined' | 'present';
+  status: "invited" | "confirmed" | "declined" | "present";
   note?: string;
   createdAt: string;
 }
@@ -27,19 +28,20 @@ async function authFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const authHeader: Record<string, string> = {};
-  if (token && token !== 'cookie-session') authHeader.Authorization = `Bearer ${token}`;
+  if (token && token !== "cookie-session")
+    authHeader.Authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeader,
       ...options?.headers,
     },
   });
 
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    throw await apiErrorFromResponse(res);
   }
 
   if (res.status === 204) {
@@ -50,16 +52,24 @@ async function authFetch<T>(
 }
 
 export const guestsService = {
-  async list(token: string, eventId: string, page = 1): Promise<GuestListResponse> {
+  async list(
+    token: string,
+    eventId: string,
+    page = 1,
+  ): Promise<GuestListResponse> {
     return authFetch<GuestListResponse>(
       `/events/${eventId}/guests?page=${page}&limit=50`,
       token,
     );
   },
 
-  async add(token: string, eventId: string, data: CreateGuestData): Promise<Guest> {
+  async add(
+    token: string,
+    eventId: string,
+    data: CreateGuestData,
+  ): Promise<Guest> {
     return authFetch<Guest>(`/events/${eventId}/guests`, token, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
@@ -68,17 +78,17 @@ export const guestsService = {
     token: string,
     eventId: string,
     guestId: string,
-    status: Guest['status'],
+    status: Guest["status"],
   ): Promise<Guest> {
     return authFetch<Guest>(`/events/${eventId}/guests/${guestId}`, token, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ status }),
     });
   },
 
   async remove(token: string, eventId: string, guestId: string): Promise<void> {
     return authFetch<void>(`/events/${eventId}/guests/${guestId}`, token, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };

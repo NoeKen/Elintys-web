@@ -1,26 +1,31 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowRight, Check } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { Input } from '@/shared/ui/Input';
-import { Select } from '@/shared/ui/Select';
-import { waitlistSchema, type WaitlistInput } from '@/features/waitlist/schemas';
-import { waitlistService } from '@/features/waitlist/services/waitlist.service';
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Check } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Input } from "@/shared/ui/Input";
+import { Select } from "@/shared/ui/Select";
+import {
+  waitlistSchema,
+  type WaitlistInput,
+} from "@/features/waitlist/schemas";
+import { waitlistService } from "@/features/waitlist/services/waitlist.service";
+import { getUserFacingError } from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 const ROLE_OPTIONS = [
-  { value: 'organisateur', label: "Organisateur d'événements" },
-  { value: 'prestataire', label: 'Prestataire de services' },
-  { value: 'gestionnaire', label: 'Gestionnaire de lieu / espace' },
-  { value: 'visiteur', label: 'Visiteur / participant' },
+  { value: "organisateur", label: "Organisateur d'événements" },
+  { value: "prestataire", label: "Prestataire de services" },
+  { value: "gestionnaire", label: "Gestionnaire de lieu / espace" },
+  { value: "visiteur", label: "Visiteur / participant" },
 ];
 
 export function CtaSection({ id }: { id?: string }) {
-  const [result, setResult] = useState<'success' | 'exists' | null>(null);
+  const [result, setResult] = useState<"success" | "exists" | null>(null);
 
   const {
     register,
@@ -39,13 +44,13 @@ export function CtaSection({ id }: { id?: string }) {
         firstName: input.firstName,
         email: input.email,
         role: input.role,
-        source: 'cta',
+        source: "cta",
         consentMarketing: input.consentMarketing,
       }),
-    onSuccess: (data) => setResult(data.alreadyExists ? 'exists' : 'success'),
+    onSuccess: (data) => setResult(data.alreadyExists ? "exists" : "success"),
   });
 
-  const role = watch('role');
+  const role = watch("role");
 
   if (result) {
     return (
@@ -55,9 +60,9 @@ export function CtaSection({ id }: { id?: string }) {
             <Check size={16} aria-hidden="true" />
           </span>
           <p className="text-sm font-medium text-on-surface">
-            {result === 'exists'
-              ? 'Vous êtes déjà sur la liste ! On vous contacte bientôt.'
-              : 'Bienvenue ! Vous êtes sur la liste.'}
+            {result === "exists"
+              ? "Vous êtes déjà sur la liste ! On vous contacte bientôt."
+              : "Bienvenue ! Vous êtes sur la liste."}
           </p>
         </div>
       </section>
@@ -65,15 +70,12 @@ export function CtaSection({ id }: { id?: string }) {
   }
 
   return (
-    <section
-      id={id}
-      className="relative overflow-hidden px-6 py-28"
-    >
+    <section id={id} className="relative overflow-hidden px-6 py-28">
       <div className="glass-card relative mx-auto max-w-2xl px-5 py-10 text-center sm:px-10">
         <motion.span
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
+          viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5 }}
           className="mb-6 inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-bold text-teal-dark"
         >
@@ -97,8 +99,8 @@ export function CtaSection({ id }: { id?: string }) {
           transition={{ duration: 0.5, delay: 0.14 }}
           className="mb-10 text-base leading-relaxed text-on-surface-variant"
         >
-          Les accès bêta sont limités. Inscrivez-vous maintenant — organisateurs, prestataires et
-          gestionnaires de lieux bienvenus.
+          Les accès bêta sont limités. Inscrivez-vous maintenant —
+          organisateurs, prestataires et gestionnaires de lieux bienvenus.
         </motion.p>
 
         <motion.form
@@ -110,7 +112,7 @@ export function CtaSection({ id }: { id?: string }) {
           className="mx-auto mb-6 flex max-w-md flex-col gap-4 text-left"
         >
           <Input
-            {...register('firstName')}
+            {...register("firstName")}
             label="Votre prénom"
             floatingLabel
             error={errors.firstName?.message}
@@ -122,16 +124,22 @@ export function CtaSection({ id }: { id?: string }) {
             <Select
               options={ROLE_OPTIONS}
               value={role}
-              onValueChange={(v) => setValue('role', v as WaitlistInput['role'], { shouldValidate: true })}
+              onValueChange={(v) =>
+                setValue("role", v as WaitlistInput["role"], {
+                  shouldValidate: true,
+                })
+              }
               placeholder="Je suis..."
               disabled={mutation.isPending}
               className="text-on-surface"
             />
-            {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
+            {errors.role && (
+              <p className="text-xs text-destructive">{errors.role.message}</p>
+            )}
           </div>
 
           <Input
-            {...register('email')}
+            {...register("email")}
             type="email"
             label="votre@email.com"
             floatingLabel
@@ -144,40 +152,54 @@ export function CtaSection({ id }: { id?: string }) {
             <label className="flex cursor-pointer items-start gap-2.5 text-on-surface-variant">
               <input
                 type="checkbox"
-                {...register('consentTerms')}
+                {...register("consentTerms")}
                 className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-outline-variant accent-accent"
               />
               <span className="text-xs leading-relaxed">
-                J&apos;accepte la{' '}
-                <Link href="/confidentialite" className="underline transition-colors hover:text-accent">
+                J&apos;accepte la{" "}
+                <Link
+                  href="/confidentialite"
+                  className="underline transition-colors hover:text-accent"
+                >
                   Politique de confidentialité
-                </Link>{' '}
-                et les{' '}
-                <Link href="/conditions" className="underline transition-colors hover:text-accent">
+                </Link>{" "}
+                et les{" "}
+                <Link
+                  href="/conditions"
+                  className="underline transition-colors hover:text-accent"
+                >
                   Conditions d&apos;utilisation
-                </Link>{' '}
+                </Link>{" "}
                 d&apos;Elintys. Je confirme avoir 18 ans ou plus.
               </span>
             </label>
             {errors.consentTerms && (
-              <p className="text-xs text-destructive">{errors.consentTerms.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.consentTerms.message}
+              </p>
             )}
 
             <label className="flex cursor-pointer items-start gap-2.5 text-on-surface-variant">
               <input
                 type="checkbox"
-                {...register('consentMarketing')}
+                {...register("consentMarketing")}
                 className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-outline-variant accent-accent"
               />
               <span className="text-xs leading-relaxed">
-                J&apos;accepte de recevoir les nouvelles, mises à jour et offres d&apos;Elintys par
-                courriel. Je peux me désabonner à tout moment.
+                J&apos;accepte de recevoir les nouvelles, mises à jour et offres
+                d&apos;Elintys par courriel. Je peux me désabonner à tout
+                moment.
               </span>
             </label>
           </div>
 
           {mutation.isError && (
-            <p className="text-xs text-destructive">{(mutation.error as Error).message}</p>
+            <FormErrorAlert
+              error={getUserFacingError(mutation.error, {
+                fallback:
+                  "Impossible de vous inscrire à la liste pour le moment. Vérifiez vos informations, puis réessayez.",
+              })}
+            />
           )}
 
           <motion.button

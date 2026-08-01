@@ -3,6 +3,17 @@
     "title": "Elintys — L'événementiel québécois réinventé",
     "description": "Créez, équipez, vendez, gérez et accueillez votre événement. Tout en un seul endroit."
   },
+  "invitationRedemption": {
+    "eyebrow": "Invitation personnelle",
+    "title": "Votre invitation Elintys",
+    "description": "Validez cette invitation pour confirmer votre droit d’accès. Le lien ne peut pas être réutilisé après acceptation.",
+    "accept": "Accepter l’invitation",
+    "accepting": "Validation en cours…",
+    "success": "Invitation acceptée. Votre accès est maintenant confirmé.",
+    "missing": "Ce lien d’invitation est incomplet.",
+    "invalid": "Cette invitation est invalide, expirée ou a déjà été utilisée.",
+    "back": "Voir les événements"
+  },
   "nav": {
     "evenements": "Événements",
     "prestataires": "Prestataires",
@@ -285,16 +296,22 @@
       "description": "Description complète",
       "descriptionPlaceholder": "Racontez l’histoire de votre événement…",
       "visibility": "Confidentialité et accès",
-      "visibilityHint": "Définissez qui peut découvrir et rejoindre votre événement.",
+      "visibilityQuestion": "Où souhaitez-vous rendre cet événement visible ?",
+      "visibilityHint": "La visibilité détermine où l’événement peut être découvert, indépendamment de ses règles d’accès.",
       "public": {
-        "label": "Public",
-        "description": "Tout le monde peut découvrir cet événement.",
-        "help": "L’événement peut apparaître dans les résultats Elintys et être accessible publiquement."
+        "label": "Visible publiquement",
+        "description": "L’événement peut être découvert par tout le monde.",
+        "help": "Il peut apparaître dans le catalogue Elintys et dans les résultats de recherche."
+      },
+      "unlisted": {
+        "label": "Non répertorié",
+        "description": "L’événement n’apparaît pas dans le catalogue.",
+        "help": "Il reste accessible aux personnes qui disposent de son lien direct."
       },
       "private": {
         "label": "Privé",
-        "description": "L’accès est limité selon les règles que vous définissez.",
-        "help": "L’événement n’est pas ouvert à tous. Vous pouvez contrôler l’accès avec un lien privé, un code, un domaine courriel ou une validation."
+        "description": "L’événement n’est pas exposé publiquement.",
+        "help": "Ses informations sont accessibles uniquement aux personnes autorisées."
       },
       "inviteOnly": {
         "label": "Sur invitation",
@@ -304,10 +321,61 @@
       "privateRules": "Règles d’accès privé",
       "privateLink": "Lien privé",
       "accessCode": "Code d’accès",
-      "accessCodeHint": "Le code sécurisé sera généré depuis l’espace événement.",
+      "accessCodeHint": "Le code est hashé par Elintys et ne sera jamais réaffiché. Laissez vide pour conserver un code existant.",
       "emailDomain": "Domaine courriel autorisé",
       "emailDomainPlaceholder": "@entreprise.ca",
-      "manualApproval": "Validation manuelle"
+      "manualApproval": "Validation manuelle",
+      "discoverabilityLabels": {
+        "public": "Visible publiquement",
+        "unlisted": "Non répertorié",
+        "private": "Privé"
+      },
+      "accessQuestion": "Qui peut s’inscrire ou demander à participer ?",
+      "accessHint": "Choisissez une seule règle d’accès. Elle sera appliquée côté serveur à chaque action participant.",
+      "accessOptions": {
+        "open": "Accès ouvert",
+        "registration_required": "Inscription obligatoire",
+        "access_code": "Code d’accès",
+        "email_domain": "Domaine courriel autorisé",
+        "manual_approval": "Approbation manuelle",
+        "guest_list": "Liste d’invités",
+        "invitation_token": "Invitation personnelle"
+      },
+      "accessCodePlaceholder": "Au moins 6 caractères",
+      "emailDomainHint": "Séparez plusieurs domaines par une virgule. Exemple : entreprise.ca, partenaire.org",
+      "admissionQuestion": "Comment les participants obtiennent-ils leur accès ?",
+      "admissionHint": "Plusieurs modes peuvent coexister.",
+      "admissionOptions": {
+        "free": "Accès gratuit",
+        "registration_only": "Inscription simple",
+        "free_ticket": "Billet gratuit",
+        "paid_ticket": "Billet payant",
+        "invitation": "Invitation"
+      },
+      "admissionExample": "Exemple : billet payant pour le public et invitation pour les VIP."
+      ,"publicAccessTitle": "Conditions d’accès",
+      "publicAccessDescriptions": {
+        "open": "Accès ouvert",
+        "registration_required": "Inscription requise",
+        "access_code": "Un code d’accès est requis pour participer",
+        "email_domain": "Accès réservé aux adresses professionnelles autorisées",
+        "manual_approval": "Participation soumise à approbation",
+        "guest_list": "Accès réservé aux personnes inscrites sur la liste d’invités",
+        "invitation_token": "Sur invitation uniquement"
+      },
+      "publicCtas": {
+        "register": "S’inscrire",
+        "request": "Demander l’accès",
+        "enterCode": "Entrer un code",
+        "verifyEmail": "Vérifier mon adresse",
+        "buyTicket": "Acheter un billet",
+        "useInvitation": "Utiliser mon invitation"
+      },
+      "codeVerified": "Code vérifié. Vous pouvez maintenant poursuivre.",
+      "domainVerified": "Votre adresse courriel est autorisée.",
+      "domainDenied": "Votre adresse courriel ne correspond pas à un domaine autorisé pour cet événement.",
+      "requestSent": "Votre demande a été transmise à l’organisateur.",
+      "accessActionError": "L’accès n’a pas pu être validé. Vérifiez vos informations et réessayez."
     },
     "review": {
       "eyebrow": "Étape finale",
@@ -319,6 +387,8 @@
       "providers": "Prestataires",
       "identity": "Identité",
       "access": "Accès",
+      "visibility": "Visibilité",
+      "admission": "Admission",
       "noVenue": "Aucun lieu pour le moment",
       "providersLater": "À compléter plus tard",
       "providersCount": "{count} besoin(s) ajouté(s)",
@@ -334,6 +404,27 @@
       "complete": "Complet",
       "optionalItem": "Optionnel",
       "finalHelp": "Terminez la configuration pour ouvrir l’espace de travail de cet événement. La publication restera une action distincte."
+      ,"publishReady": "Prêt à publier",
+      "publishNotReady": "Éléments à compléter avant publication",
+      "readinessLoading": "Vérification de la publication…",
+      "readinessErrors": {
+        "TITLE_REQUIRED": "Ajoutez un titre.",
+        "EVENT_TYPE_REQUIRED": "Choisissez un type d’événement.",
+        "START_DATE_REQUIRED": "Ajoutez une date de début.",
+        "END_BEFORE_START": "La date de fin doit suivre la date de début.",
+        "PHYSICAL_LOCATION_REQUIRED": "Ajoutez un lieu pour cet événement présentiel.",
+        "DISCOVERABILITY_REQUIRED": "Choisissez une visibilité.",
+        "ACCESS_POLICY_REQUIRED": "Choisissez une règle d’accès.",
+        "ADMISSION_MODE_REQUIRED": "Choisissez au moins un mode d’admission.",
+        "ACCESS_CODE_REQUIRED": "Définissez un code d’accès.",
+        "ALLOWED_DOMAIN_REQUIRED": "Ajoutez au moins un domaine courriel.",
+        "ALLOWED_DOMAIN_INVALID": "Corrigez le domaine courriel autorisé.",
+        "INVITATION_ADMISSION_REQUIRED": "Ajoutez le mode d’admission Invitation.",
+        "PRIVATE_EVENT_REQUIRES_RESTRICTION": "Choisissez un accès restreint pour l’événement privé.",
+        "FREE_TICKET_TYPE_REQUIRED": "Créez au moins un type de billet gratuit.",
+        "PAID_TICKET_TYPE_REQUIRED": "Créez au moins un type de billet payant.",
+        "LEGACY_ACCESS_CODE_REQUIRES_MIGRATION": "Remplacez l’ancien code d’accès avant de publier cet événement."
+      }
     },
     "validation": {
       "titleRequired": "Donnez un nom à votre événement.",
@@ -349,7 +440,11 @@
       "provinceRequired": "Indiquez la province.",
       "postalRequired": "Indiquez le code postal.",
       "emailInvalid": "Saisissez une adresse courriel valide.",
-      "domainInvalid": "Utilisez un domaine comme @entreprise.ca."
+      "domainInvalid": "Utilisez un domaine comme @entreprise.ca.",
+      "admissionRequired": "Choisissez au moins un mode d’admission.",
+      "accessCodeMin": "Le code d’accès doit contenir au moins 6 caractères.",
+      "invitationAdmissionRequired": "Ajoutez le mode Invitation pour utiliser une invitation personnelle.",
+      "privateRestrictionRequired": "Un événement privé doit utiliser une règle d’accès restreinte."
     },
     "dashboard": {
       "draft": "Brouillon",

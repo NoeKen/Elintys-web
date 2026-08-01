@@ -10,6 +10,11 @@ import { LockOpen, Mail, Loader2 } from "lucide-react";
 import { authService } from "@/features/auth/client/auth.service";
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@/shared/lib/utils";
+import {
+  getUserFacingError,
+  type UserFacingError,
+} from "@/shared/lib/user-facing-error";
+import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
 
 const schema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -18,7 +23,10 @@ type FormData = z.infer<typeof schema>;
 
 const fade = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.25, ease: "easeOut" as const } },
+  show: {
+    opacity: 1,
+    transition: { duration: 0.25, ease: "easeOut" as const },
+  },
   exit: { opacity: 0, transition: { duration: 0.15 } },
 };
 
@@ -26,12 +34,13 @@ const fieldClass = cn(
   "w-full bg-transparent py-2 text-sm text-on-surface",
   "border-0 border-b border-outline-variant",
   "focus:outline-none focus:border-b-2 focus:border-accent",
-  "placeholder:text-on-surface-variant transition-colors"
+  "placeholder:text-on-surface-variant transition-colors",
 );
 
 export default function MotDePasseOubliePage() {
   const [state, setState] = useState<"idle" | "submitted">("idle");
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [submitError, setSubmitError] = useState<UserFacingError | null>(null);
 
   const {
     register,
@@ -40,9 +49,19 @@ export default function MotDePasseOubliePage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    setSubmittedEmail(data.email);
-    await authService.forgotPassword(data.email);
-    setState("submitted");
+    setSubmitError(null);
+    try {
+      await authService.forgotPassword(data.email);
+      setSubmittedEmail(data.email);
+      setState("submitted");
+    } catch (error) {
+      setSubmitError(
+        getUserFacingError(error, {
+          fallback:
+            "Impossible d’envoyer le lien de réinitialisation. Vérifiez l’adresse saisie, puis réessayez.",
+        }),
+      );
+    }
   };
 
   return (
@@ -68,11 +87,15 @@ export default function MotDePasseOubliePage() {
                 Mot de passe oublié ?
               </h1>
               <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">
-                Pas d&apos;inquiétude. Entrez votre adresse e-mail ci-dessous et nous vous
-                enverrons un lien pour réinitialiser votre accès.
+                Pas d&apos;inquiétude. Entrez votre adresse e-mail ci-dessous et
+                nous vous enverrons un lien pour réinitialiser votre accès.
               </p>
 
-              <form onSubmit={handleSubmit(onSubmit)} noValidate className="text-left space-y-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+                className="text-left space-y-6"
+              >
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] uppercase tracking-[0.08em] text-on-surface-variant font-medium">
                     ADRESSE EMAIL
@@ -81,13 +104,21 @@ export default function MotDePasseOubliePage() {
                     type="email"
                     placeholder="exemple@elintys.ca"
                     autoComplete="email"
-                    className={errors.email ? cn(fieldClass, "border-destructive") : fieldClass}
+                    className={
+                      errors.email
+                        ? cn(fieldClass, "border-destructive")
+                        : fieldClass
+                    }
                     {...register("email")}
                   />
                   {errors.email && (
-                    <p className="text-xs text-destructive">{errors.email.message}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
+
+                {submitError && <FormErrorAlert error={submitError} />}
 
                 <button
                   type="submit"
@@ -95,7 +126,7 @@ export default function MotDePasseOubliePage() {
                   className={cn(
                     "w-full h-12 rounded-md bg-accent text-white text-sm font-semibold",
                     "flex items-center justify-center gap-2 transition-opacity",
-                    "hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                    "hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed",
                   )}
                 >
                   {isSubmitting ? (
@@ -133,9 +164,12 @@ export default function MotDePasseOubliePage() {
                 <Mail size={28} className="text-accent" />
               </div>
 
-              <h1 className="font-serif text-[28px] text-on-surface mb-3">Lien envoyé !</h1>
+              <h1 className="font-serif text-[28px] text-on-surface mb-3">
+                Lien envoyé !
+              </h1>
               <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">
-                Nous avons envoyé les instructions de réinitialisation à l&apos;adresse{" "}
+                Nous avons envoyé les instructions de réinitialisation à
+                l&apos;adresse{" "}
                 <strong className="text-on-surface">{submittedEmail}</strong>.
               </p>
 
@@ -144,7 +178,7 @@ export default function MotDePasseOubliePage() {
                 className={cn(
                   "inline-flex items-center justify-center w-full h-12 rounded-md",
                   "border-[1.5px] border-accent text-accent text-sm font-semibold",
-                  "hover:bg-accent-light transition-colors mb-4"
+                  "hover:bg-accent-light transition-colors mb-4",
                 )}
               >
                 Retour à la connexion
@@ -177,11 +211,28 @@ export default function MotDePasseOubliePage() {
         <div className="flex items-center justify-center gap-4">
           <span className="font-serif text-lg text-accent">Elintys</span>
           <span className="text-outline-variant">·</span>
-          <a href="#" className="text-xs text-on-surface-variant hover:text-on-surface">Support</a>
-          <a href="#" className="text-xs text-on-surface-variant hover:text-on-surface">Confidentialité</a>
-          <a href="#" className="text-xs text-on-surface-variant hover:text-on-surface">Conditions</a>
+          <a
+            href="#"
+            className="text-xs text-on-surface-variant hover:text-on-surface"
+          >
+            Support
+          </a>
+          <a
+            href="#"
+            className="text-xs text-on-surface-variant hover:text-on-surface"
+          >
+            Confidentialité
+          </a>
+          <a
+            href="#"
+            className="text-xs text-on-surface-variant hover:text-on-surface"
+          >
+            Conditions
+          </a>
         </div>
-        <p className="text-xs text-on-surface-variant">© 2024 Elintys. Tous droits réservés.</p>
+        <p className="text-xs text-on-surface-variant">
+          © 2024 Elintys. Tous droits réservés.
+        </p>
       </div>
     </div>
   );
