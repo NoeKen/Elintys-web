@@ -17,8 +17,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      <div
+        className="flex h-screen items-center justify-center"
+        role="status"
+        aria-label="Vérification de la session"
+      >
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent"
+          aria-hidden="true"
+        />
       </div>
     );
   }
