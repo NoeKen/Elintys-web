@@ -13,7 +13,7 @@ Domaines apparentés attendus :
 
 | Environnement | Frontend | API |
 | --- | --- | --- |
-| Développement distant | `https://app.dev.elintys.app` | `https://api.dev.elintys.app/api/v1` |
+| Développement distant | `https://dev.elintys.com` | `https://api.dev.elintys.com/api/v1` |
 | Production | `https://app.elintys.com` | `https://api.elintys.com/api/v1` |
 
 Le frontend appelle directement l'API : aucun proxy/BFF n'est introduit. Le

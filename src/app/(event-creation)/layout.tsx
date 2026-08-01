@@ -1,10 +1,9 @@
-import { requireAuth } from '@/server/auth/guards';
+import { ProtectedRoute } from '@/shared/guards/ProtectedRoute';
 
-export default async function EventCreationLayout({
+export default function EventCreationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireAuth();
-  return children;
+  return <ProtectedRoute>{children}</ProtectedRoute>;
 }
