@@ -1,5 +1,5 @@
-import { DashboardSkeleton } from '@/shared/ui/Skeleton';
+import { OrganizerDashboardExperience } from '@/components/events/organizer/OrganizerDashboardExperience';
 
 export default function OrganisateurHubPage() {
-  return <DashboardSkeleton />;
+  return <OrganizerDashboardExperience />;
 }

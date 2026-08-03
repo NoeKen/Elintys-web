@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import type { Event } from '@/features/events/types';
@@ -10,6 +11,7 @@ import {
   eventCreationCopy as copy,
   formatEventCreationCopy,
 } from '@/features/events/i18n/event-creation.copy';
+import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 const STATUS_LABELS: Record<string, string> = {
   draft: copy.dashboard.statuses.draft,
@@ -29,9 +31,13 @@ const STATUS_COLORS: Record<string, string> = {
 
 interface Props {
   event: Event;
+  priority?: boolean;
 }
 
-export function DashboardEventCard({ event }: Props) {
+export function DashboardEventCard({ event, priority = false }: Props) {
+  const cover = event.coverImage
+    ? getOptimizedMediaUrl(event.coverImage, 'card')
+    : undefined;
   const date = event.startDate
     ? new Date(event.startDate).toLocaleDateString('fr-CA', {
         day: 'numeric',
@@ -58,6 +64,22 @@ export function DashboardEventCard({ event }: Props) {
   return (
     <Link href={href} className="group block">
       <article className="premium-card cursor-pointer p-5 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-premium">
+        <div className="relative mb-5 aspect-[16/9] overflow-hidden rounded-2xl bg-surface-low">
+          {cover ? (
+            <Image
+              src={cover}
+              alt=""
+              fill
+              priority={priority}
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            />
+          ) : (
+            <span className="flex h-full items-center justify-center font-serif text-5xl text-teal/45" aria-hidden="true">
+              E
+            </span>
+          )}
+        </div>
         <div className="mb-4 flex items-start justify-between gap-3">
           <h3 className="line-clamp-2 flex-1 font-serif text-2xl leading-tight text-navy-dark">{event.title}</h3>
           <span

@@ -1,5 +1,5 @@
-import { DashboardSkeleton } from '@/shared/ui/Skeleton';
+import { OrganizerEventsExperience } from '@/components/events/organizer/OrganizerEventsExperience';
 
 export default function OrganisateurEvenementsPage() {
-  return <DashboardSkeleton />;
+  return <OrganizerEventsExperience />;
 }

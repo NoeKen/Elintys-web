@@ -17,7 +17,7 @@ interface MobileNavItem {
 const MOBILE_ITEMS: MobileNavItem[] = [
   { href: '/tableau-de-bord', label: 'Accueil', Icon: LayoutGrid },
   { href: '/evenements', label: 'Événements', Icon: IconCalendar },
-  { href: '/messages', label: 'Messages', Icon: IconRequests },
+  { href: '/tableau-de-bord/messages', label: 'Messages', Icon: IconRequests },
   { href: '/prestataires', label: 'Explorer', Icon: IconSearch },
   { href: '/parametres', label: 'Paramètres', Icon: IconSettings },
 ];

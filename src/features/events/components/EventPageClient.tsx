@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { CalendarDays, MapPin, Ticket } from 'lucide-react';
+import { CalendarDays, Image as ImageIcon, MapPin, Ticket, UsersRound } from 'lucide-react';
 import { PurchaseModal } from '@/components/tickets/PurchaseModal';
 import { cn } from '@/shared/lib/utils';
 import type { MediaImageSource } from '@/shared/types/media.types';
 import { getOptimizedMediaUrl } from '@/shared/lib/media';
 import api from '@/shared/lib/api';
 import { eventCreationCopy as copy } from '@/features/events/i18n/event-creation.copy';
+import { getUserFacingError } from '@/shared/lib/user-facing-error';
 
 interface TicketType {
   _id: string;
@@ -31,7 +32,11 @@ interface Event {
   _id: string;
   title: string;
   description?: string;
+  shortDescription?: string;
   coverImage?: MediaImageSource;
+  gallery?: Array<MediaImageSource>;
+  eventType?: string;
+  capacity?: number;
   startDate: string;
   endDate?: string;
   location?: EventLocation;
@@ -98,8 +103,8 @@ export function EventPageClient({ event, ticketTypes }: Props) {
         await api.post(`/events/${event._id}/access/request`, {});
         setAccessFeedback(copy.identity.requestSent);
       }
-    } catch {
-      setAccessFeedback(copy.identity.accessActionError);
+    } catch (error: unknown) {
+      setAccessFeedback(getUserFacingError(error, { fallback: copy.identity.accessActionError }).message);
     } finally {
       setAccessLoading(false);
     }
@@ -147,6 +152,12 @@ export function EventPageClient({ event, ticketTypes }: Props) {
                 {event.description}
               </p>
             )}
+
+            <section className="mb-6 grid gap-3 sm:grid-cols-3" aria-label="Informations clés">
+              <PublicFact icon={<CalendarDays size={18} />} label="Date" value={startDate} />
+              <PublicFact icon={<MapPin size={18} />} label="Format" value={event.location?.type === 'online' ? 'En ligne' : event.location?.city ?? 'Lieu à confirmer'} />
+              <PublicFact icon={<UsersRound size={18} />} label="Capacité" value={event.capacity ? `${event.capacity} personnes` : 'À confirmer'} />
+            </section>
 
             <section className="premium-card mb-6 p-5 sm:p-6">
               <p className="section-eyebrow mb-3">{copy.identity.publicAccessTitle}</p>
@@ -250,6 +261,15 @@ export function EventPageClient({ event, ticketTypes }: Props) {
                 </div>
               )}
             </section>
+
+            {event.gallery && event.gallery.length > 0 ? (
+              <section className="premium-card mt-6 p-5 sm:p-6">
+                <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta-pale text-terracotta-dark"><ImageIcon size={18} aria-hidden="true" /></span><div><p className="section-eyebrow">Inspiration</p><h2 className="mt-1 font-serif text-2xl text-on-surface">L’univers de l’événement</h2></div></div>
+                <div className="grid auto-rows-[170px] gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {event.gallery.slice(0, 6).map((image, index) => <div key={`${getOptimizedMediaUrl(image, 'card')}-${index}`} className={cn('relative overflow-hidden rounded-2xl', index === 0 && 'sm:row-span-2')}><Image src={getOptimizedMediaUrl(image, 'card')} alt={`Ambiance de ${event.title} — image ${index + 1}`} fill className="object-cover transition-transform duration-500 hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" /></div>)}
+                </div>
+              </section>
+            ) : null}
           </div>
         </article>
       </div>
@@ -264,4 +284,8 @@ export function EventPageClient({ event, ticketTypes }: Props) {
       )}
     </main>
   );
+}
+
+function PublicFact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return <div className="rounded-2xl border border-outline-variant/60 bg-white/70 p-4"><span className="text-teal" aria-hidden="true">{icon}</span><p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-on-surface-variant">{label}</p><p className="mt-1 text-sm font-semibold text-on-surface">{value}</p></div>;
 }

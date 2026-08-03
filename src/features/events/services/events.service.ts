@@ -1,11 +1,62 @@
 import api from "@/shared/lib/api";
 import type { PaginatedResponse } from "@/shared/types";
-import type { Event, CreateEventInput, UpdateEventInput } from "../types";
+import type { Event, CreateEventInput, UpdateEventInput, EventAccessRequest, EventAccessRequestStatus } from "../types";
+
+export interface EventPublishReadinessError {
+  code: string;
+  field: string;
+}
 
 export interface EventPublishReadiness {
   publishable: boolean;
-  errors: Array<{ code: string; field: string }>;
+  errors: EventPublishReadinessError[];
   warnings: string[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function normalizeReadinessError(value: unknown): EventPublishReadinessError | null {
+  if (typeof value === "string") {
+    const code = value.trim();
+    return code ? { code, field: "" } : null;
+  }
+
+  if (!isRecord(value)) return null;
+
+  const rawCode = typeof value.code === "string" ? value.code : value.message;
+  const code = typeof rawCode === "string" ? rawCode.trim() : "";
+  if (!code) return null;
+
+  return {
+    code,
+    field: typeof value.field === "string" ? value.field.trim() : "",
+  };
+}
+
+export function normalizeEventPublishReadiness(payload: unknown): EventPublishReadiness {
+  if (!isRecord(payload)) {
+    return { publishable: false, errors: [], warnings: [] };
+  }
+
+  const errors = new Map<string, EventPublishReadinessError>();
+  if (Array.isArray(payload.errors)) {
+    payload.errors.forEach((value) => {
+      const error = normalizeReadinessError(value);
+      if (error) errors.set(`${error.code}:${error.field}`, error);
+    });
+  }
+
+  const warnings = Array.isArray(payload.warnings)
+    ? [...new Set(payload.warnings.filter((value): value is string => typeof value === "string"))]
+    : [];
+
+  return {
+    publishable: payload.publishable === true,
+    errors: [...errors.values()],
+    warnings,
+  };
 }
 
 export const eventsService = {
@@ -44,7 +95,22 @@ export const eventsService = {
   },
 
   async getPublishReadiness(id: string): Promise<EventPublishReadiness> {
-    const res = await api.get<EventPublishReadiness>(`/events/${id}/publish-readiness`);
+    const res = await api.get<unknown>(`/events/${id}/publish-readiness`);
+    return normalizeEventPublishReadiness(res.data);
+  },
+
+  async listAccessRequests(id: string): Promise<EventAccessRequest[]> {
+    const res = await api.get<EventAccessRequest[]>(`/events/${id}/access/requests`);
+    return res.data;
+  },
+
+  async reviewAccessRequest(id: string, requestId: string, status: EventAccessRequestStatus): Promise<EventAccessRequest> {
+    const res = await api.patch<EventAccessRequest>(`/events/${id}/access/requests/${requestId}`, { status });
+    return res.data;
+  },
+
+  async publish(id: string): Promise<Event> {
+    const res = await api.patch<Event>(`/events/${id}/publish`, {});
     return res.data;
   },
 };

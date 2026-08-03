@@ -1,5 +1,7 @@
-'use client'
-import { useEffect } from 'react'
+'use client';
+
+import { useEffect } from 'react';
+import { CloudOff, RefreshCw } from 'lucide-react';
 
 export default function DashboardError({
   error,
@@ -9,18 +11,19 @@ export default function DashboardError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error(error)
-  }, [error])
+    console.error(error);
+  }, [error]);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4">
-      <h2 className="text-xl font-semibold" style={{ color: 'var(--on-surface)' }}>
-        Une erreur est survenue
-      </h2>
-      <button onClick={reset}
-              className="rounded-lg bg-[#4A8E9E] px-4 py-2 text-white text-sm">
-        Réessayer
+    <section className="mx-auto mt-12 max-w-3xl rounded-3xl border border-destructive/20 bg-white/85 p-8 text-center shadow-event-panel">
+      <CloudOff className="mx-auto text-event-petrol" size={52} strokeWidth={1.3} aria-hidden="true" />
+      <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-destructive">Connexion interrompue</p>
+      <h2 className="mt-4 font-serif text-4xl text-event-petrol">Une brume passagère empêche l’accès à vos données</h2>
+      <p className="mx-auto mt-4 max-w-xl leading-7 text-event-muted">Rien de grave. Votre travail est conservé; réessayez pour reprendre là où vous étiez.</p>
+      <button type="button" onClick={reset} className="premium-button mt-7 px-6">
+        <RefreshCw size={17} aria-hidden="true" /> Réessayer
       </button>
-    </div>
-  )
+      {error.digest ? <p className="mt-6 text-xs text-event-muted">Référence : {error.digest}</p> : null}
+    </section>
+  );
 }

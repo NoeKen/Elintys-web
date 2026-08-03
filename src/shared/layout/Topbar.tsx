@@ -17,7 +17,7 @@ const BREADCRUMBS: Record<string, string> = {
   '/invites': 'Invités',
   '/billetterie': 'Billetterie',
   '/parametres': 'Paramètres',
-  '/messages': 'Messages',
+  '/tableau-de-bord/messages': 'Messages',
   '/favoris': 'Favoris',
   '/evenements': 'Événements',
   '/prestataires': 'Prestataires',

@@ -78,6 +78,21 @@ export interface EventCreationProgress {
   lastSavedAt: string;
 }
 
+export type EventAccessRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface EventAccessRequest {
+  _id: string;
+  eventId: string;
+  userId: string | {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
+  status: EventAccessRequestStatus;
+  requestedAt: string;
+  reviewedAt?: string;
+}
+
 export interface Event {
   _id: string;
   id?: string;

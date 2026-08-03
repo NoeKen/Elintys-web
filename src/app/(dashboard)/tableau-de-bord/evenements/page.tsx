@@ -1,3 +1,5 @@
+import { OrganizerEventsExperience } from '@/components/events/organizer/OrganizerEventsExperience';
+
 export default function EvenementsPage() {
-  return <div>Événements</div>;
+  return <OrganizerEventsExperience />;
 }
