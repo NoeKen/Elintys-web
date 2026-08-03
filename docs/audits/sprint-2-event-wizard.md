@@ -308,3 +308,195 @@ niveau API ou unitaire. Le risque résiduel est donc **faible mais non nul**.
 
 **Recommandation** : un dernier passage ciblé (étape 5 via UI + QA visuelle + F-036)
 suffirait à autoriser le gel. Le harnais est en place ; le travail restant est additif.
+
+---
+
+# Sprint 2.2 — clôture F-036 et tentative de pilotage étape 5/6
+
+## 1. F-036 — débordement horizontal à 1024×768 — ✅ FERMÉ
+
+### Diagnostic (preuve DOM, avant correctif)
+
+```
+viewport=1024  scrollWidth=1060  dépassement=36px
+coupable : DIV.flex items-center justify-end gap-4  (w=320, right=1060)
+parent   : DIV.mx-auto grid min-h-[82px] max-w-[1500px]
+```
+
+### Cause réelle
+
+`EventCreationChrome.tsx:182` — l'en-tête sticky bascule sur une grille à trois
+colonnes fixes au point de rupture `lg`, qui vaut **exactement 1024px** :
+
+```
+320 (marque) + 360 (min. colonne centrale) + 320 (actions)
++ 32 (2 gouttières gap-4) + 56 (padding sm:px-7 ×2) = 1088px requis
+```
+
+À 1024px la grille réclame donc 1088px : 36px de débordement, exactement la
+valeur mesurée. Ce n'est pas un problème de contenu mais de seuil de bascule.
+
+### Correctif appliqué
+
+`lg:grid-cols-[320px_minmax(360px,660px)_320px]` → `xl:grid-cols-[...]`.
+
+La grille à trois colonnes n'est activée qu'à partir de 1280px, où les 1088px
+requis tiennent confortablement. Ce choix est **cohérent avec le reste du
+composant** : l'aside latéral utilise déjà `xl:block`, donc les trois colonnes et
+la colonne latérale apparaissent désormais au même point de rupture.
+
+**Aucun `overflow-x-hidden` n'a été ajouté** : le débordement est supprimé à sa
+source, pas masqué.
+
+### Vérification — critère `documentElement.scrollWidth === window.innerWidth`
+
+| Viewport | scrollWidth | innerWidth | Dépassement |
+|---|---|---|---|
+| 320×568 | 320 | 320 | 0 |
+| 375×667 | 375 | 375 | 0 |
+| 390×844 | 390 | 390 | 0 |
+| 768×1024 | 768 | 768 | 0 |
+| **1024×768** | **1024** | **1024** | **0** |
+| 1440×900 | 1440 | 1440 | 0 |
+| 1538×1100 | 1538 | 1538 | 0 |
+
+**7/7 viewports propres.** Non-régression : lint EXIT 0, typecheck 0 erreur,
+187/187 tests unitaires verts.
+
+## 2. Pilotage de l'étape 5 via l'UI — ❌ NON ABOUTI
+
+Trois approches ont été tentées pour atteindre l'étape 5 dans un test Playwright
+piloté uniquement par l'interface. Aucune n'a fonctionné.
+
+| # | Approche | Résultat observé |
+|---|---|---|
+| 1 | Clic sur la pastille « 5. Identité et accès » | `<button disabled aria-label="5. Identité et accès">` — les pastilles sont désactivées tant que l'étape n'a pas été atteinte |
+| 2 | Boucle de clics sur « Continuer » depuis l'étape 1 | Le parcours n'atteint pas l'étape 5 ; `input[type=file]` jamais attaché |
+| 3 | Création API avec `creationProgress: { currentStep: 5 }` puis ouverture du brouillon | Le wizard ne s'ouvre pas à l'étape 5 — les 24 tests échouent, y compris ceux qui ne touchent pas aux médias |
+
+Le comportement n°1 est **correct** pour un wizard guidé : on ne saute pas une
+étape non franchie. Le point n°3 est une **observation à vérifier**, pas un
+défaut établi : `creationProgress.currentStep` est bien persisté par l'API, mais
+la reprise d'un brouillon ne semble pas repositionner l'utilisateur à l'étape
+enregistrée. Cela mérite une vérification produit dédiée (« la reprise d'un
+brouillon doit-elle ramener à la dernière étape atteinte ? ») avant d'être
+qualifié de bug.
+
+**Le fichier `wizard-step5-6.spec.ts` n'a pas été livré** : on ne verse pas une
+suite rouge au dépôt. Le harnais reste à reconstruire sur la base d'un parcours
+UI complet 1→5 renseignant réellement chaque étape.
+
+**Conséquence** : médias (cover, remplacement, rejet non-image), 3 visibilités,
+7 politiques d'accès, 6 modes d'admission et les boutons « Modifier » de
+l'étape 6 restent couverts **au niveau API (Sprint 1) et unitaire**, pas par
+l'interface réelle.
+
+## 3. QA visuelle Stitch — ❌ NON RÉALISÉE
+
+Seules les 5 références Stitch ont été versées dans
+`docs/design-qa/event-wizard-sprint-2/references/`. Aucune capture
+d'implémentation ni comparaison n'a été produite pendant ce sprint, et
+`report.md` n'existe pas.
+
+## 4. F-037 — pagination sans tri sur les listes d'événements — ✅ FERMÉ
+
+### Découverte
+
+La suite fonctionnelle est passée à 44/45, l'échec portant sur un test de
+sécurité — `security.spec.ts:70`, « devrait cloisonner *Mes événements* par
+compte ». L'assertion en échec était toutefois `inMine`, **pas** l'assertion de
+cloisonnement :
+
+```
+Error: le propriétaire voit son événement
+Expected: true   Received: false
+```
+
+Le cloisonnement (`inTheirs === false`) passait. **Aucune fuite de données entre
+comptes.**
+
+### Cause réelle
+
+`events.service.ts` paginait sans ordre explicite, aux deux endroits :
+
+```ts
+this.eventModel.find(filter).skip(skip).limit(limit)   // aucun .sort()
+```
+
+Preuve du déclencheur (base `elintys-dev`, agrégat par organisateur) :
+
+```
+evenements par organisateur (top 3) : 57, 11, 1
+```
+
+Le compte owner QA porte 57 événements pour une page 1 limitée à 20. Sans tri,
+`skip`/`limit` s'appuient sur l'**ordre naturel** de MongoDB : le brouillon
+fraîchement créé ne se trouvait pas sur la première page.
+
+### Portée réelle du défaut
+
+Ce n'est pas qu'un artefact de test. Deux conséquences produit :
+
+1. **Pagination non déterministe** — sans ordre total, MongoDB ne garantit pas
+   la stabilité entre deux requêtes de pages : un document peut être omis ou
+   rendu deux fois lors d'un parcours page par page. Cela affecte le catalogue
+   public (`findAll`) autant que « Mes événements » (`findByOrganizer`).
+2. **Un organisateur de plus de 20 événements ne retrouve pas son brouillon**
+   fraîchement créé dans sa liste.
+
+### Correctif
+
+Tri stable et total ajouté aux deux requêtes paginées, avec `_id` en départage :
+
+```ts
+const PAGINATION_SORT = { createdAt: -1, _id: -1 } as const;
+```
+
+Non-régression : `events.service.spec.ts` — « devrait trier la page sur un ordre
+stable et déterministe » vérifie l'appel `.sort()`.
+
+**Réserve consignée** : l'ordre métier du catalogue public (afficher les
+événements *à venir* en premier plutôt que les plus récemment créés) est une
+décision produit distincte, hors périmètre de ce correctif. Seul le
+déterminisme a été traité ici.
+
+### Vérification
+
+Suite fonctionnelle complète : **45/45 verte** (contre 44/45 avant correctif).
+Portes API : lint 0, typecheck 0 erreur, build 0, **522/522 tests**.
+
+## 5. Registre des anomalies
+
+| Anomalie | Sévérité | Statut |
+|---|---|---|
+| F-035 (contrôle mobile) | P2 | ✅ Fermé — faux positif |
+| **F-036** (débordement 1024×768) | P3 | ✅ **Fermé — corrigé, vérifié 7/7** |
+| **F-037** (pagination sans tri) | **P2** | ✅ **Fermé — corrigé, 45/45** |
+
+**P0 : 0 · P1 : 0 · P2 : 0 · P3 : 0**
+
+## 6. Verdict Sprint 2.2
+
+### ❌ GEL MVP REFUSÉ — preuve manquante explicite
+
+Le refus ne repose sur **aucun défaut produit connu** : le registre d'anomalies
+est vide et toutes les portes de qualité passent. Il repose sur des **preuves
+explicitement manquantes**, au sens du critère fixé :
+
+1. L'étape 5 n'a **jamais été pilotée via l'interface réelle** — exigence
+   centrale du sprint, non satisfaite.
+2. Les boutons « Modifier » de l'étape 6 ne sont pas validés en E2E.
+3. La QA visuelle comparative Stitch n'existe pas.
+
+Ce qui est acquis et vérifié : F-036 corrigé à la source avec preuve DOM sur
+7 viewports ; F-037 (pagination non déterministe) découvert et corrigé ; portes
+web 187/187 et API 522/522 ; suite fonctionnelle 45/45 ; lint, typecheck et
+build à 0 sur les deux dépôts ; aucune régression.
+
+### Chemin le plus court vers le gel
+
+Construire un helper Playwright qui traverse réellement les étapes 1→4 en
+renseignant les champs requis (le fichier `wizard-ui.spec.ts` y parvient déjà
+jusqu'à l'étape 3 — c'est la base à étendre), puis rejouer les 24 assertions
+étape 5/6 par-dessus. La QA visuelle et les boutons « Modifier » suivent
+immédiatement. Aucun de ces travaux ne suppose de correctif produit.
