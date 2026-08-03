@@ -17,7 +17,7 @@ describe('public catalog filters', () => {
   });
 
   it('sends vendor enum, city and price parameters', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<PrestatairesContent vendors={[]} total={0} />);
 
     await user.click(screen.getByLabelText('Photographie'));
@@ -31,7 +31,7 @@ describe('public catalog filters', () => {
   });
 
   it('sends venue enum and minimum capacity parameters', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<LieuxContent venues={[]} total={0} />);
 
     await user.click(screen.getByLabelText('Salle de conférence'));
@@ -42,7 +42,7 @@ describe('public catalog filters', () => {
   });
 
   it('sends event category and city parameters', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(
       <EventsCatalogContent
         events={[]}

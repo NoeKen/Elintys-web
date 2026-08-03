@@ -83,7 +83,7 @@ describe("EventCreationWizard", () => {
   });
 
   it("valide le titre, crée le draft puis passe à l’étape 2", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.create.mockResolvedValue(draft());
     renderWizard();
 
@@ -122,7 +122,7 @@ describe("EventCreationWizard", () => {
   });
 
   it("reste sur place et propose un retry si la création échoue", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.create.mockRejectedValueOnce(new Error("network"));
     renderWizard();
 
@@ -163,7 +163,7 @@ describe("EventCreationWizard", () => {
   });
 
   it("présente séparément visibilité, règle d’accès et admission à l’étape 5", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     renderWizard(
       draft({
         discoverability: "public",

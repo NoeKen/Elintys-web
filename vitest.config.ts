@@ -11,6 +11,10 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // L'instrumentation de couverture ralentit les tests userEvent lourds :
+    // 5000ms (défaut) provoquait des timeouts sous `test:coverage` (finding F-014).
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     css: true,
@@ -25,7 +29,9 @@ export default defineConfig({
         "src/**/*.stories.{ts,tsx}",
         "src/app/**/layout.tsx",
         "src/app/**/page.tsx",
-        "src/middleware.ts",
+        // `server-only` n'est pas analysable par le parseur de coverage-v8
+        // (PARSE_ERROR silencieux) : exclusion explicite et documentée.
+        "src/server/catalog/catalog-api.ts",
       ],
       thresholds: {
         // Plancher global : garde-fou anti-régression sur la couverture actuelle.

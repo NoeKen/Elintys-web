@@ -38,7 +38,7 @@ describe('EventPageClient access policies', () => {
   });
 
   it('bloque l’achat avant validation du code puis transmet le grant', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.post.mockResolvedValue({ data: { authorized: true, accessGrant: 'signed-grant' } });
     render(
       <EventPageClient
@@ -56,7 +56,7 @@ describe('EventPageClient access policies', () => {
   });
 
   it('ne déverrouille pas les billets lorsqu’un domaine est refusé', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.post.mockResolvedValue({ data: { authorized: false, reason: 'EMAIL_DOMAIN_NOT_ALLOWED' } });
     render(
       <EventPageClient
@@ -71,7 +71,7 @@ describe('EventPageClient access policies', () => {
   });
 
   it('expose une demande d’approbation et une invitation avec des CTA distincts', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.post.mockResolvedValue({ data: {} });
     const { rerender } = render(
       <EventPageClient

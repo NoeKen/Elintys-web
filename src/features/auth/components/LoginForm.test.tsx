@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 function fillAndSubmit(email: string, password: string) {
-  const user = userEvent.setup();
+  const user = userEvent.setup({ delay: null });
   render(<LoginForm />);
   return {
     user,
@@ -47,7 +47,7 @@ describe("LoginForm", () => {
   });
 
   it("affiche une erreur de validation si l'email est invalide", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<LoginForm />);
     await user.type(
       screen.getByPlaceholderText("nom@exemple.com"),

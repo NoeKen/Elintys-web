@@ -14,6 +14,7 @@
 /coverage
 /playwright-report
 /test-results
+/.visual-qa/
 
 # next.js
 /.next/
@@ -43,3 +44,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude/settings.local.json
+.e2e/

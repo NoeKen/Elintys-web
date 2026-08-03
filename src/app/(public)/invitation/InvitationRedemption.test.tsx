@@ -19,7 +19,7 @@ describe('InvitationRedemption', () => {
   });
 
   it('accepte une invitation une seule fois depuis une action explicite', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     mocks.accept.mockResolvedValue({});
     render(<InvitationRedemption token="raw-token" />);
     await user.click(screen.getByRole('button', { name: 'Accepter l’invitation' }));

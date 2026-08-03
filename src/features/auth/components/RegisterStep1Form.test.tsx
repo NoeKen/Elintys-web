@@ -46,7 +46,7 @@ describe("RegisterStep1Form", () => {
 
   it("appelle onSuccess avec email et password si le formulaire est valide", async () => {
     const onSuccess = vi.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RegisterStep1Form onSuccess={onSuccess} />);
 
     await fillValidForm(user);
@@ -60,7 +60,7 @@ describe("RegisterStep1Form", () => {
 
   it("n'appelle pas onSuccess si les conditions ne sont pas acceptées", async () => {
     const onSuccess = vi.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RegisterStep1Form onSuccess={onSuccess} />);
 
     await fillValidForm(user, { skipTerms: true });
@@ -72,7 +72,7 @@ describe("RegisterStep1Form", () => {
 
   it("affiche une erreur si les mots de passe ne correspondent pas", async () => {
     const onSuccess = vi.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RegisterStep1Form onSuccess={onSuccess} />);
 
     await fillValidForm(user, { confirmPassword: "Different1" });
@@ -86,7 +86,7 @@ describe("RegisterStep1Form", () => {
 
   it("affiche une erreur si le mot de passe manque une majuscule", async () => {
     const onSuccess = vi.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RegisterStep1Form onSuccess={onSuccess} />);
 
     await fillValidForm(user, { password: "lowercase1", confirmPassword: "lowercase1" });
