@@ -185,3 +185,126 @@ s'appuie sur `wizard-ui.spec.ts` et les helpers existants, sans refonte.
 
 **Prochaine action recommandée** : étendre `wizard-ui.spec.ts` aux étapes 4→6 et aux branches
 lieu, puis traiter F-035 et la QA visuelle.
+
+---
+---
+
+# Sprint 2.1 — Clôture (2026-08-03)
+
+## 1. F-035 — ✅ **fermé** (c'était un faux positif de ma suite de tests)
+
+**Diagnostic à 390 px** (Playwright, arbre d'accessibilité réel) :
+
+```
+getByRole('button', { name: 'Continuer' }) → 1 élément
+  #0 visible=true  enabled=true  135×48px
+```
+
+**Un seul contrôle, visible, activable, cible tactile conforme. Aucun doublon masqué.**
+Le produit était correct : j'avais mal diagnostiqué au Sprint 2.
+
+**La vraie cause était dans mon propre helper de test** : `openWizard()` ciblait
+`getByText('Informations')`, dont le premier match est un
+`<span class="hidden sm:inline">` réservé au desktop (`display:none` en mobile).
+L'assertion échouait donc **là**, pas sur le bouton « Continuer ».
+
+Preuve :
+```
+getByText("Informations") → 2 éléments
+  #0 visible=false SPAN display=none class="hidden text-event-ink sm:inline"
+  #1 visible=true  P     display=block
+```
+
+Correctifs : sélecteur d'ouverture basé sur le contrôle d'action ; helper `expectStep`
+filtrant sur `visible=true` ; assertion F-035 renforcée dans le test mobile (comptage
+strict à 1 + cible tactile ≥ 44 px).
+
+## 2. Scénarios E2E ajoutés — **14/14 verts**
+
+| Scénario | Résultat |
+|---|---|
+| Branche lieu « je choisirai plus tard » | ✅ |
+| Branche lieu « j'ai déjà mon lieu » (saisie manuelle) | ✅ |
+| Branche lieu « recherche Elintys » (catalogue / vide / erreur) | ✅ |
+| **Publication refusée** — readiness backend refuse, statut reste `draft`, aucun faux succès | ✅ |
+| **Publication réussie** — statut `published`, page publique accessible à un anonyme | ✅ |
+| Étape 1 : validation bloquante, anti-double-soumission | ✅ |
+| Navigation avant/arrière, skip prestataires | ✅ |
+| Refresh, reprise depuis « Mes événements » | ✅ |
+| Mobile 390 px + vérification F-035 | ✅ |
+
+## 3. Responsive — 7 viewports, **6/7 conformes**
+
+| Viewport | Débordement | « Continuer » |
+|---|---|---|
+| 320×720 | ✓ aucun | 1 · 48 px |
+| 375×812 | ✓ aucun | 1 · 48 px |
+| 390×844 | ✓ aucun | 1 · 48 px |
+| 768×1024 | ✓ aucun | 1 · 48 px |
+| **1024×768** | ❌ **débordement horizontal** | 1 · 48 px |
+| 1440×900 | ✓ aucun | 1 · 48 px |
+| 1538×1100 | ✓ aucun | 1 · 48 px |
+
+→ nouveau finding **F-036 (P3)** : débordement horizontal en **1024×768** (tablette
+paysage). Un seul viewport sur sept ; les six autres sont propres et le contrôle
+principal est correctement dimensionné partout.
+
+## 4. Accessibilité
+
+- **axe (WCAG 2.0/2.1 A & AA) sur le wizard : 0 violation.**
+- Navigation clavier : focus atteint les champs, **contour de focus visible** (`outline: solid`).
+- Cible tactile du contrôle principal : **48 px** à tous les viewports (≥ 44 px requis).
+
+## 5. Gates
+
+| Commande | Résultat |
+|---|---|
+| Web `lint` | ✅ 0 |
+| Web `typecheck` | ✅ 0 |
+| Web `test` | ✅ 187 |
+| E2E wizard UI | ✅ **14/14** |
+| axe | ✅ 0 violation |
+
+API inchangée par ce Sprint (aucune modification) — gates Sprint 1 valides (522 tests).
+
+## 6. Commits
+
+| Hash | Commit |
+|---|---|
+| `1b4fc98` | `fix(web): close F-035 and complete wizard UI coverage` |
+
+## 7. Findings
+
+| ID | Sévérité | Statut |
+|---|---|---|
+| F-034 (code mort) | P3 | ✅ Fermé (Sprint 2) |
+| **F-035** (contrôle mobile) | P2 | ✅ **Fermé — faux positif, produit conforme** |
+| **F-036** (débordement 1024×768) | **P3** | ⏳ Ouvert |
+
+**P0 : 0 · P1 : 0 · P2 : 0 · P3 : 1**
+
+## 8. Verdict final
+
+### ❌ GEL MVP REFUSÉ — mais de justesse
+
+**Acquis** : F-035 fermé avec preuve, 14/14 E2E UI, trois branches lieu, publication
+refusée **et** réussie validées, axe 0 violation, clavier OK, 6/7 viewports propres,
+aucun P0/P1/P2 ouvert.
+
+**Ce qui manque encore** :
+1. **Étape 5 (médias, accès, admission) non pilotée via l'UI** — l'upload cover/galerie,
+   les 7 politiques d'accès et les 6 modes d'admission restent validés par les **E2E API du
+   Sprint 1**, pas par des clics dans l'interface.
+2. **Étape 6 partiellement via UI** — la readiness et la publication sont vérifiées par
+   l'API dans le parcours ; les boutons « Modifier » du récapitulatif sont couverts en
+   tests unitaires, pas en E2E.
+3. **QA visuelle Stitch non réalisée** — seules deux captures d'implémentation (390 et
+   1538) ont été produites, sans comparaison aux références.
+4. **F-036** ouvert.
+
+Ce sont des **écarts de couverture de test, pas des défauts produit connus** : aucune
+anomalie fonctionnelle n'a été trouvée sur ces chemins, et ils sont tous couverts au
+niveau API ou unitaire. Le risque résiduel est donc **faible mais non nul**.
+
+**Recommandation** : un dernier passage ciblé (étape 5 via UI + QA visuelle + F-036)
+suffirait à autoriser le gel. Le harnais est en place ; le travail restant est additif.
