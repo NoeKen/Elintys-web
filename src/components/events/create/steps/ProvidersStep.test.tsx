@@ -21,7 +21,7 @@ vi.mock("@/features/vendors/services/vendors.service", () => ({
   vendorsService: { list: mocks.list },
 }));
 
-function renderStep(overrides: Partial<React.ComponentProps<typeof ProvidersStep>> = {}) {
+function renderStep(overrides: Record<string, unknown> = {}) {
   const props = {
     providerNeeds: [] as ProviderNeedState[],
     onProviderNeedsChange: vi.fn(),
@@ -30,6 +30,10 @@ function renderStep(overrides: Partial<React.ComponentProps<typeof ProvidersStep
     selectedVendors: {} as SelectedVendorMap,
     onSelectedVendorsChange: vi.fn(),
     ...overrides,
+  } as unknown as React.ComponentProps<typeof ProvidersStep> & {
+    onProviderNeedsChange: ReturnType<typeof vi.fn>;
+    onManualProvidersChange: ReturnType<typeof vi.fn>;
+    onSelectedVendorsChange: ReturnType<typeof vi.fn>;
   };
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -79,7 +83,7 @@ describe("ProvidersStep — besoins", () => {
 describe("ProvidersStep — reprise depuis un brouillon", () => {
   it("devrait refléter des besoins déjà enregistrés", () => {
     const providerNeeds: ProviderNeedState[] = [
-      { category: "traiteur", mode: "platform" },
+      { category: "caterer", mode: "elintys" },
     ];
     const { container } = renderStep({ providerNeeds });
     expect(container.textContent).toBeTruthy();
@@ -90,7 +94,7 @@ describe("ProvidersStep — reprise depuis un brouillon", () => {
   it("ne devrait pas dupliquer un besoin déjà présent", async () => {
     const user = userEvent.setup({ delay: null });
     const providerNeeds: ProviderNeedState[] = [
-      { category: "traiteur", mode: "platform" },
+      { category: "caterer", mode: "elintys" },
     ];
     const { props } = renderStep({ providerNeeds });
 
@@ -127,13 +131,13 @@ describe("ProvidersStep — catalogue de prestataires", () => {
     mocks.list.mockResolvedValue({
       data: [
         { _id: "v1", businessName: "DJ Kevin MTL", category: "dj" },
-        { _id: "v2", businessName: "Traiteur Nord", category: "traiteur" },
+        { _id: "v2", businessName: "Traiteur Nord", category: "caterer" },
       ],
       total: 2,
       page: 1,
       limit: 20,
     });
-    const providerNeeds: ProviderNeedState[] = [{ category: "dj", mode: "platform" }];
+    const providerNeeds: ProviderNeedState[] = [{ category: "dj", mode: "elintys" }];
     renderStep({ providerNeeds });
 
     await waitFor(() => expect(mocks.list).toHaveBeenCalled());
@@ -141,7 +145,7 @@ describe("ProvidersStep — catalogue de prestataires", () => {
 
   it("ne devrait pas planter si le service échoue (état d'erreur géré)", async () => {
     mocks.list.mockRejectedValue(new Error("réseau indisponible"));
-    const providerNeeds: ProviderNeedState[] = [{ category: "dj", mode: "platform" }];
+    const providerNeeds: ProviderNeedState[] = [{ category: "dj", mode: "elintys" }];
     const { container } = renderStep({ providerNeeds });
 
     await waitFor(() => expect(mocks.list).toHaveBeenCalled());
@@ -151,7 +155,7 @@ describe("ProvidersStep — catalogue de prestataires", () => {
 
   it("devrait gérer un catalogue vide sans erreur", async () => {
     mocks.list.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
-    const providerNeeds: ProviderNeedState[] = [{ category: "fleuriste", mode: "platform" }];
+    const providerNeeds: ProviderNeedState[] = [{ category: "other", mode: "elintys" }];
     const { container } = renderStep({ providerNeeds });
 
     await waitFor(() => expect(mocks.list).toHaveBeenCalled());
@@ -162,7 +166,7 @@ describe("ProvidersStep — catalogue de prestataires", () => {
 describe("ProvidersStep — prestataires sélectionnés et manuels", () => {
   it("devrait refléter une sélection existante", () => {
     const { container } = renderStep({
-      providerNeeds: [{ category: "dj", mode: "platform" }],
+      providerNeeds: [{ category: "dj", mode: "elintys" }],
       selectedVendors: { dj: "v1" } as SelectedVendorMap,
     });
     expect(container.textContent).toBeTruthy();
@@ -170,16 +174,16 @@ describe("ProvidersStep — prestataires sélectionnés et manuels", () => {
 
   it("devrait refléter un prestataire ajouté manuellement", () => {
     const manualProviders = {
-      traiteur: {
+      caterer: {
         name: "Traiteur QA",
-        category: "traiteur",
+        category: "caterer",
         email: "qa@demo.elintys.com",
         phone: "",
       },
     } as unknown as ManualProviderMap;
 
     const { container } = renderStep({
-      providerNeeds: [{ category: "traiteur", mode: "manual" }],
+      providerNeeds: [{ category: "caterer", mode: "manual" }],
       manualProviders,
     });
     // Le nom saisi vit dans les champs contrôlés du formulaire manuel.
@@ -189,7 +193,7 @@ describe("ProvidersStep — prestataires sélectionnés et manuels", () => {
 
   it("ne devrait exposer aucune donnée sensible dans le rendu", () => {
     const { container } = renderStep({
-      providerNeeds: [{ category: "dj", mode: "platform" }],
+      providerNeeds: [{ category: "dj", mode: "elintys" }],
       selectedVendors: { dj: "v1" } as SelectedVendorMap,
     });
     expect(container.innerHTML).not.toMatch(/tokenHash|password|secret/i);
