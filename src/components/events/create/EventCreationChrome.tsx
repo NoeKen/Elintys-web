@@ -179,7 +179,7 @@ export function EventCreationHeader({
 }: EventCreationHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-event-outline-subtle/70 bg-event-background/90 backdrop-blur-xl">
-      <div className="mx-auto grid min-h-[82px] max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-7 lg:grid-cols-[320px_minmax(360px,660px)_320px]">
+      <div className="mx-auto grid min-h-[82px] max-w-[1500px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 sm:px-7 xl:grid-cols-[320px_minmax(360px,660px)_320px]">
         <div className="flex min-w-0 items-center gap-4">
           <span className="font-serif text-xl text-event-petrol">
             {copy.brand}
