@@ -215,6 +215,12 @@ export function IdentityAccessStep({
             </label>
           ))}
         </div>
+        {/*
+          Sans ce rendu, la combinaison « privé + accès ouvert » bloque le
+          passage à l'étape suivante en silence : la validation échoue et le
+          focus est renvoyé sur un `input` `sr-only`, donc invisible.
+        */}
+        <FieldError message={form.formState.errors.accessPolicyType?.message} />
 
         {accessPolicyType === 'access_code' && (
           <div className="mt-5">
