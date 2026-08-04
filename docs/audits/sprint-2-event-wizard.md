@@ -500,3 +500,157 @@ renseignant les champs requis (le fichier `wizard-ui.spec.ts` y parvient déjà
 jusqu'à l'étape 3 — c'est la base à étendre), puis rejouer les 24 assertions
 étape 5/6 par-dessus. La QA visuelle et les boutons « Modifier » suivent
 immédiatement. Aucun de ces travaux ne suppose de correctif produit.
+
+---
+
+# Sprint 2.3 — pilotage réel des étapes 5 et 6, QA visuelle (2026-08-04)
+
+## 1. Cause du blocage du Sprint 2.2 — identifiée
+
+Le bouton d'action principal **change de libellé selon l'étape** :
+
+| Étape | Libellé | Source |
+|---|---|---|
+| 1, 2, 4, 5 | « Continuer » | `copy.continue` |
+| 3 en mode « je choisirai plus tard » | « **Continuer sans lieu** » | `copy.venue.continueWithout` |
+| 6 | « Terminer la configuration » | `copy.finish` |
+
+`EventCreationChrome.tsx` — `StepNavigation`, calcul de `primaryLabel`.
+
+Les trois tentatives du Sprint 2.2 échouaient donc toutes pour la même raison :
+la boucle ciblait `getByRole('button', { name: 'Continuer' })`, qui correspond
+en équivalence exacte et ne matche pas « Continuer sans lieu ». Le parcours
+s'arrêtait invariablement à l'étape 3.
+
+## 2. Traversée réelle 1 → 6 — ✅ ACQUISE
+
+`e2e/functional/wizard-journey.ts` traverse le wizard comme un humain :
+
+1. Étape 1 — saisie du nom ; le brouillon est créé côté API, l'URL bascule sur
+   `/tableau-de-bord/evenements/<id>/configuration`.
+2. Étape 2 — date et heure de début, puis mode de lieu « je choisirai plus
+   tard ». Ce choix est fait ici et non à l'étape 3 : `venueMode` est un champ
+   de l'étape 2 (`getStepFieldNames`).
+3. Étape 3 — cette branche ne réclame **aucun** champ, ce qui rend le parcours
+   indépendant du catalogue de lieux. Franchie par « Continuer sans lieu ».
+4. Étape 4 — franchie par « Passer cette étape » (ou par le bouton principal
+   sous le point de rupture `sm`, où ce raccourci est masqué).
+5. Étape 5 atteinte, puis étape 6 après configuration d'accès.
+
+Aucune URL forgée, aucune progression injectée par l'API : les pastilles de
+progression restent `disabled` tant qu'une étape n'est pas atteinte, et
+`creationProgress.currentStep = 5` est vérifié côté backend après la traversée.
+
+## 3. Étapes 5 et 6 — **13/13 tests verts**
+
+`e2e/functional/wizard-step5-6.spec.ts` :
+
+| Domaine | Couverture |
+|---|---|
+| Accès à l'étape | traversée 1→4, progression persistée (`currentStep: 5`, étape 4 dans `skippedSteps`) |
+| Médias | téléversement de couverture, remplacement, rejet d'un non-image sans appel serveur, ajout à la galerie |
+| Visibilité | les **3** valeurs sélectionnables, exclusivité mutuelle vérifiée |
+| Accès | les **7** politiques sélectionnables ; champs conditionnels `#event-access-code` et `#allowed-domains` révélés **uniquement** par la politique correspondante |
+| Admission | les **5** modes (et non 6 : `free`, `registration_only`, `free_ticket`, `paid_ticket`, `invitation`), cumulables |
+| Persistance | configuration saisie à l'écran relue côté API ; le code d'accès **n'apparaît jamais en clair** dans la réponse |
+| Validation | « privé + accès ouvert » refusé, wizard maintenu sur l'étape 5 |
+| Étape 6 | récapitulatif fidèle aux saisies, boutons « Modifier » ramenant à la bonne étape, retour à l'étape 5 par la pastille avec restitution des choix |
+
+## 4. F-038 — erreur de validation jamais affichée — ✅ FERMÉ
+
+**Constat.** `accessPolicyType` était le seul champ du wizard dont l'erreur
+n'était pas rendue. La combinaison « privé + accès ouvert » échoue à la
+validation Zod ; `form.trigger(..., { shouldFocus: true })` renvoie alors le
+focus sur un `input` `sr-only`, donc invisible. L'utilisateur cliquait
+« Continuer » et **rien ne se produisait, sans le moindre message**.
+
+**Preuve.** Audit du rendu des erreurs, étape par étape : `venueProfile`,
+`startDate`, `endDate`, `eventType`, `capacity`, `accessCodeValue`,
+`allowedDomains` et `admissionModes` disposent tous d'un `<FieldError>` ;
+`accessPolicyType` était le seul sans.
+
+**Correctif.** `IdentityAccessStep.tsx` — ajout du `<FieldError>` manquant sous
+la grille des politiques d'accès.
+
+**Vérification.** Le test « devrait refuser un événement privé laissé en accès
+ouvert » échouait sur l'absence du message avant correctif, passe après.
+
+## 5. QA visuelle — ✅ RÉALISÉE, avec une réserve majeure
+
+Rapport complet : `docs/design-qa/event-wizard-sprint-2/report.md`.
+Rapprochements : `comparisons/index.html`. Captures : `implementations/`
+(6 étapes × 2 viewports, produites par `wizard-capture.spec.ts`).
+
+**Les maquettes Stitch de référence sont périmées.** Elles décrivent un wizard
+à 5 étapes (Informations · Configuration · Billetterie · Design · Publication)
+avec sidebar de tableau de bord, assistant IA, tarification de lieu et palette
+verte. Le produit livré est un wizard à 6 étapes en plein écran, sur la palette
+V2, avec le modèle Access V2 et sans billetterie.
+
+Aucun score de conformité Stitch n'est donc publié : il mesurerait un écart de
+spécification, pas la qualité d'exécution. La conformité est évaluée contre
+`docs/design-principles.md` et le design system — **87/100**, sans défaut
+bloquant.
+
+## 6. Accessibilité — **0 violation**
+
+`e2e/functional/wizard-a11y.spec.ts`, axe-core WCAG 2.1 AA. Résultats bruts
+dans `docs/design-qa/event-wizard-sprint-2/axe-wizard.json`.
+
+| Écran | Violations |
+|---|---|
+| Étape 1 — 1440×900 | 0 |
+| Étape 3 — 1440×900 | 0 |
+| Étape 5 — 1440×900 | 0 |
+| Étape 6 — 1440×900 | 0 |
+| Étape 5 — 390×844 | 0 |
+| Étape 5 — 1024×768 | 0 |
+
+Le test échoue sur toute violation `critical` ou `serious` : c'est désormais une
+porte de qualité, pas un simple relevé. Navigation clavier vérifiée : les
+options d'accès `sr-only` restent focusables et activables à la barre d'espace,
+et le viewport 1024×768 reste sans débordement (`scrollWidth === innerWidth`).
+
+## 7. Portes de qualité
+
+| Porte | Résultat |
+|---|---|
+| Web — lint | 0 erreur (11 avertissements préexistants) |
+| Web — typecheck | 0 |
+| Web — build | 0 |
+| Web — tests unitaires | **187/187** |
+| E2E fonctionnels | **59 passés, 2 ignorés** (capture de QA visuelle, désactivée par défaut) |
+| API | inchangée ce sprint — dernier état vert : 522/522 |
+
+## 8. Registre des anomalies
+
+| Réf. | Sévérité | État |
+|---|---|---|
+| F-038 — erreur de validation `accessPolicyType` jamais affichée | P2 | ✅ fermé |
+| F-039 — « Passer cette étape » masqué sous `sm` : l'étape 4 n'a plus de sortie nommée en mobile | P3 | ouvert — arbitrage produit |
+| F-040 — sous-palette `--event-*` non déclarée dans le design system | P3 | ouvert — arbitrage design |
+
+**P0 : 0 · P1 : 0 · P2 : 0 (fermé) · P3 : 2 (ouverts, arbitrages)**
+
+Observation levée : la reprise d'un brouillon honore bien
+`creationProgress.currentStep` via `getNextStep()` (`event-creation.ts:480`).
+Le doute soulevé au Sprint 2.2 n'était pas fondé.
+
+## 9. Verdict Sprint 2.3
+
+### ✅ GEL MVP ACCORDÉ
+
+Les trois preuves qui manquaient au Sprint 2.2 existent désormais :
+
+1. L'étape 5 est **pilotée via l'interface réelle** — médias, 3 visibilités,
+   7 politiques d'accès, 5 modes d'admission, persistance et validation.
+2. Les boutons « Modifier » de l'étape 6 sont validés en E2E.
+3. La QA visuelle est produite, avec captures, rapprochements et rapport.
+
+Aucun défaut bloquant n'est ouvert. Les deux points restants (F-039, F-040)
+sont des arbitrages produit et design, documentés et sans impact fonctionnel :
+ils ne justifient pas de prolonger le sprint.
+
+Réserve à porter au backlog, sans effet sur le gel : les maquettes Stitch
+doivent être régénérées sur le périmètre réel avant de resservir de référentiel
+de recette visuelle.

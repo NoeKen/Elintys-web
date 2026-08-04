@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QA visuelle — Wizard de création d'événement</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; padding: 2rem; font: 16px/1.6 system-ui, sans-serif; }
+      h1 { font-size: 1.5rem; }
+      .avertissement { border-left: 4px solid #C99A3E; padding: 0.75rem 1rem; background: #00000008; }
+      section { margin-top: 3rem; }
+      .paire { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+      figure { margin: 0; }
+      figcaption { font-size: 0.85rem; opacity: 0.75; margin-bottom: 0.5rem; }
+      img { width: 100%; height: auto; border: 1px solid #8883; border-radius: 8px; }
+      .absente { padding: 2rem; border: 1px dashed #8886; border-radius: 8px; text-align: center; opacity: 0.7; }
+    </style>
+  </head>
+  <body>
+    <h1>QA visuelle — Wizard de création d'événement</h1>
+
+    <p class="avertissement">
+      Les maquettes Stitch décrivent un wizard à <strong>5 étapes</strong> avec sidebar de
+      tableau de bord, assistant IA, étape billetterie et palette verte. Le produit livré est
+      un wizard à <strong>6 étapes</strong> en plein écran, sur la palette V2, avec le modèle
+      Access V2. Ces rapprochements documentent donc un <em>écart de spécification</em>, pas
+      un écart d'exécution : voir <a href="../report.md">report.md</a>.
+    </p>
+
+    <section>
+      <h2>Étape 1 — Informations</h2>
+      <div class="paire">
+        <figure>
+          <figcaption>Référence Stitch — « Informations générales » (étape 1 sur 5)</figcaption>
+          <img src="../references/stitch-etape-1.png" alt="Maquette Stitch de l'étape 1" />
+        </figure>
+        <figure>
+          <figcaption>Implémentation — « L'essentiel » (étape 1 sur 6), 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape1-1538x1100.png" alt="Implémentation de l'étape 1" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Étape 2 — Date et lieu</h2>
+      <div class="paire">
+        <figure>
+          <figcaption>Référence Stitch — « Configuration » (étape 2 sur 5)</figcaption>
+          <img src="../references/stitch-etape-2.png" alt="Maquette Stitch de l'étape 2" />
+        </figure>
+        <figure>
+          <figcaption>Implémentation — « Date et lieu » (étape 2 sur 6), 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape2-1538x1100.png" alt="Implémentation de l'étape 2" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Étape 3 — Lieu</h2>
+      <div class="paire">
+        <figure>
+          <figcaption>Référence Stitch — « Sélection du lieu », avec carte et tarification</figcaption>
+          <img src="../references/stitch-etape-3.png" alt="Maquette Stitch de l'étape 3" />
+        </figure>
+        <figure>
+          <figcaption>Implémentation — branche « je choisirai plus tard », 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape3-1538x1100.png" alt="Implémentation de l'étape 3" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Étape 4 — Prestataires</h2>
+      <div class="paire">
+        <figure>
+          <figcaption>Référence Stitch — « Design » (étape 4 sur 5)</figcaption>
+          <img src="../references/stitch-etape-4.png" alt="Maquette Stitch de l'étape 4" />
+        </figure>
+        <figure>
+          <figcaption>Implémentation — « Prestataires » (étape 4 sur 6), 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape4-1538x1100.png" alt="Implémentation de l'étape 4" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Étape 5 — Identité et accès</h2>
+      <div class="paire">
+        <figure>
+          <figcaption>Référence Stitch — « Publication » (étape 5 sur 5)</figcaption>
+          <img src="../references/stitch-etape-5.png" alt="Maquette Stitch de l'étape 5" />
+        </figure>
+        <figure>
+          <figcaption>Implémentation — « Identité et accès » (étape 5 sur 6), 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape5-1538x1100.png" alt="Implémentation de l'étape 5" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Étape 6 — Récapitulatif</h2>
+      <div class="paire">
+        <div class="absente">Aucune maquette : les références s'arrêtent à l'étape 5.</div>
+        <figure>
+          <figcaption>Implémentation — « Récapitulatif » (étape 6 sur 6), 1538×1100</figcaption>
+          <img src="../implementations/wizard-etape6-1538x1100.png" alt="Implémentation de l'étape 6" />
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Mobile — 390×844</h2>
+      <p>Aucune maquette mobile n'existe pour le wizard. Captures de référence pour la recette.</p>
+      <div class="paire">
+        <figure>
+          <figcaption>Étape 1</figcaption>
+          <img src="../implementations/wizard-etape1-390x844.png" alt="Étape 1 en mobile" />
+        </figure>
+        <figure>
+          <figcaption>Étape 5</figcaption>
+          <img src="../implementations/wizard-etape5-390x844.png" alt="Étape 5 en mobile" />
+        </figure>
+        <figure>
+          <figcaption>Étape 6</figcaption>
+          <img src="../implementations/wizard-etape6-390x844.png" alt="Étape 6 en mobile" />
+        </figure>
+      </div>
+    </section>
+  </body>
+</html>
