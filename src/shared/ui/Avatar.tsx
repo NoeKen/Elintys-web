@@ -17,7 +17,7 @@ export function Avatar({ src, alt, fallback, size = "md", className }: AvatarPro
   return (
     <RadixAvatar.Root className={cn("relative flex shrink-0 overflow-hidden rounded-full", sizeMap[size], className)}>
       <RadixAvatar.Image src={src} alt={alt} className="aspect-square h-full w-full object-cover" />
-      <RadixAvatar.Fallback className="flex h-full w-full items-center justify-center bg-accent-light font-semibold text-accent">
+      <RadixAvatar.Fallback className="flex h-full w-full items-center justify-center bg-accent-light font-semibold text-teal-dark">
         {fallback.slice(0, 2).toUpperCase()}
       </RadixAvatar.Fallback>
     </RadixAvatar.Root>

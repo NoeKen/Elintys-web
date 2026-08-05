@@ -11,6 +11,15 @@ interface SelectOption {
 
 interface SelectProps {
   options: SelectOption[];
+  /**
+   * Nom accessible du champ.
+   *
+   * Obligatoire : le déclencheur Radix porte `role="combobox"`, un rôle qui
+   * **n'admet pas** le nom calculé depuis le contenu. Le texte visible (valeur
+   * ou libellé de substitution) n'est donc jamais annoncé, et le champ reste
+   * muet pour un lecteur d'écran sans nom explicite.
+   */
+  label: string;
   value?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
@@ -18,10 +27,11 @@ interface SelectProps {
   className?: string;
 }
 
-export function Select({ options, value, onValueChange, placeholder = 'Sélectionner…', disabled, className }: SelectProps) {
+export function Select({ options, label, value, onValueChange, placeholder = 'Sélectionner…', disabled, className }: SelectProps) {
   return (
     <RadixSelect.Root value={value} onValueChange={onValueChange} disabled={disabled}>
       <RadixSelect.Trigger
+        aria-label={label}
         className={cn(
           'flex w-full items-center justify-between',
           'border-b-2 border-outline-variant/30 bg-transparent py-2 text-sm text-on-surface',

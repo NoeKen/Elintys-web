@@ -123,6 +123,7 @@ export function CtaSection({ id }: { id?: string }) {
           <div className="flex flex-col gap-1.5">
             <Select
               options={ROLE_OPTIONS}
+              label="Votre rôle"
               value={role}
               onValueChange={(v) =>
                 setValue("role", v as WaitlistInput["role"], {

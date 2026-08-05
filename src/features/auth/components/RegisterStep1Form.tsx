@@ -98,7 +98,7 @@ export function RegisterStep1Form({ onSuccess, emailTakenError, initialEmail = "
 
       {/* Chip gratuit */}
       <div className="mb-4">
-        <span className="inline-flex items-center rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-accent">
+        <span className="inline-flex items-center rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-teal-dark">
           GRATUIT
         </span>
       </div>

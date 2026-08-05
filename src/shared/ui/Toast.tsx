@@ -15,7 +15,7 @@ interface ToastProps {
 }
 
 const VARIANT_STYLES: Record<NonNullable<ToastProps['variant']>, string> = {
-  success: 'border-l-4 border-l-accent bg-accent-light text-accent',
+  success: 'border-l-4 border-l-accent bg-accent-light text-teal-dark',
   error: 'border-l-4 border-l-destructive bg-destructive/5 text-destructive',
   warning: 'border-l-4 border-l-amber bg-amber/5 text-amber',
   info: 'border-l-4 border-l-primary bg-primary/5 text-primary',

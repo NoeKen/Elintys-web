@@ -110,7 +110,7 @@ export function EventCard({
         </div>
         <Link
           href={href}
-          className="flex-shrink-0 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:shadow-float"
+          className="flex-shrink-0 rounded-full bg-teal-dark px-3 py-1.5 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-primary hover:shadow-float"
           data-testid="event-card-link"
         >
           Découvrir
@@ -170,7 +170,7 @@ export function EventCard({
             <span className="text-sm font-semibold text-amber">{priceLabel}</span>
             <Link
               href={href}
-              className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-teal-dark"
+              className="rounded-full bg-teal-dark px-4 py-2 text-xs font-semibold text-white shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-primary"
               data-testid="event-card-link"
             >
               Voir l&apos;événement
@@ -245,8 +245,8 @@ export function EventCard({
           <Link
             href={href}
             className={cn(
-              'rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white',
-              'shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-teal-dark'
+              'rounded-full bg-teal-dark px-3 py-1.5 text-xs font-semibold text-white',
+              'shadow-[var(--shadow-soft-line)] transition duration-300 hover:-translate-y-0.5 hover:bg-primary'
             )}
             data-testid="event-card-link"
           >

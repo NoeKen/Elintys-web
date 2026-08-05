@@ -11,8 +11,11 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:     'bg-primary/10 text-primary',
-        accent:      'bg-accent-light text-accent',
-        teal:        'bg-accent-light text-accent',
+        // `text-accent` (#4A8E9E) sur `bg-accent-light` (#E6F5F0) plafonne à
+        // 3.3:1, sous le minimum AA de 4.5:1 pour du texte de 12 px.
+        // `teal-dark` (#2A6070) porte le rapport à 6.2:1.
+        accent:      'bg-accent-light text-teal-dark',
+        teal:        'bg-accent-light text-teal-dark',
         amber:       'bg-amber/10 text-amber',
         success:     'bg-success/10 text-success',
         error:       'bg-destructive/10 text-destructive',
