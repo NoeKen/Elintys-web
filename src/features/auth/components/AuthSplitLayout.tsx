@@ -1,7 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowLeft, BadgeCheck, CalendarDays, Sparkles, Users } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
@@ -24,15 +24,15 @@ export interface AuthSplitLayoutProps {
   children: React.ReactNode;
 }
 
-const containerVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
-};
+/**
+ * Échelonne l'entrée du panneau éditorial.
+ *
+ * L'animation est portée par CSS et non par Framer Motion : la citation est
+ * l'élément LCP des pages de connexion et d'inscription, elle ne doit pas
+ * attendre l'hydratation pour être peinte.
+ */
+const reveal = (index: number): CSSProperties =>
+  ({ "--reveal-delay": `${(index * 0.08).toFixed(2)}s`, "--reveal-duration": "0.3s", "--reveal-shift": "16px" }) as CSSProperties;
 
 const socialAvatarColors = [
   "bg-teal-pale text-teal",
@@ -87,40 +87,35 @@ export function AuthSplitLayout({
               <Sparkles size={22} aria-hidden="true" />
             </div>
 
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="space-y-6"
-            >
+            <div className="space-y-6">
               {headline && (
-                <motion.h2
-                  variants={itemVariants}
-                  className="font-serif text-[clamp(38px,4vw,58px)] leading-[1.03] text-navy-dark"
+                <h2
+                  className="reveal font-serif text-[clamp(38px,4vw,58px)] leading-[1.03] text-navy-dark"
+                  style={reveal(0)}
                 >
                   {headline}
-                </motion.h2>
+                </h2>
               )}
 
               {subheadline && (
-                <motion.p
-                  variants={itemVariants}
-                  className="max-w-md text-base leading-7 text-on-surface-variant"
+                <p
+                  className="reveal max-w-md text-base leading-7 text-on-surface-variant"
+                  style={reveal(1)}
                 >
                   {subheadline}
-                </motion.p>
+                </p>
               )}
 
               {quote && (
-                <motion.blockquote variants={itemVariants} className="border-l-4 border-accent pl-5">
+                <blockquote className="reveal border-l-4 border-accent pl-5" style={reveal(2)}>
                   <p className="font-serif text-[clamp(34px,4vw,52px)] leading-[1.06] text-navy-dark">
                     « {quote} »
                   </p>
-                </motion.blockquote>
+                </blockquote>
               )}
 
               {author && (
-                <motion.div variants={itemVariants} className="flex items-center gap-3 pt-2">
+                <div className="reveal flex items-center gap-3 pt-2" style={reveal(3)}>
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-teal-pale text-teal">
                     {author.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -137,13 +132,13 @@ export function AuthSplitLayout({
                     <p className="text-sm font-bold text-on-surface">{author.name}</p>
                     <p className="text-xs text-on-surface-variant">{author.title}</p>
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {showSocialProof && (
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-4"
+                <div
+                  className="reveal flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-4"
+                  style={reveal(4)}
                 >
                   <div className="flex items-center">
                     {socialAvatarColors.map((color, i) => (
@@ -165,10 +160,10 @@ export function AuthSplitLayout({
                   <p className="text-sm font-semibold text-on-surface-variant">
                     Plus de 200 professionnels nous font confiance
                   </p>
-                </motion.div>
+                </div>
               )}
 
-              <motion.div variants={itemVariants} className="grid gap-3 pt-2">
+              <div className="reveal grid gap-3 pt-2" style={reveal(5)}>
                 {featureItems.map((feature) => {
                   const Icon = feature.icon;
                   return (
@@ -183,8 +178,8 @@ export function AuthSplitLayout({
                     </div>
                   );
                 })}
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
             <div className="mt-8 flex items-end justify-between gap-5 border-t border-outline-variant/60 pt-5">
               <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">

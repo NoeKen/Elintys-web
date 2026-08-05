@@ -1774,3 +1774,41 @@ body::before {
     accent-color: var(--event-petrol);
   }
 }
+
+/* ==========================================================================
+   Entrée « reveal » pilotée par CSS
+   --------------------------------------------------------------------------
+   Les blocs au-dessus de la ligne de flottaison étaient animés par Framer
+   Motion depuis `opacity: 0`. Le HTML serveur les livrait donc invisibles, et
+   ils n'apparaissaient qu'une fois React hydraté : sur un mobile milieu de
+   gamme, le LCP était repoussé à ~4,5 s alors que le texte était déjà dans le
+   document depuis le premier rendu.
+
+   Cette animation produit le même effet visuel, mais démarre à la peinture,
+   sans dépendre du JavaScript.
+   ========================================================================== */
+@layer components {
+  @keyframes elintys-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(var(--reveal-shift, 12px));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .reveal {
+    animation: elintys-reveal var(--reveal-duration, 0.45s)
+      cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

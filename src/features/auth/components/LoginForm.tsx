@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { PasswordInput } from "@/shared/ui/PasswordInput";
 import { authService } from "../client/auth.service";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ROUTES } from "@/shared/constants/routes";
-import { getPostAuthPath, sanitizeRedirectPath } from "@/lib/auth/redirects";
+import { getPostAuthPath } from "@/lib/auth/redirects";
 import { cn } from "@/shared/lib/utils";
 import {
   getUserFacingError,
@@ -51,10 +51,21 @@ const fieldErrorClass = cn(
   "border-destructive placeholder:text-on-surface-variant",
 );
 
-export function LoginForm() {
+interface LoginFormProps {
+  /**
+   * Destination après connexion, déjà assainie côté serveur.
+   *
+   * Elle est reçue en prop plutôt que lue via `useSearchParams` : ce hook
+   * exclut du rendu serveur tout le sous-arbre sous sa frontière `Suspense`,
+   * ce qui livrait une carte de connexion vide et provoquait un décalage de
+   * mise en page à l'hydratation.
+   */
+  redirectTo?: string;
+}
+
+export function LoginForm({ redirectTo }: LoginFormProps = {}) {
   const { login } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [globalError, setGlobalError] = useState<UserFacingError | null>(null);
 
   const {
@@ -70,10 +81,7 @@ export function LoginForm() {
     try {
       const session = await authService.login(data);
       login(session);
-      router.push(
-        sanitizeRedirectPath(searchParams.get("redirect")) ??
-          getPostAuthPath(session.user),
-      );
+      router.push(redirectTo ?? getPostAuthPath(session.user));
     } catch (err: unknown) {
       setGlobalError(
         getUserFacingError(err, {

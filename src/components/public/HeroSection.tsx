@@ -1,6 +1,4 @@
-'use client';
-
-import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { CategoryChip } from './CategoryChip';
 import { SearchBar } from './SearchBar';
@@ -13,7 +11,15 @@ const CHIPS = [
   { label: 'Festival', slug: 'festival' },
 ];
 
-const EASE = 'easeOut' as const;
+/**
+ * Échelonne l'entrée des blocs du héros.
+ *
+ * L'animation est portée par CSS et non par Framer Motion : le titre est
+ * l'élément LCP de la page, il ne doit pas attendre l'hydratation pour être
+ * peint.
+ */
+const REVEAL = (delay: number): CSSProperties =>
+  ({ '--reveal-delay': `${delay}s`, '--reveal-duration': '0.55s', '--reveal-shift': '20px' }) as CSSProperties;
 
 interface HeroSectionProps {
   eventCount: number | null;
@@ -32,63 +38,33 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
   return (
     <section className="hero-section">
       <div className="hero-content">
-        <motion.div
-          className="hero-badge"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0 }}
-        >
+        <div className="hero-badge reveal" style={REVEAL(0)}>
           Plateforme événementielle québécoise
-        </motion.div>
+        </div>
 
-        <motion.h1
-          className="hero-title"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.10 }}
-        >
+        <h1 className="hero-title reveal" style={REVEAL(0.1)}>
           Découvrez les événements<br />qui méritent votre soirée.
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="hero-subtitle"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.18 }}
-        >
+        <p className="hero-subtitle reveal" style={REVEAL(0.18)}>
           Une sélection publique d&apos;événements, de lieux et de prestataires
           pour composer une expérience cohérente, du billet au dernier détail.
-        </motion.p>
+        </p>
 
-        <motion.div
-          className="hero-cta-row"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.24 }}
-        >
+        <div className="hero-cta-row reveal" style={REVEAL(0.24)}>
           <Link href="/evenements/recherche" className="premium-button">
             Explorer les événements
           </Link>
           <Link href="/comment-ca-marche" className="premium-button-secondary">
             Voir le fonctionnement
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.32 }}
-          className="w-full max-w-[760px]"
-        >
+        <div className="reveal w-full max-w-[760px]" style={REVEAL(0.32)}>
           <SearchBar />
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="hero-chips"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.40 }}
-        >
+        <div className="hero-chips reveal" style={REVEAL(0.4)}>
           {CHIPS.map((chip) => (
             <CategoryChip
               key={chip.slug}
@@ -96,21 +72,16 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
               href={`/evenements?category=${chip.slug}`}
             />
           ))}
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="hero-proof-row"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: EASE, delay: 0.48 }}
-        >
+        <div className="hero-proof-row reveal" style={REVEAL(0.48)}>
           {proofPoints.map((point) => (
             <div key={point.value} className="hero-proof-card">
               <strong>{point.value}</strong>
               <span>{point.label}</span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

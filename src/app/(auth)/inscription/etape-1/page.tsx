@@ -1,24 +1,18 @@
-"use client";
-
-import { Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { AuthSplitLayout } from "@/features/auth/components/AuthSplitLayout";
-import { RegisterStep1Form, type Step1Data } from "@/features/auth/components/RegisterStep1Form";
-import { saveRegistrationDraft } from "@/lib/auth/registration-draft";
+import { RegisterStep1Client } from "@/features/auth/components/RegisterStep1Client";
 
 const EMAIL_TAKEN_MESSAGE =
   "Un compte existe déjà avec cette adresse courriel. Connectez-vous ou utilisez une autre adresse.";
 
-function InscriptionEtape1Content() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const emailTakenError = searchParams.get("error") === "email-taken" ? EMAIL_TAKEN_MESSAGE : null;
-  const initialEmail = searchParams.get("email") ?? "";
+interface InscriptionEtape1PageProps {
+  searchParams: Promise<{ error?: string; email?: string }>;
+}
 
-  const handleStep1Success = (data: Step1Data) => {
-    saveRegistrationDraft(data);
-    router.push("/inscription/etape-2");
-  };
+export default async function InscriptionEtape1Page({ searchParams }: InscriptionEtape1PageProps) {
+  // Les paramètres sont lus côté serveur : le formulaire n'a plus besoin de
+  // `useSearchParams`, qui excluait la page entière du rendu serveur et
+  // repoussait son premier rendu à l'hydratation.
+  const { error, email } = await searchParams;
 
   return (
     <AuthSplitLayout
@@ -29,19 +23,10 @@ function InscriptionEtape1Content() {
       backHref="/"
       backLabel="Retour à l'accueil"
     >
-      <RegisterStep1Form
-        onSuccess={handleStep1Success}
-        emailTakenError={emailTakenError}
-        initialEmail={initialEmail}
+      <RegisterStep1Client
+        emailTakenError={error === "email-taken" ? EMAIL_TAKEN_MESSAGE : null}
+        initialEmail={email ?? ""}
       />
     </AuthSplitLayout>
-  );
-}
-
-export default function InscriptionEtape1Page() {
-  return (
-    <Suspense>
-      <InscriptionEtape1Content />
-    </Suspense>
   );
 }

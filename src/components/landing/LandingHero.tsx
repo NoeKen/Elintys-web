@@ -1,13 +1,9 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, ArrowRight, Building2, CalendarDays, Check, ScanLine, Ticket, Users } from 'lucide-react';
-import {
-  staggerContainer,
-  staggerItem,
-  chipBounce,
-  useReducedMotionVariants,
-} from '@/lib/animations';
+import { chipBounce } from '@/lib/animations';
 
 const TRUST = [
   'Accès bêta gratuit',
@@ -28,47 +24,32 @@ function AnimatedHeadline({ text }: { text: string }) {
   const words = text.split(' ');
   return (
     <h1 className="font-serif text-4xl leading-[1.06] text-navy-dark md:text-6xl lg:text-[4.5rem]">
-      <motion.span className="inline" variants={staggerContainer} initial="hidden" animate="visible">
-        {words.map((word, i) => (
-          <motion.span
-            key={`${word}-${i}`}
-            className={`inline-block ${i < words.length - 1 ? 'mr-[0.16em]' : ''}`}
-            style={{ transformOrigin: 'bottom center' }}
-            variants={{
-              hidden: { opacity: 0, y: 28, rotateX: -12 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                rotateX: 0,
-                transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.05 },
-              },
-            }}
-          >
-            {word}
-            {i < words.length - 1 ? ' ' : ''}
-          </motion.span>
-        ))}
-      </motion.span>
+      {words.map((word, i) => (
+        <span
+          key={`${word}-${i}`}
+          className={`reveal inline-block ${i < words.length - 1 ? 'mr-[0.16em]' : ''}`}
+          style={
+            {
+              '--reveal-delay': `${(0.07 + i * 0.05).toFixed(2)}s`,
+              '--reveal-duration': '0.55s',
+              '--reveal-shift': '28px',
+            } as CSSProperties
+          }
+        >
+          {word}
+          {i < words.length - 1 ? ' ' : ''}
+        </span>
+      ))}
     </h1>
   );
 }
 
 export function LandingHero() {
-  const { container, item } = useReducedMotionVariants(
-    { container: staggerContainer, item: staggerItem },
-    { container: {}, item: {} },
-  );
-
   return (
     <section className="relative flex min-h-[100svh] items-start px-6 pb-20 pt-[calc(var(--navbar-height)+80px)] lg:pt-[calc(var(--navbar-height)+104px)]">
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="visible"
-        className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_0.86fr]"
-      >
+      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_0.86fr]">
         <div className="flex flex-col items-start gap-7 text-left">
-          <motion.div variants={item}>
+          <div className="reveal" style={{ '--reveal-delay': '0s' } as CSSProperties}>
             <motion.span
               className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-white/70 px-4 py-1.5 text-xs font-bold tracking-wider text-teal-dark [box-shadow:var(--shadow-soft-line)] backdrop-blur-md"
               animate={{
@@ -78,21 +59,24 @@ export function LandingHero() {
             >
               Écosystème bêta — Montréal, Québec
             </motion.span>
-          </motion.div>
+          </div>
 
-          <motion.div variants={item} style={{ perspective: 900 }}>
+          <div style={{ perspective: 900 }}>
             <AnimatedHeadline text={HEADLINE} />
-          </motion.div>
+          </div>
 
-          <motion.p
-            variants={item}
-            className="max-w-2xl text-lg leading-relaxed text-on-surface-variant md:text-xl"
+          <p
+            className="reveal max-w-2xl text-lg leading-relaxed text-on-surface-variant md:text-xl"
+            style={{ '--reveal-delay': '0.14s' } as CSSProperties}
           >
             Elintys réunit organisateurs, prestataires et gestionnaires de lieux dans un seul
             écosystème — pour que chaque événement soit vécu pleinement, pas seulement géré.
-          </motion.p>
+          </p>
 
-          <motion.div variants={item} className="flex flex-col gap-4 sm:flex-row">
+          <div
+            className="reveal flex flex-col gap-4 sm:flex-row"
+            style={{ '--reveal-delay': '0.21s' } as CSSProperties}
+          >
             <motion.a
               href="#cta"
               className="premium-button px-8 py-4 text-base"
@@ -111,9 +95,12 @@ export function LandingHero() {
               Découvrir la plateforme
               <ArrowDown size={18} aria-hidden="true" />
             </motion.a>
-          </motion.div>
+          </div>
 
-          <motion.div variants={item} className="flex flex-wrap gap-x-6 gap-y-2">
+          <div
+            className="reveal flex flex-wrap gap-x-6 gap-y-2"
+            style={{ '--reveal-delay': '0.28s' } as CSSProperties}
+          >
             {TRUST.map((t, i) => (
               <motion.span
                 key={t}
@@ -134,12 +121,12 @@ export function LandingHero() {
                 {t}
               </motion.span>
             ))}
-          </motion.div>
+          </div>
         </div>
 
-        <motion.div
-          variants={item}
-          className="glass-card relative w-full max-w-[460px] justify-self-center overflow-hidden p-4 sm:p-5 lg:justify-self-end"
+        <div
+          className="reveal glass-card relative w-full max-w-[460px] justify-self-center overflow-hidden p-4 sm:p-5 lg:justify-self-end"
+          style={{ '--reveal-delay': '0.35s' } as CSSProperties}
         >
           <div
             aria-hidden="true"
@@ -204,8 +191,8 @@ export function LandingHero() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

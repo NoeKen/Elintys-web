@@ -1,8 +1,16 @@
-import { Suspense } from "react";
 import { AuthSplitLayout } from "@/features/auth/components/AuthSplitLayout";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import { sanitizeRedirectPath } from "@/lib/auth/redirects";
 
-export default function ConnexionPage() {
+interface ConnexionPageProps {
+  searchParams: Promise<{ redirect?: string }>;
+}
+
+export default async function ConnexionPage({ searchParams }: ConnexionPageProps) {
+  // La destination est lue et assainie côté serveur : le formulaire n'a plus
+  // besoin de `useSearchParams`, il est donc rendu dans le HTML initial.
+  const { redirect } = await searchParams;
+
   return (
     <AuthSplitLayout
       headline="L'événement parfait commence ici."
@@ -10,9 +18,7 @@ export default function ConnexionPage() {
       backHref="/"
       backLabel="Retour à l'accueil"
     >
-      <Suspense>
-        <LoginForm />
-      </Suspense>
+      <LoginForm redirectTo={sanitizeRedirectPath(redirect ?? null) ?? undefined} />
     </AuthSplitLayout>
   );
 }
