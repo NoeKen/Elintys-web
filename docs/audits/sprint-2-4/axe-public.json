@@ -1,0 +1,72 @@
+[
+  {
+    "route": "/",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/connexion",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/connexion",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/inscription",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/inscription",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/evenements",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/evenements",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/prestataires",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/prestataires",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/lieux",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/lieux",
+    "viewport": "mobile",
+    "violations": []
+  },
+  {
+    "route": "/tarification",
+    "viewport": "desktop",
+    "violations": []
+  },
+  {
+    "route": "/tarification",
+    "viewport": "mobile",
+    "violations": []
+  }
+]

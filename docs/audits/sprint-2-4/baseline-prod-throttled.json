@@ -1,0 +1,376 @@
+{
+  "base": "http://localhost:3200",
+  "runs": 3,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "throttle": true,
+  "date": "2026-08-05T01:14:47.905Z",
+  "resultats": [
+    {
+      "route": "/",
+      "statut": 200,
+      "froid": {
+        "ttfb": 18,
+        "fcp": 1416,
+        "lcp": 4352,
+        "cls": 0.0068
+      },
+      "chaud": {
+        "ttfb": 5,
+        "fcp": 1424,
+        "lcp": 4416,
+        "domContentLoaded": 917,
+        "load": 2844,
+        "requetes": 44,
+        "octetsTotal": 560832,
+        "octetsJs": 414482,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0068
+      },
+      "runs": [
+        {
+          "ttfb": 5,
+          "fcp": 1344,
+          "lcp": 4416,
+          "cls": 0.0068
+        },
+        {
+          "ttfb": 5,
+          "fcp": 1424,
+          "lcp": 4232,
+          "cls": 0.0068
+        },
+        {
+          "ttfb": 10,
+          "fcp": 1444,
+          "lcp": 4736,
+          "cls": 0.0068
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/connexion",
+      "statut": 200,
+      "froid": {
+        "ttfb": 4,
+        "fcp": 1144,
+        "lcp": 3424,
+        "cls": 0.0816
+      },
+      "chaud": {
+        "ttfb": 5,
+        "fcp": 1152,
+        "lcp": 3616,
+        "domContentLoaded": 916,
+        "load": 2522,
+        "requetes": 41,
+        "octetsTotal": 603774,
+        "octetsJs": 468272,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0816
+      },
+      "runs": [
+        {
+          "ttfb": 6,
+          "fcp": 1148,
+          "lcp": 3452,
+          "cls": 0.0816
+        },
+        {
+          "ttfb": 4,
+          "fcp": 1152,
+          "lcp": 3616,
+          "cls": 0.0816
+        },
+        {
+          "ttfb": 5,
+          "fcp": 1172,
+          "lcp": 3684,
+          "cls": 0.0816
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/inscription",
+      "statut": 200,
+      "froid": {
+        "ttfb": 168,
+        "fcp": 3788,
+        "lcp": 4012,
+        "cls": 0
+      },
+      "chaud": {
+        "ttfb": 165,
+        "fcp": 3984,
+        "lcp": 4228,
+        "domContentLoaded": 1066,
+        "load": 3044,
+        "requetes": 46,
+        "octetsTotal": 577552,
+        "octetsJs": 437396,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0
+      },
+      "runs": [
+        {
+          "ttfb": 165,
+          "fcp": 3820,
+          "lcp": 4044,
+          "cls": 0
+        },
+        {
+          "ttfb": 163,
+          "fcp": 4052,
+          "lcp": 4272,
+          "cls": 0
+        },
+        {
+          "ttfb": 167,
+          "fcp": 3984,
+          "lcp": 4228,
+          "cls": 0
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/evenements",
+      "statut": 200,
+      "froid": {
+        "ttfb": 151,
+        "fcp": 1680,
+        "lcp": 4324,
+        "cls": 0.0013
+      },
+      "chaud": {
+        "ttfb": 157,
+        "fcp": 1648,
+        "lcp": 4520,
+        "domContentLoaded": 932,
+        "load": 2755,
+        "requetes": 44,
+        "octetsTotal": 411610,
+        "octetsJs": 257971,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0013
+      },
+      "runs": [
+        {
+          "ttfb": 136,
+          "fcp": 1648,
+          "lcp": 4964,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 157,
+          "fcp": 1640,
+          "lcp": 4332,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 385,
+          "fcp": 1860,
+          "lcp": 4520,
+          "cls": 0.0013
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/prestataires",
+      "statut": 200,
+      "froid": {
+        "ttfb": 107,
+        "fcp": 1504,
+        "lcp": 1504,
+        "cls": 0.0013
+      },
+      "chaud": {
+        "ttfb": 112,
+        "fcp": 1508,
+        "lcp": 1508,
+        "domContentLoaded": 923,
+        "load": 2555,
+        "requetes": 54,
+        "octetsTotal": 494036,
+        "octetsJs": 337301,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0013
+      },
+      "runs": [
+        {
+          "ttfb": 118,
+          "fcp": 1508,
+          "lcp": 1508,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 112,
+          "fcp": 1504,
+          "lcp": 1504,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 101,
+          "fcp": 2000,
+          "lcp": 2000,
+          "cls": 0.0013
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/lieux",
+      "statut": 200,
+      "froid": {
+        "ttfb": 124,
+        "fcp": 1656,
+        "lcp": 1656,
+        "cls": 0.0013
+      },
+      "chaud": {
+        "ttfb": 178,
+        "fcp": 1456,
+        "lcp": 1456,
+        "domContentLoaded": 942,
+        "load": 2459,
+        "requetes": 56,
+        "octetsTotal": 520394,
+        "octetsJs": 363325,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0013
+      },
+      "runs": [
+        {
+          "ttfb": 180,
+          "fcp": 1476,
+          "lcp": 1476,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 118,
+          "fcp": 1396,
+          "lcp": 1396,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 178,
+          "fcp": 1456,
+          "lcp": 1456,
+          "cls": 0.0013
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    },
+    {
+      "route": "/tarification",
+      "statut": 200,
+      "froid": {
+        "ttfb": 4,
+        "fcp": 1212,
+        "lcp": 1212,
+        "cls": 0.0013
+      },
+      "chaud": {
+        "ttfb": 6,
+        "fcp": 1192,
+        "lcp": 1192,
+        "domContentLoaded": 915,
+        "load": 2381,
+        "requetes": 63,
+        "octetsTotal": 484969,
+        "octetsJs": 327484,
+        "octetsCss": 24653,
+        "octetsImages": 0,
+        "cls": 0.0013
+      },
+      "runs": [
+        {
+          "ttfb": 7,
+          "fcp": 1176,
+          "lcp": 1176,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 4,
+          "fcp": 1224,
+          "lcp": 1224,
+          "cls": 0.0013
+        },
+        {
+          "ttfb": 6,
+          "fcp": 1192,
+          "lcp": 1192,
+          "cls": 0.0013
+        }
+      ],
+      "consoleErrors": [
+        "Access to fetch at 'http://localhost:3001/api/v1/auth/refresh' from origin 'http://localhost:3200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failed": [
+        "POST http://localhost:3001/api/v1/auth/refresh net::ERR_FAILED",
+        "GET http://localhost:3200/_vercel/insights/script.js net::ERR_ABORTED"
+      ]
+    }
+  ]
+}
