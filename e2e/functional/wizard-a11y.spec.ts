@@ -39,6 +39,14 @@ test.afterAll(async () => {
  * bloquer : ils relèvent d'arbitrages de design, pas de barrières d'usage.
  */
 async function auditer(page: Page, ecran: string): Promise<void> {
+  // Le catalogue de lieux et les listes arrivent en différé : auditer avant
+  // leur stabilisation produit des verdicts non reproductibles.
+  await page.waitForLoadState('networkidle').catch(() => undefined);
+  // `AnimatePresence` garde l'étape sortante montée pendant son fondu : sans
+  // cette attente, axe mesure le contraste d'un texte transitoirement
+  // translucide et signale des violations qui n'existent pas à l'écran.
+  await page.waitForTimeout(700);
+
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -52,16 +60,21 @@ async function auditer(page: Page, ecran: string): Promise<void> {
     })),
   });
 
-  const bloquantes = violations.filter(
-    (violation) => violation.impact === 'critical' || violation.impact === 'serious',
-  );
-  expect(
-    bloquantes.map((violation) => `${violation.id} (${violation.nodes.length} nœuds)`),
-    `${ecran} : violations critiques ou sérieuses`,
-  ).toEqual([]);
+  const bloquantes = violations
+    .filter((violation) => violation.impact === 'critical' || violation.impact === 'serious')
+    .flatMap((violation) =>
+      violation.nodes.map(
+        (noeud) =>
+          `${violation.id} ${noeud.target.join(' ')} — ${noeud.failureSummary?.replace(/\s+/g, ' ').slice(0, 180)}`,
+      ),
+    );
+  expect(bloquantes, `${ecran} : violations critiques ou sérieuses`).toEqual([]);
 }
 
 test.describe('Wizard — accessibilité', () => {
+  // Les transitions d'étape se superposent : l'audit vise l'état stabilisé.
+  test.use({ reducedMotion: 'reduce' });
+
   test('devrait rester conforme WCAG 2.1 AA sur les six étapes', async ({ page }) => {
     test.setTimeout(180_000);
     await page.setViewportSize({ width: 1440, height: 900 });

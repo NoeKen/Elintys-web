@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     "node_modules/**",
     ".next/**",
+    // Build de production isolé pour les mesures de performance.
+    ".next-perf/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
