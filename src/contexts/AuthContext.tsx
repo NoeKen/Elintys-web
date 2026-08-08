@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { AuthSession, User } from "@/shared/types";
@@ -24,18 +25,22 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const loggedInManuallyRef = useRef(false);
 
   useEffect(() => {
     authService
       .refreshSession()
-      .then((restoredSession) => setSession(restoredSession))
+      .then((restoredSession) => {
+        if (!loggedInManuallyRef.current) setSession(restoredSession);
+      })
       .catch(() => {
-        setSession(null);
+        if (!loggedInManuallyRef.current) setSession(null);
       })
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback((newSession: AuthSession) => {
+    loggedInManuallyRef.current = true;
     setSession(newSession);
   }, []);
 
