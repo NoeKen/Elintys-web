@@ -73,7 +73,9 @@ async function auditer(page: Page, ecran: string): Promise<void> {
 
 test.describe('Wizard — accessibilité', () => {
   // Les transitions d'étape se superposent : l'audit vise l'état stabilisé.
-  test.use({ reducedMotion: 'reduce' });
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+  });
 
   test('devrait rester conforme WCAG 2.1 AA sur les six étapes', async ({ page }) => {
     test.setTimeout(180_000);

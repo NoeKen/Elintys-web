@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeEventPublishReadiness } from "./events.service";
+import { normalizeEventPublishReadiness, normalizeOrganizerEventsPage } from "./events.service";
 
 describe("normalizeEventPublishReadiness", () => {
   it("conserve le contrat courant du backend", () => {
@@ -40,5 +40,24 @@ describe("normalizeEventPublishReadiness", () => {
         errors: [null, {}, { field: "title" }, ""],
       }),
     ).toEqual({ publishable: false, errors: [], warnings: [] });
+  });
+});
+
+describe('normalizeOrganizerEventsPage', () => {
+  it('normalise la pagination brute de l’API Nest', () => {
+    expect(normalizeOrganizerEventsPage({ data: [], total: 25, page: 2, limit: 12 })).toEqual({
+      data: [],
+      total: 25,
+      page: 2,
+      limit: 12,
+      meta: { total: 25, page: 2, perPage: 12, lastPage: 3 },
+    });
+  });
+
+  it('reste compatible avec l’ancien wrapper meta', () => {
+    expect(normalizeOrganizerEventsPage({
+      data: [],
+      meta: { total: 3, page: 1, perPage: 20, lastPage: 1 },
+    })).toMatchObject({ total: 3, page: 1, limit: 20 });
   });
 });

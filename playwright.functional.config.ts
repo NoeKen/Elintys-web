@@ -14,7 +14,9 @@ function loadEnvFile(file: string): void {
     if (!match) continue;
     const [, key, rawValue] = match;
     if (process.env[key] !== undefined) continue;
-    process.env[key] = rawValue.trim().replace(/^["']|["']$/g, '');
+    const value = rawValue.trim().replace(/^["']|["']$/g, '');
+    if (!value) continue;
+    process.env[key] = value;
   }
 }
 
@@ -58,7 +60,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'npm --prefix ../Elintys-api run start:dev',
+      command: 'npm run start:dev',
+      cwd: '../Elintys-api',
       url: 'http://localhost:3001/api/v1/health',
       reuseExistingServer: true,
       timeout: 180_000,
