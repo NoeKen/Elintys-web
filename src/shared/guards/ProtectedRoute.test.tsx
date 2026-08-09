@@ -23,6 +23,7 @@ describe('ProtectedRoute', () => {
     replace.mockReset();
     authState.isAuthenticated = false;
     authState.isLoading = true;
+    window.history.replaceState({}, "", "/tableau-de-bord?vue=liste");
   });
 
   it('attend la validation de session sans afficher le contenu protégé', () => {
@@ -46,7 +47,11 @@ describe('ProtectedRoute', () => {
       </ProtectedRoute>,
     );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/connexion'));
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(
+        '/connexion?redirect=%2Ftableau-de-bord%3Fvue%3Dliste',
+      ),
+    );
     expect(screen.queryByText('Contenu privé')).not.toBeInTheDocument();
   });
 

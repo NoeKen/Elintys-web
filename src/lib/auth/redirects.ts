@@ -34,3 +34,9 @@ export function sanitizeRedirectPath(value: string | null): string | null {
     return null;
   }
 }
+
+export function getLoginPath(returnPath: string): string {
+  const safePath = sanitizeRedirectPath(returnPath) ?? "/tableau-de-bord";
+  const params = new URLSearchParams({ redirect: safePath });
+  return `/connexion?${params.toString()}`;
+}

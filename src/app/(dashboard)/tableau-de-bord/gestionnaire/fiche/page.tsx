@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
-import { useAuthToken } from "@/server/auth/use-auth-token";
+import { useAuthToken } from "@/shared/hooks/useAuthToken";
 import { venueProfileService } from "@/features/venues/services/venue-profile.service";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";

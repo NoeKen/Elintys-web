@@ -55,24 +55,6 @@ export default defineConfig({
           functions: 100,
           lines: 100,
         },
-        "src/server/auth/guards.ts": {
-          statements: 100,
-          branches: 100,
-          functions: 100,
-          lines: 100,
-        },
-        "src/server/auth/session.ts": {
-          statements: 100,
-          branches: 100,
-          functions: 100,
-          lines: 100,
-        },
-        "src/server/auth/cookies.ts": {
-          statements: 100,
-          branches: 100,
-          functions: 100,
-          lines: 100,
-        },
         "src/features/auth/schemas/index.ts": {
           statements: 100,
           branches: 100,

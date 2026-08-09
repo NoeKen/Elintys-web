@@ -81,7 +81,7 @@ export function LoginForm({ redirectTo }: LoginFormProps = {}) {
     try {
       const session = await authService.login(data);
       login(session);
-      router.push(redirectTo ?? getPostAuthPath(session.user));
+      router.replace(redirectTo ?? getPostAuthPath(session.user));
     } catch (err: unknown) {
       setGlobalError(
         getUserFacingError(err, {

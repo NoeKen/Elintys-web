@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { guestsService } from "../services/guests.service";
-import { useAuthToken } from "@/server/auth/use-auth-token";
+import { useAuthToken } from "@/shared/hooks/useAuthToken";
 
 export function useGuests(eventId: string, page = 1) {
   const token = useAuthToken();

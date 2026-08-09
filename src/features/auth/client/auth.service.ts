@@ -120,7 +120,6 @@ export const authService = {
 
   async refreshSession(): Promise<AuthSession | null> {
     try {
-      await api.post("/auth/refresh");
       const response = await api.get<ApiUser>("/auth/me");
       return buildSession(response.data);
     } catch {

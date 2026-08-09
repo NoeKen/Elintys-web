@@ -10,7 +10,7 @@ import {
   guestsService,
   type Guest,
 } from "@/features/guests/services/guests.service";
-import { useAuthToken } from "@/server/auth/use-auth-token";
+import { useAuthToken } from "@/shared/hooks/useAuthToken";
 import { cn } from "@/shared/lib/utils";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";

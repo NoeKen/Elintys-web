@@ -8,7 +8,13 @@ test.describe('Authentification', () => {
     const page = await context.newPage();
 
     for (const route of ['/tableau-de-bord', '/organisateur', '/parametres']) {
-      await page.goto(route);
+      const initialResponse = await page.goto(route, { waitUntil: 'domcontentloaded' });
+      expect(initialResponse, `${route} doit être rendu par Next.js avant la garde cliente`).not.toBeNull();
+      expect(initialResponse?.status(), `${route} ne doit pas être redirigé par un proxy Next.js`).toBe(200);
+      expect(
+        new URL(initialResponse?.url() ?? page.url()).pathname,
+        `${route} doit être la réponse de navigation initiale`,
+      ).toBe(route);
       await expect(page, `${route} doit renvoyer vers la connexion`).toHaveURL(/\/connexion/);
       expect(page.url(), 'le chemin de retour doit être conservé').toContain('redirect=');
     }

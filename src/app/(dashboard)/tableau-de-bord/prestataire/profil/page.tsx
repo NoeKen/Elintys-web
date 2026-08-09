@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuthToken } from "@/server/auth/use-auth-token";
+import { useAuthToken } from "@/shared/hooks/useAuthToken";
 import { vendorProfileService } from "@/features/vendors/services/vendor-profile.service";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";

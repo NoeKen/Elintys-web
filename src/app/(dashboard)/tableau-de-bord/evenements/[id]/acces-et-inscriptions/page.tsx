@@ -9,7 +9,7 @@ import { organizerCopy, organizerEventCopy as copy } from '@/features/events/i18
 import { getUserFacingError } from '@/shared/lib/user-facing-error';
 import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
 import { guestsService } from '@/features/guests/services/guests.service';
-import { useAuthToken } from '@/server/auth/use-auth-token';
+import { useAuthToken } from '@/shared/hooks/useAuthToken';
 
 export default function EventAccessManagementPage() {
   const { id } = useParams<{ id: string }>();

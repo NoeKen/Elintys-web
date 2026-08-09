@@ -3,12 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "./LoginForm";
 
-const pushMock = vi.fn();
+const replaceMock = vi.fn();
 const loginMock = vi.fn();
 const authServiceLoginMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock }),
+  useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -86,7 +86,42 @@ describe("LoginForm", () => {
     await submit();
 
     await waitFor(() => expect(loginMock).toHaveBeenCalledWith(session));
-    expect(pushMock).toHaveBeenCalledWith("/tableau-de-bord");
+    expect(replaceMock).toHaveBeenCalledWith("/tableau-de-bord");
+  });
+
+  it("remplace la page de connexion par la destination de retour", async () => {
+    const session = {
+      user: {
+        id: "u1",
+        email: "user@example.com",
+        firstName: "Jane",
+        lastName: "Doe",
+        roles: ["organisateur"],
+        subscriptions: [],
+        referralBalance: 0,
+        createdAt: "",
+        updatedAt: "",
+        isEmailVerified: true,
+        onboardingCompleted: true,
+        onboardingByRole: {},
+        onboardingData: {},
+      },
+    };
+    authServiceLoginMock.mockResolvedValue(session);
+
+    const user = userEvent.setup({ delay: null });
+    render(<LoginForm redirectTo="/tableau-de-bord/evenements" />);
+    await user.type(
+      screen.getByPlaceholderText("nom@exemple.com"),
+      "user@example.com",
+    );
+    await user.type(screen.getByPlaceholderText("••••••••"), "password123");
+    await user.click(screen.getByRole("button", { name: /se connecter/i }));
+
+    await waitFor(() => expect(loginMock).toHaveBeenCalledWith(session));
+    expect(replaceMock).toHaveBeenCalledWith(
+      "/tableau-de-bord/evenements",
+    );
   });
 
   it("affiche un message d'erreur spécifique pour des identifiants invalides", async () => {
@@ -98,7 +133,7 @@ describe("LoginForm", () => {
     expect(
       await screen.findByText("Adresse courriel ou mot de passe incorrect."),
     ).toBeInTheDocument();
-    expect(pushMock).not.toHaveBeenCalled();
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 
   it("affiche un message d'erreur générique pour une erreur inconnue", async () => {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { useAuthToken } from '@/server/auth/use-auth-token';
+import { useAuthToken } from '@/shared/hooks/useAuthToken';
 import {
   favoritesAuthService,
   type Favorite,

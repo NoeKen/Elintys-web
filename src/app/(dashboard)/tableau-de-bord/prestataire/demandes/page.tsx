@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthToken } from "@/server/auth/use-auth-token";
+import { useAuthToken } from "@/shared/hooks/useAuthToken";
 import {
   vendorProfileService,
   type VendorRequest,

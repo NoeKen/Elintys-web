@@ -17,8 +17,16 @@ Domaines apparentés attendus :
 | Production | `https://app.elintys.com` | `https://api.elintys.com/api/v1` |
 
 Le frontend appelle directement l'API : aucun proxy/BFF n'est introduit. Le
-backend doit limiter CORS à l'origine frontend exacte et configurer ses cookies
-HTTP-only avec le domaine approprié à l'environnement.
+backend limite CORS à l'origine frontend exacte et conserve ses cookies
+HTTP-only en mode host-only sur son propre domaine.
+
+L'API est l'unique frontière de confiance pour la session et l'autorisation.
+Ses cookies restent host-only sur le domaine API; Next.js ne tente donc jamais
+de les lire dans un `proxy.ts`, un middleware ou un Server Component. Les zones
+privées utilisent une garde de navigation cliente qui restaure la session via
+`GET /auth/me`, tandis que chaque endpoint métier demeure protégé côté NestJS.
+Cette séparation évite de partager les cookies entre sous-domaines sans ajouter
+de BFF.
 
 Un build Preview ou Production échoue volontairement si la variable n'est pas
 définie. Cette règle évite qu'un déploiement distant appelle silencieusement

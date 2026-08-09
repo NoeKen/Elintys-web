@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/shared/lib/utils';
-import { useAuthToken } from '@/server/auth/use-auth-token';
+import { useAuthToken } from '@/shared/hooks/useAuthToken';
 import {
   notificationsService,
   type AppNotification,

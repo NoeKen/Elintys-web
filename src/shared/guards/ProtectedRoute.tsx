@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { ROUTES } from "@/shared/constants/routes";
+import { getLoginPath } from "@/lib/auth/redirects";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -11,7 +11,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace(ROUTES.AUTH.LOGIN);
+      const returnPath = `${window.location.pathname}${window.location.search}`;
+      router.replace(getLoginPath(returnPath));
     }
   }, [isAuthenticated, isLoading, router]);
 

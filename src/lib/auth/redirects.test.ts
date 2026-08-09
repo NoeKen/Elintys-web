@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { User } from "@/shared/types";
-import { getFirstOnboardingPath, getPostAuthPath, sanitizeRedirectPath } from "./redirects";
+import {
+  getFirstOnboardingPath,
+  getLoginPath,
+  getPostAuthPath,
+  sanitizeRedirectPath,
+} from "./redirects";
 
 function buildUser(overrides: Partial<User> = {}): User {
   return {
@@ -94,5 +99,19 @@ describe("sanitizeRedirectPath", () => {
 
   it("retourne null si le décodage URI échoue", () => {
     expect(sanitizeRedirectPath("/%")).toBeNull();
+  });
+});
+
+describe("getLoginPath", () => {
+  it("conserve le chemin interne et ses paramètres", () => {
+    expect(getLoginPath("/tableau-de-bord/evenements?vue=liste")).toBe(
+      "/connexion?redirect=%2Ftableau-de-bord%2Fevenements%3Fvue%3Dliste",
+    );
+  });
+
+  it("remplace une destination externe par le tableau de bord", () => {
+    expect(getLoginPath("//evil.example")).toBe(
+      "/connexion?redirect=%2Ftableau-de-bord",
+    );
   });
 });
