@@ -113,11 +113,11 @@ Web :
 - `7d5a70c` — `feat(web): implement organizer dashboard`;
 - `dabc7a7` — `feat(web): complete event library views`;
 - `d044362` — `test(web): cover dashboard and event library flows`;
-- commit documentation/QA : ce rapport et les artefacts associés.
+- `631a941` — `docs(web): add sprint 3 wave 1 QA report`.
 
 ## 19. Push
 
-Les commits fonctionnels API et Web ont été poussés sur `dev` uniquement, sans force push. Le commit documentation est poussé dans la même branche après génération du présent rapport. Les contrôles finaux exigent `HEAD == origin/dev` et un working tree propre.
+Tous les commits API et Web ont été poussés sur `dev` uniquement, sans force push. Vérification après push : API `HEAD == origin/dev == ccee085`, Web `HEAD == origin/dev == 631a941`, arbres propres. Aucun workflow GitHub Actions n’est présent dans ces dépôts et `gh run list --branch dev` retourne une liste vide; les gates locales exhaustives constituent donc le contrôle disponible pour cette vague, sans empiéter sur F-047.
 
 ## 20. Risques
 
