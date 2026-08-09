@@ -1,5 +1,4 @@
 import api from "@/shared/lib/api";
-import type { PaginatedResponse } from "@/shared/types";
 import type { Event, CreateEventInput, UpdateEventInput, EventAccessRequest, EventAccessRequestStatus } from "../types";
 
 export interface EventPublishReadinessError {
@@ -11,6 +10,86 @@ export interface EventPublishReadiness {
   publishable: boolean;
   errors: EventPublishReadinessError[];
   warnings: string[];
+}
+
+export type OrganizerEventView = 'all' | 'draft' | 'ready' | 'published' | 'completed' | 'archived';
+export type OrganizerEventSort = 'updated_desc' | 'date_asc' | 'title_asc';
+export type OrganizerEventProgress = 'incomplete' | 'complete';
+export type OrganizerEventDate = 'upcoming' | 'past' | 'undated';
+export type OrganizerActionCode =
+  | 'REVIEW_ACCESS_REQUESTS'
+  | 'COMPLETE_INFORMATION'
+  | 'COMPLETE_SCHEDULE'
+  | 'ADD_VENUE'
+  | 'ADD_COVER'
+  | 'CONFIGURE_ACCESS'
+  | 'CONFIGURE_TICKETS'
+  | 'CONTINUE_CREATION'
+  | 'PUBLISH_EVENT';
+
+export interface OrganizerEvent extends Event {
+  readiness: EventPublishReadiness;
+  pendingAccessRequests: number;
+}
+
+export interface OrganizerEventsQuery {
+  page?: number;
+  limit?: number;
+  view?: OrganizerEventView;
+  status?: string;
+  search?: string;
+  eventType?: string;
+  discoverability?: string;
+  accessPolicy?: string;
+  progress?: OrganizerEventProgress;
+  date?: OrganizerEventDate;
+  sort?: OrganizerEventSort;
+}
+
+export interface OrganizerEventsPage {
+  data: OrganizerEvent[];
+  total: number;
+  page: number;
+  limit: number;
+  meta: { total: number; page: number; perPage: number; lastPage: number };
+}
+
+export interface OrganizerDashboardAction {
+  code: OrganizerActionCode;
+  priority: 'high' | 'medium' | 'low';
+  event: OrganizerEvent;
+  progress: number;
+  requestCount?: number;
+}
+
+export interface OrganizerDashboardSummary {
+  metrics: {
+    totalEvents: number;
+    activeEvents: number;
+    upcomingEvents: number;
+    draftEvents: number;
+    pendingActions: number;
+  };
+  actions: OrganizerDashboardAction[];
+  upcoming: OrganizerEvent[];
+  activityAvailable: false;
+}
+
+interface OrganizerEventsPayload {
+  data?: OrganizerEvent[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  meta?: { total?: number; page?: number; perPage?: number; lastPage?: number };
+}
+
+export function normalizeOrganizerEventsPage(payload: OrganizerEventsPayload): OrganizerEventsPage {
+  const data = Array.isArray(payload.data) ? payload.data : [];
+  const total = payload.total ?? payload.meta?.total ?? data.length;
+  const page = payload.page ?? payload.meta?.page ?? 1;
+  const limit = payload.limit ?? payload.meta?.perPage ?? Math.max(data.length, 1);
+  const lastPage = payload.meta?.lastPage ?? Math.max(1, Math.ceil(total / limit));
+  return { data, total, page, limit, meta: { total, page, perPage: limit, lastPage } };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -60,9 +139,9 @@ export function normalizeEventPublishReadiness(payload: unknown): EventPublishRe
 }
 
 export const eventsService = {
-  async list(page = 1, perPage = 20): Promise<PaginatedResponse<Event>> {
-    const res = await api.get<PaginatedResponse<Event>>("/events", { params: { page, perPage } });
-    return res.data;
+  async list(page = 1, perPage = 20): Promise<{ data: Event[]; meta: { total: number; page: number; perPage: number; lastPage: number } }> {
+    const res = await api.get<OrganizerEventsPayload>("/events", { params: { page, limit: perPage } });
+    return normalizeOrganizerEventsPage(res.data);
   },
 
   async get(id: string): Promise<Event> {
@@ -89,8 +168,13 @@ export const eventsService = {
     return res.data;
   },
 
-  async getMyEvents(params?: { page?: number; limit?: number; status?: string }): Promise<PaginatedResponse<Event>> {
-    const res = await api.get<PaginatedResponse<Event>>('/events/my', { params });
+  async getMyEvents(params?: OrganizerEventsQuery): Promise<OrganizerEventsPage> {
+    const res = await api.get<OrganizerEventsPayload>('/events/my', { params });
+    return normalizeOrganizerEventsPage(res.data);
+  },
+
+  async getOrganizerSummary(): Promise<OrganizerDashboardSummary> {
+    const res = await api.get<OrganizerDashboardSummary>('/events/my/summary');
     return res.data;
   },
 
@@ -111,6 +195,16 @@ export const eventsService = {
 
   async publish(id: string): Promise<Event> {
     const res = await api.patch<Event>(`/events/${id}/publish`, {});
+    return res.data;
+  },
+
+  async archive(id: string): Promise<Event> {
+    const res = await api.patch<Event>(`/events/${id}/archive`, {});
+    return res.data;
+  },
+
+  async restore(id: string): Promise<Event> {
+    const res = await api.patch<Event>(`/events/${id}/restore`, {});
     return res.data;
   },
 };

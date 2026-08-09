@@ -101,6 +101,7 @@ export interface Event {
   shortDescription?: string;
   description?: string;
   status: EventStatus;
+  archivedAt?: string | null;
   startDate?: string;
   endDate?: string;
   location?: EventLocation;
