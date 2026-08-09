@@ -46,3 +46,6 @@ yarn-error.log*
 next-env.d.ts
 .claude/settings.local.json
 .e2e/
+
+# Generated code-graph reports (local audit artefacts)
+/graphify-out/
