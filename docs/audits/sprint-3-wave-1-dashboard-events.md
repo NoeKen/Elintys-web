@@ -113,11 +113,12 @@ Web :
 - `7d5a70c` — `feat(web): implement organizer dashboard`;
 - `dabc7a7` — `feat(web): complete event library views`;
 - `d044362` — `test(web): cover dashboard and event library flows`;
-- `631a941` — `docs(web): add sprint 3 wave 1 QA report`.
+- `631a941` — `docs(web): add sprint 3 wave 1 QA report`;
+- `46335c3` — `docs(web): record final dev verification`.
 
 ## 19. Push
 
-Tous les commits API et Web ont été poussés sur `dev` uniquement, sans force push. Vérification après push : API `HEAD == origin/dev == ccee085`, Web `HEAD == origin/dev == 631a941`, arbres propres. Aucun workflow GitHub Actions n’est présent dans ces dépôts et `gh run list --branch dev` retourne une liste vide; les gates locales exhaustives constituent donc le contrôle disponible pour cette vague, sans empiéter sur F-047.
+Tous les commits API et Web ont été poussés sur `dev` uniquement, sans force push. Vérification après push : API `HEAD == origin/dev == ccee085`; Web `HEAD == origin/dev` sur le commit contenant la version finale de ce rapport; les deux arbres sont propres. Aucun workflow GitHub Actions n’est présent dans ces dépôts et `gh run list --branch dev` retourne une liste vide; les gates locales exhaustives constituent donc le contrôle disponible pour cette vague, sans empiéter sur F-047.
 
 ## 20. Risques
 
