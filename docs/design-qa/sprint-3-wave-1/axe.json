@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-08-09T16:39:10.371Z",
+  "surfaces": [
+    {
+      "surface": "dashboard-desktop",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "dashboard-mobile",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "events-grid-desktop",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "events-grid-mobile",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "events-list-desktop",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "events-list-mobile",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "empty",
+      "viewport": "1280x720",
+      "violations": []
+    },
+    {
+      "surface": "error",
+      "viewport": "1280x720",
+      "violations": []
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "base": "http://localhost:3200",
+  "runs": 3,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "throttle": false,
+  "routes": [
+    "/tableau-de-bord",
+    "/tableau-de-bord/evenements"
+  ],
+  "authenticated": true,
+  "date": "2026-08-09T16:26:19.562Z",
+  "resultats": [
+    {
+      "route": "/tableau-de-bord",
+      "statut": 200,
+      "froid": {
+        "ttfb": 19,
+        "fcp": 1560,
+        "lcp": 1876,
+        "cls": 0.0564
+      },
+      "chaud": {
+        "ttfb": 8,
+        "fcp": 1484,
+        "lcp": 1792,
+        "domContentLoaded": 52,
+        "load": 133,
+        "requetes": 88,
+        "octetsTotal": 660160,
+        "octetsJs": 499346,
+        "octetsCss": 25010,
+        "octetsImages": 0,
+        "apiRequests": 4,
+        "apiDuplicateRequests": 0,
+        "apiPayloadBytes": 4563,
+        "cls": 0.0545
+      },
+      "runs": [
+        {
+          "ttfb": 6,
+          "fcp": 1484,
+          "lcp": 1792,
+          "cls": 0.0545
+        },
+        {
+          "ttfb": 8,
+          "fcp": 1484,
+          "lcp": 1768,
+          "cls": 0.0545
+        },
+        {
+          "ttfb": 8,
+          "fcp": 1496,
+          "lcp": 1792,
+          "cls": 0.0547
+        }
+      ],
+      "consoleErrors": [],
+      "failed": []
+    },
+    {
+      "route": "/tableau-de-bord/evenements",
+      "statut": 200,
+      "froid": {
+        "ttfb": 6,
+        "fcp": 1640,
+        "lcp": 1640,
+        "cls": 0.0544
+      },
+      "chaud": {
+        "ttfb": 6,
+        "fcp": 1576,
+        "lcp": 1576,
+        "domContentLoaded": 40,
+        "load": 133,
+        "requetes": 90,
+        "octetsTotal": 661975,
+        "octetsJs": 499346,
+        "octetsCss": 25010,
+        "octetsImages": 0,
+        "apiRequests": 4,
+        "apiDuplicateRequests": 0,
+        "apiPayloadBytes": 11398,
+        "cls": 0.0579
+      },
+      "runs": [
+        {
+          "ttfb": 7,
+          "fcp": 1564,
+          "lcp": 1564,
+          "cls": 0.0579
+        },
+        {
+          "ttfb": 6,
+          "fcp": 1576,
+          "lcp": 1576,
+          "cls": 0.0582
+        },
+        {
+          "ttfb": 5,
+          "fcp": 1620,
+          "lcp": 1620,
+          "cls": 0.057
+        }
+      ],
+      "consoleErrors": [],
+      "failed": []
+    }
+  ]
+}

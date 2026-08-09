@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import { chromium } from '@playwright/test';
 
-const ROUTES = [
+const DEFAULT_ROUTES = [
   '/',
   '/connexion',
   '/inscription',
@@ -33,6 +33,11 @@ function arg(name, fallback) {
 const BASE = arg('base', 'http://localhost:3200');
 const RUNS = Number(arg('runs', '3'));
 const OUT = arg('out', null);
+const STORAGE_STATE = arg('storage-state', null);
+const ROUTES = arg('routes', DEFAULT_ROUTES.join(','))
+  .split(',')
+  .map((route) => route.trim())
+  .filter(Boolean);
 const THROTTLE = process.argv.includes('--throttle');
 const VIEWPORT = arg('viewport', 'desktop') === 'mobile'
   ? { width: 390, height: 844 }
@@ -53,6 +58,11 @@ const RESEAU_4G_LENT = {
 /** Collecte les métriques d'un chargement complet. */
 async function measure(context, url) {
   const page = await context.newPage();
+  await page.route('**/_vercel/insights/script.js', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: '',
+  }));
   if (THROTTLE) {
     const session = await context.newCDPSession(page);
     await session.send('Network.enable');
@@ -61,6 +71,8 @@ async function measure(context, url) {
   }
   const consoleErrors = [];
   const failed = [];
+  const apiRequests = [];
+  const apiResponsePromises = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
   });
@@ -69,6 +81,17 @@ async function measure(context, url) {
     // `ERR_ABORTED` sur les préchargements RSC est un comportement normal de Next.
     if (request.url().includes('_rsc=') && text === 'net::ERR_ABORTED') return;
     failed.push(`${request.method()} ${request.url()} ${text}`);
+  });
+  page.on('request', (request) => {
+    if (request.url().includes('/api/v1/')) apiRequests.push(`${request.method()} ${request.url()}`);
+  });
+  page.on('response', (response) => {
+    if (!response.url().includes('/api/v1/')) return;
+    apiResponsePromises.push((async () => {
+      const contentLength = Number(response.headers()['content-length'] ?? 0);
+      if (contentLength > 0) return contentLength;
+      return (await response.body().catch(() => Buffer.alloc(0))).length;
+    })());
   });
 
   // Les observateurs doivent exister avant la navigation pour capter le LCP.
@@ -87,6 +110,7 @@ async function measure(context, url) {
   const response = await page.goto(url, { waitUntil: 'load', timeout: 60_000 });
   // Laisse le LCP se stabiliser après le chargement des polices et images.
   await page.waitForTimeout(2500);
+  const apiPayloadBytes = (await Promise.all(apiResponsePromises)).reduce((total, bytes) => total + bytes, 0);
 
   const metrics = await page.evaluate(() => {
     const nav = performance.getEntriesByType('navigation')[0];
@@ -110,7 +134,15 @@ async function measure(context, url) {
   });
 
   await page.close();
-  return { statut: response?.status() ?? 0, ...metrics, consoleErrors, failed };
+  return {
+    statut: response?.status() ?? 0,
+    ...metrics,
+    apiRequests: apiRequests.length,
+    apiDuplicateRequests: apiRequests.length - new Set(apiRequests).size,
+    apiPayloadBytes,
+    consoleErrors,
+    failed,
+  };
 }
 
 const mediane = (valeurs) => {
@@ -126,7 +158,8 @@ for (const route of ROUTES) {
   const url = `${BASE}${route}`;
 
   // Run à froid : contexte neuf, aucun cache navigateur, route jamais servie.
-  const contexteFroid = await navigateur.newContext({ viewport: VIEWPORT });
+  const contextOptions = { viewport: VIEWPORT, ...(STORAGE_STATE ? { storageState: STORAGE_STATE } : {}) };
+  const contexteFroid = await navigateur.newContext(contextOptions);
   const froid = await measure(contexteFroid, url);
   await contexteFroid.close();
 
@@ -134,13 +167,13 @@ for (const route of ROUTES) {
   // mais serveur déjà sollicité sur cette route.
   const chauds = [];
   for (let index = 0; index < RUNS; index += 1) {
-    const contexte = await navigateur.newContext({ viewport: VIEWPORT });
+    const contexte = await navigateur.newContext(contextOptions);
     chauds.push(await measure(contexte, url));
     await contexte.close();
   }
 
   const agrege = {};
-  for (const cle of ['ttfb', 'fcp', 'lcp', 'domContentLoaded', 'load', 'requetes', 'octetsTotal', 'octetsJs', 'octetsCss', 'octetsImages']) {
+  for (const cle of ['ttfb', 'fcp', 'lcp', 'domContentLoaded', 'load', 'requetes', 'octetsTotal', 'octetsJs', 'octetsCss', 'octetsImages', 'apiRequests', 'apiDuplicateRequests', 'apiPayloadBytes']) {
     agrege[cle] = mediane(chauds.map((run) => run[cle]));
   }
   agrege.cls = Number(mediane(chauds.map((run) => run.cls * 10_000)) / 10_000);
@@ -155,17 +188,18 @@ for (const route of ROUTES) {
     failed: [...new Set(chauds.flatMap((run) => run.failed))],
   });
 
-  const { ttfb, fcp, lcp, cls, octetsJs, requetes } = agrege;
+  const { ttfb, fcp, lcp, cls, octetsJs, requetes, apiRequests: apiCount, apiDuplicateRequests, apiPayloadBytes } = agrege;
   console.log(
     `${route.padEnd(16)} froid LCP ${String(froid.lcp).padStart(5)} ms | ` +
       `chaud TTFB ${String(ttfb).padStart(4)} FCP ${String(fcp).padStart(4)} ` +
-      `LCP ${String(lcp).padStart(4)} CLS ${cls} | JS ${Math.round(octetsJs / 1024)} Ko | ${requetes} req`,
+      `LCP ${String(lcp).padStart(4)} CLS ${cls} | JS ${Math.round(octetsJs / 1024)} Ko | ${requetes} req | ` +
+      `API ${apiCount} (${apiDuplicateRequests} doublon) ${Math.round(apiPayloadBytes / 1024)} Ko`,
   );
 }
 
 await navigateur.close();
 
 if (OUT) {
-  fs.writeFileSync(OUT, `${JSON.stringify({ base: BASE, runs: RUNS, viewport: VIEWPORT, throttle: THROTTLE, date: new Date().toISOString(), resultats }, null, 2)}\n`);
+  fs.writeFileSync(OUT, `${JSON.stringify({ base: BASE, runs: RUNS, viewport: VIEWPORT, throttle: THROTTLE, routes: ROUTES, authenticated: Boolean(STORAGE_STATE), date: new Date().toISOString(), resultats }, null, 2)}\n`);
   console.log(`\nRapport écrit : ${OUT}`);
 }
