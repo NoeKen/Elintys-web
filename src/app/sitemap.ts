@@ -13,9 +13,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const response = await fetch(`${API_URL}/events?limit=100`, { next: { revalidate: 3600 } });
     if (!response.ok) return staticRoutes;
-    const payload = await response.json() as { data?: Array<{ slug?: string; updatedAt?: string; discoverability?: string }> };
+    const payload = await response.json() as {
+      data?: Array<{
+        slug?: string;
+        updatedAt?: string;
+        discoverability?: string;
+        status?: string;
+        archivedAt?: string | null;
+      }>;
+    };
     const events = (payload.data ?? [])
-      .filter((event) => event.slug && event.discoverability === 'public')
+      .filter((event) =>
+        event.slug
+        && event.status === 'published'
+        && !event.archivedAt
+        && event.discoverability === 'public',
+      )
       .map((event) => ({
         url: `${SITE_URL}/evenements/${event.slug}`,
         lastModified: event.updatedAt ? new Date(event.updatedAt) : undefined,

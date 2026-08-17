@@ -152,3 +152,84 @@ export interface CreateEventInput {
 export interface UpdateEventInput extends Partial<CreateEventInput> {
   status?: EventStatus;
 }
+
+export interface PublicEventVenue {
+  _id: string;
+  name: string;
+  type: string;
+  description?: string;
+  address: {
+    street: string;
+    city: string;
+    province?: string;
+    postalCode?: string;
+  };
+  capacity: number;
+  photos: string[];
+  amenities: string[];
+  rating: number;
+  reviewCount: number;
+}
+
+export interface PublicEventProvider {
+  _id: string;
+  businessName: string;
+  category: string;
+  description?: string;
+  photos: string[];
+  serviceArea: string;
+  rating: number;
+  reviewCount: number;
+}
+
+export interface PublicEventTicketType {
+  _id: string;
+  name: string;
+  price: number;
+  isFree: boolean;
+  quantity: number;
+  sold: number;
+  description?: string;
+}
+
+export interface PublicRelatedEvent {
+  _id: string;
+  slug: string;
+  title: string;
+  shortDescription?: string;
+  eventType?: EventType;
+  coverImage?: MediaImageSource;
+  startDate: string;
+  endDate?: string;
+  location?: Pick<EventLocation, 'type' | 'name' | 'address' | 'city' | 'province' | 'postalCode'>;
+}
+
+export interface PublicEventDetail {
+  _id: string;
+  slug: string;
+  title: string;
+  shortDescription?: string;
+  description?: string;
+  eventType?: EventType;
+  coverImage?: MediaImageSource;
+  gallery: MediaImageSource[];
+  startDate: string;
+  endDate?: string;
+  timezone: string;
+  dateIsTentative: boolean;
+  location?: Pick<EventLocation, 'type' | 'name' | 'address' | 'city' | 'province' | 'postalCode'>;
+  capacity?: number;
+  discoverability: Extract<EventDiscoverability, 'public' | 'unlisted'>;
+  accessPolicy: {
+    type: EventAccessPolicyType;
+    requiresAuthentication?: boolean;
+    hasAccessCode?: boolean;
+  };
+  admissionModes: AdmissionMode[];
+  organizer?: { name: string };
+  venue?: PublicEventVenue;
+  providers: PublicEventProvider[];
+  ticketTypes: PublicEventTicketType[];
+  relatedEvents: PublicRelatedEvent[];
+  updatedAt?: string;
+}
