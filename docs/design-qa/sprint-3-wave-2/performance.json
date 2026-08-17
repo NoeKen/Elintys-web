@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-08-09T19:11:14.462Z",
+  "environment": "Next.js production build, next start on localhost:3002, Chromium 1440x900",
+  "method": "Median of 3 cold browser contexts per scenario",
+  "summary": [
+    {
+      "scenario": "sans-cover",
+      "path": "/evenements/expo-nouvelles-voix-demo",
+      "ttfbMs": 26,
+      "fcpMs": 228,
+      "lcpMs": 392,
+      "cls": 0.0013,
+      "initialJsKb": 438.4,
+      "imagesKb": 0,
+      "imageRequests": 0,
+      "browserApiRequests": 2,
+      "duplicateRequests": 0,
+      "totalTransferKb": 573.5,
+      "apiPayloadBytes": 1583,
+      "heroInInitialHtml": true
+    },
+    {
+      "scenario": "avec-cover",
+      "path": "/evenements/gala-annuel-elintys",
+      "ttfbMs": 23,
+      "fcpMs": 144,
+      "lcpMs": 384,
+      "cls": 0.0013,
+      "initialJsKb": 438.4,
+      "imagesKb": 80.9,
+      "imageRequests": 5,
+      "browserApiRequests": 2,
+      "duplicateRequests": 0,
+      "totalTransferKb": 818,
+      "apiPayloadBytes": 3996,
+      "heroInInitialHtml": true
+    },
+    {
+      "scenario": "avec-galerie",
+      "path": "/evenements/gala-annuel-elintys#galerie",
+      "ttfbMs": 22,
+      "fcpMs": 148,
+      "lcpMs": 360,
+      "cls": 0.0013,
+      "initialJsKb": 438.4,
+      "imagesKb": 80.9,
+      "imageRequests": 5,
+      "browserApiRequests": 2,
+      "duplicateRequests": 0,
+      "totalTransferKb": 820.1,
+      "apiPayloadBytes": 3996,
+      "heroInInitialHtml": true
+    }
+  ],
+  "browserApiRequests": [
+    "GET /api/v1/auth/me",
+    "POST /api/v1/auth/refresh"
+  ],
+  "notes": [
+    "The event payload is fetched on the server and is not requested again after hydration.",
+    "The two browser API calls come from the existing global authentication provider and are not duplicate event requests.",
+    "Gallery and cover assets are served through Next image optimization; no duplicate resource URL was observed."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-08-17T19:41:45Z",
+  "surfaces": [
+    {
+      "surface": "private-not-found",
+      "violations": []
+    },
+    {
+      "surface": "public-desktop",
+      "violations": []
+    },
+    {
+      "surface": "public-mobile",
+      "violations": []
+    },
+    {
+      "surface": "no-cover",
+      "violations": []
+    },
+    {
+      "surface": "access-code",
+      "violations": []
+    },
+    {
+      "surface": "email-domain",
+      "violations": []
+    },
+    {
+      "surface": "manual-approval",
+      "violations": []
+    },
+    {
+      "surface": "invitation",
+      "violations": []
+    },
+    {
+      "surface": "ticketing",
+      "violations": []
+    },
+    {
+      "surface": "gallery",
+      "violations": []
+    },
+    {
+      "surface": "error",
+      "violations": []
+    }
+  ]
+}

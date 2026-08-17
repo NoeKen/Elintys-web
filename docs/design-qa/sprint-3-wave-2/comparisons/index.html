@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elintys — Sprint 3 Vague 2 — comparaison visuelle</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, system-ui, sans-serif; background: #edf5f6; color: #102b3a; }
+      body { margin: 0; padding: 32px; }
+      h1 { margin: 0 0 8px; font: 700 clamp(28px, 4vw, 48px) Georgia, serif; }
+      p { margin: 0 0 28px; color: #526d7d; }
+      main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+      figure { margin: 0; overflow: hidden; border: 1px solid #d4e2e6; border-radius: 24px; background: white; box-shadow: 0 20px 50px rgb(16 43 58 / 10%); }
+      figcaption { padding: 16px 20px; border-bottom: 1px solid #e5edef; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+      img { display: block; width: 100%; height: auto; }
+      @media (max-width: 900px) { body { padding: 18px; } main { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <h1>Page événement publique</h1>
+    <p>Comparaison sémantique : référence Stitch à gauche, implémentation live enrichie à droite.</p>
+    <main>
+      <figure>
+        <figcaption>Référence Stitch</figcaption>
+        <img src="../references/reference-event-public-desktop.png" alt="Référence Stitch de la page événement publique" />
+      </figure>
+      <figure>
+        <figcaption>Implémentation Vague 2</figcaption>
+        <img src="../implementations/public-cover-gallery-1538x1100.png" alt="Implémentation live de la page événement publique" />
+      </figure>
+    </main>
+  </body>
+</html>
