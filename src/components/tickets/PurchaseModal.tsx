@@ -10,6 +10,7 @@ import {
   type UserFacingError,
 } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+import { Modal } from "@/shared/ui/Modal";
 
 interface TicketType {
   _id: string;
@@ -98,18 +99,13 @@ export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-navy">{ticketType.name}</h2>
-          <button
-            onClick={onClose}
-            aria-label="Fermer"
-            className="text-muted hover:text-navy text-xl leading-none"
-          >
-            ✕
-          </button>
-        </div>
+    <Modal
+      open
+      onOpenChange={(open) => !open && onClose()}
+      title={ticketType.name}
+      description={eventTitle}
+      className="max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto"
+    >
         <p className="text-sm text-muted mb-4">{eventTitle}</p>
 
         {/* Quantity selector */}
@@ -121,7 +117,7 @@ export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: 
             <button
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               aria-label="Réduire la quantité"
-              className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-surface text-navy"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-navy hover:bg-surface"
             >
               −
             </button>
@@ -131,7 +127,7 @@ export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: 
             <button
               onClick={() => setQuantity((q) => Math.min(available, q + 1))}
               aria-label="Augmenter la quantité"
-              className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-surface text-navy"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-navy hover:bg-surface"
             >
               +
             </button>
@@ -197,7 +193,7 @@ export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: 
             onClick={handlePurchase}
             disabled={loading || available === 0}
             className={cn(
-              "px-5 py-2 rounded-lg text-sm font-medium transition-colors",
+              "min-h-11 rounded-lg px-5 py-2 text-sm font-medium transition-colors",
               loading || available === 0
                 ? "bg-surface text-muted cursor-not-allowed"
                 : "bg-teal text-white hover:bg-teal/90",
@@ -206,7 +202,6 @@ export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: 
             {loading ? "Chargement…" : ticketType.isFree ? "Réserver" : "Payer"}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

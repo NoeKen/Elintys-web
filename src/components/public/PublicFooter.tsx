@@ -23,7 +23,7 @@ const BOTTOM_LINKS = [
 function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
     <div>
-      <h4 className="footer-col-title">{title}</h4>
+      <h2 className="footer-col-title">{title}</h2>
       <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
         {links.map((l) => (
           <li key={l.href}>
@@ -93,7 +93,7 @@ export function PublicFooter() {
           <FooterColumn title="COMPAGNIE" links={COMPANY_LINKS} />
 
           <div>
-            <h4 className="footer-col-title">NEWSLETTER</h4>
+            <h2 className="footer-col-title">NEWSLETTER</h2>
             <p className="mb-4 text-sm leading-6 text-on-surface-variant">
               Recevez chaque jeudi notre sélection exclusive directement dans votre boîte.
             </p>

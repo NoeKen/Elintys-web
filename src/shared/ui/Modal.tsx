@@ -61,7 +61,7 @@ export function Modal({ open, onOpenChange, title, description, children, classN
                 <Dialog.Close asChild>
                   <button
                     aria-label="Fermer"
-                    className="absolute right-4 top-4 rounded-md p-1 text-on-surface-variant hover:bg-surface-low focus-visible:outline-2 focus-visible:outline-accent"
+                    className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-low focus-visible:outline-2 focus-visible:outline-accent"
                   >
                     <IconClose size={18} />
                   </button>

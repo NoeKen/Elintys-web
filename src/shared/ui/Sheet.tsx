@@ -54,7 +54,7 @@ export function Sheet({ open, onOpenChange, side = 'right', title, children }: S
                   <Dialog.Close asChild>
                     <button
                       aria-label="Fermer"
-                      className="ml-auto rounded-md p-1 text-on-surface-variant hover:bg-surface-low focus-visible:outline-2 focus-visible:outline-accent"
+                      className="ml-auto flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-low focus-visible:outline-2 focus-visible:outline-accent"
                     >
                       <IconClose size={18} />
                     </button>

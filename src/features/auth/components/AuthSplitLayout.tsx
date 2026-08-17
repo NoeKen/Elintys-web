@@ -60,7 +60,7 @@ export function AuthSplitLayout({
   children,
 }: AuthSplitLayoutProps) {
   return (
-    <main className="mesh-gradient premium-noise relative min-h-screen overflow-hidden px-4 py-5 text-on-surface sm:px-6 lg:px-8">
+    <main className="mesh-gradient premium-noise relative min-h-screen overflow-x-clip px-4 py-5 text-on-surface sm:px-6 lg:px-8">
       <div
         className="pointer-events-none absolute left-[8%] top-[10%] h-64 w-64 rounded-full bg-teal-pale/70 blur-3xl"
         aria-hidden="true"

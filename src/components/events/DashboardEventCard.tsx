@@ -127,6 +127,9 @@ export function DashboardEventCard({ event, priority = false }: Props) {
               aria-valuenow={progress}
               aria-valuemin={0}
               aria-valuemax={100}
+              aria-label={formatEventCreationCopy(copy.dashboard.progress, {
+                percent: progress,
+              })}
             >
               <span
                 className="block h-full rounded-full bg-teal"
