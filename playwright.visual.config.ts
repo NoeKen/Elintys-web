@@ -1,6 +1,23 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig } from '@playwright/test';
 
 const port = 3100;
+
+function loadEnvFile(file: string): void {
+  const fullPath = path.resolve(file);
+  if (!fs.existsSync(fullPath)) return;
+  for (const line of fs.readFileSync(fullPath, 'utf8').split('\n')) {
+    const match = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(line.trim());
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (process.env[key] !== undefined) continue;
+    const value = rawValue.trim().replace(/^["']|["']$/g, '');
+    if (value) process.env[key] = value;
+  }
+}
+
+loadEnvFile('.env');
 
 export default defineConfig({
   testDir: './e2e/visual',

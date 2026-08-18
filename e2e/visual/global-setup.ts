@@ -1,13 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { request } from '@playwright/test';
-import { API_URL, credentials, QA_DIR, QA_METADATA, QA_PREFIX, type QaEventRef, type QaMetadata } from './qa-data';
+import { API_URL, credentials, QA_DIR, QA_METADATA, QA_ORIGIN, QA_PREFIX, type QaEventRef, type QaMetadata } from './qa-data';
 
 type JsonObject = Record<string, unknown>;
 
 export default async function globalSetup() {
+  const runId = Date.now();
   fs.mkdirSync(QA_DIR, { recursive: true });
-  const api = await request.newContext({ baseURL: `${API_URL}/`, extraHTTPHeaders: { origin: 'https://dev.elintys.com', referer: 'https://dev.elintys.com/' } });
+  const api = await request.newContext({
+    baseURL: `${API_URL}/`,
+    extraHTTPHeaders: { origin: QA_ORIGIN, referer: `${QA_ORIGIN}/` },
+  });
   const login = await api.post('auth/login', { data: credentials() });
   if (!login.ok()) throw new Error(`Connexion QA impossible (${login.status()}).`);
   const onboarding = await api.patch('auth/onboarding/organisateur', {
@@ -37,7 +41,9 @@ export default async function globalSetup() {
 
   const events: Record<string, QaEventRef> = {};
   const create = async (key: string, title: string, overrides: JsonObject = {}, publish = false) => {
-    const response = await api.post('events', { data: { ...future, title: `${QA_PREFIX} ${title}`, ...overrides } });
+    const response = await api.post('events', {
+      data: { ...future, title: `${QA_PREFIX} ${title} ${runId}`, ...overrides },
+    });
     if (!response.ok()) throw new Error(`Création ${key} impossible (${response.status()}).`);
     let event = await response.json() as { _id: string; slug?: string; title: string };
     if (publish) {

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { expect, test as base, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { API_URL } from './qa-data';
+import { API_URL, QA_ORIGIN } from './qa-data';
 
 export const VIEWPORTS = [
   { name: '1538x1100', width: 1538, height: 1100 },
@@ -18,7 +18,12 @@ export async function installApiBridge(context: BrowserContext) {
   await context.route(`${API_URL}/**`, async (route) => {
     try {
       const request = route.request();
-      const headers = { ...request.headers(), origin: 'https://dev.elintys.com', referer: 'https://dev.elintys.com/', 'sec-fetch-site': 'same-origin' };
+      const headers = {
+        ...request.headers(),
+        origin: QA_ORIGIN,
+        referer: `${QA_ORIGIN}/`,
+        'sec-fetch-site': 'same-origin',
+      };
       const response = await context.request.fetch(request.url(), {
         method: request.method(),
         data: request.postDataBuffer() ?? undefined,
@@ -53,6 +58,11 @@ export const test = base.extend<{ diagnostics: Diagnostics }>({
       if (/\.(?:hot-update\.json)|webpack-hmr/.test(request.url())) return;
       if (request.url().includes('_rsc=') && request.failure()?.errorText === 'net::ERR_ABORTED') return;
       if (request.url().includes('/auth/refresh') && request.failure()?.errorText === 'net::ERR_ABORTED') return;
+      if (
+        request.method() === 'GET' &&
+        request.url().startsWith(API_URL) &&
+        request.failure()?.errorText === 'net::ERR_ABORTED'
+      ) return;
       diagnostics.failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText ?? ''}`);
     });
     page.on('response', (response) => { if (response.status() >= 400 && response.url().includes('/api/v1/')) diagnostics.httpErrors.push({ status: response.status(), url: response.url().replace(/\?.*$/, '') }); });

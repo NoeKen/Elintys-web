@@ -23,15 +23,19 @@ rsync -a --delete \
 ln -sfn "$PWD/node_modules" "$visual_root/node_modules"
 
 cd "$visual_root"
-export NEXT_PUBLIC_API_URL="https://api.dev.elintys.com/api/v1"
-export NEXT_PUBLIC_APP_URL="http://localhost:3100"
+export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://api.dev.elintys.com/api/v1}"
+export NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL:-http://localhost:3100}"
+build_key="${NEXT_PUBLIC_API_URL}|${NEXT_PUBLIC_APP_URL}"
 needs_build=0
 if [ ! -f .next/BUILD_ID ]; then
+  needs_build=1
+elif [ ! -f .next/.elintys-visual-build-key ] || [ "$(cat .next/.elintys-visual-build-key)" != "$build_key" ]; then
   needs_build=1
 elif find src next.config.ts package.json -type f -newer .next/BUILD_ID -print -quit | grep -q .; then
   needs_build=1
 fi
 if [ "$needs_build" -eq 1 ]; then
   node "$PWD/node_modules/next/dist/bin/next" build --webpack
+  printf '%s' "$build_key" > .next/.elintys-visual-build-key
 fi
 node "$PWD/node_modules/next/dist/bin/next" start -p 3100

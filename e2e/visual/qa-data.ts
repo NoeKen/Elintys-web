@@ -6,6 +6,9 @@ export const QA_DIR = path.resolve('.visual-qa');
 export const QA_STATE = path.join(QA_DIR, 'auth.json');
 export const QA_METADATA = path.join(QA_DIR, 'metadata.json');
 export const API_URL = process.env.VISUAL_API_URL ?? 'https://api.dev.elintys.com/api/v1';
+export const QA_ORIGIN = process.env.VISUAL_ORIGIN ?? (
+  API_URL.startsWith('http://localhost') ? 'http://localhost:3100' : 'https://dev.elintys.com'
+);
 
 export interface QaEventRef { id: string; slug?: string; title: string; }
 export interface QaMetadata { createdAt: string; events: Record<string, QaEventRef>; }

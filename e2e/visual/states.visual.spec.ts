@@ -26,7 +26,7 @@ test('Mes événements affiche loading, empty et error sans page blanche', async
   await expect(page.locator('.premium-skeleton').first()).toBeVisible();
   await page.screenshot({ path: 'docs/design-qa/event-experience/implementations/events-loading-1538x1100.png', fullPage: true });
   await release?.();
-  await expect(page.getByText('Aucun événement ne correspond à cette vue')).toBeVisible();
+  await expect(page.getByText('Votre premier événement commence ici.')).toBeVisible();
   await capture(page, 'events-empty-1538x1100');
   await page.unroute(`${API_URL}/events/my**`);
 
@@ -38,7 +38,22 @@ test('Mes événements affiche loading, empty et error sans page blanche', async
 });
 
 test('dashboard nouveau sans événement', async ({ page }) => {
-  await page.route(`${API_URL}/events/my**`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [], meta: { total: 0, page: 1, perPage: 100, lastPage: 1 } }) }));
+  await page.route(`${API_URL}/events/my/summary`, (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      metrics: {
+        totalEvents: 0,
+        activeEvents: 0,
+        upcomingEvents: 0,
+        draftEvents: 0,
+        pendingActions: 0,
+      },
+      actions: [],
+      upcoming: [],
+      activityAvailable: false,
+    }),
+  }));
   await page.setViewportSize({ width: 1538, height: 1100 });
   await page.goto('/tableau-de-bord');
   await expect(page.getByText('Commencez votre narration événementielle')).toBeVisible();
