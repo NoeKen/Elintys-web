@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { participationCopy as copy } from '@/features/events/lib/participation-error';
 
 export const metadata = {
-  title: 'Paiement annulé',
+  title: copy.paidUnavailableTitle,
 };
 
 export default function PaymentCancelPage() {
@@ -26,19 +27,16 @@ export default function PaymentCancelPage() {
             </svg>
           </div>
 
-          <h1 className="premium-heading">Paiement annulé</h1>
+          <p className="section-eyebrow">{copy.paidUnavailableBadge}</p>
+          <h1 className="premium-heading mt-3">{copy.paidUnavailableTitle}</h1>
 
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-on-surface-variant">
-            Votre paiement a été annulé. Aucun montant n&apos;a été débité.
-          </p>
-
-          <p className="mt-3 text-sm text-on-surface-variant">
-            Vous pouvez réessayer votre paiement à tout moment.
+            {copy.paidUnavailableDescription}
           </p>
 
           <div className="mt-8">
             <Link href="/evenements" className="premium-button">
-              Retour aux événements
+              {copy.discoverEvents}
             </Link>
           </div>
         </div>

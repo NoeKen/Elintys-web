@@ -1,19 +1,11 @@
 import Link from 'next/link';
-
-interface PaymentSuccessPageProps {
-  searchParams: Promise<{ session_id?: string }>;
-}
+import { participationCopy as copy } from '@/features/events/lib/participation-error';
 
 export const metadata = {
-  title: 'Paiement confirmé',
+  title: copy.paidUnavailableTitle,
 };
 
-export default async function PaymentSuccessPage({
-  searchParams,
-}: PaymentSuccessPageProps) {
-  const params = await searchParams;
-  const sessionId = params.session_id;
-
+export default function PaymentSuccessPage() {
   return (
     <div className="public-detail-shell mesh-gradient">
       <section className="container-public">
@@ -35,24 +27,16 @@ export default async function PaymentSuccessPage({
             </svg>
           </div>
 
-          <h1 className="premium-heading">Paiement confirmé</h1>
+          <p className="section-eyebrow">{copy.paidUnavailableBadge}</p>
+          <h1 className="premium-heading mt-3">{copy.paidUnavailableTitle}</h1>
 
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-on-surface-variant">
-            Votre paiement a été traité avec succès. Vos billets sont disponibles dans votre espace.
+            {copy.paidUnavailableDescription}
           </p>
 
-          {sessionId && (
-            <p className="mt-3 break-all text-sm text-on-surface-variant">
-              Référence de session : <span className="font-mono text-navy">{sessionId}</span>
-            </p>
-          )}
-
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/billetterie" className="premium-button">
-              Voir mes billets
-            </Link>
+          <div className="mt-8 flex justify-center">
             <Link href="/evenements" className="premium-button-secondary">
-              Découvrir d&apos;autres événements
+              {copy.discoverEvents}
             </Link>
           </div>
         </div>
