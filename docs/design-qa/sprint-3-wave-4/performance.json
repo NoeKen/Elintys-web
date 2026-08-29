@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-08-29T02:24:55.290Z",
+  "environment": "local production build",
+  "url": "http://localhost:3000/evenements/e2e-publication-reussie-1787883189311",
+  "methodology": "Playwright Chromium, three fresh browser contexts per viewport; median reported; no network or CPU throttling",
+  "results": [
+    {
+      "profile": "desktop-1440x900",
+      "median": {
+        "ttfbMs": 156.8,
+        "domContentLoadedMs": 259.5,
+        "loadMs": 578.4,
+        "fcpMs": 320,
+        "lcpMs": 412,
+        "cls": 0.001293,
+        "longTasks": 4,
+        "resourceCount": 34,
+        "transferBytes": 1331534,
+        "horizontalOverflowPx": 0
+      },
+      "status": 200,
+      "participantCtaPresent": true
+    },
+    {
+      "profile": "mobile-390x844",
+      "median": {
+        "ttfbMs": 130.5,
+        "domContentLoadedMs": 200.5,
+        "loadMs": 447.1,
+        "fcpMs": 212,
+        "lcpMs": 524,
+        "cls": 0,
+        "longTasks": 3,
+        "resourceCount": 34,
+        "transferBytes": 1331531,
+        "horizontalOverflowPx": 0
+      },
+      "status": 200,
+      "participantCtaPresent": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-08-29T02:35:04.309Z",
+  "surfaces": [
+    {
+      "surface": "event-admission-desktop",
+      "violations": []
+    },
+    {
+      "surface": "participation-mobile",
+      "violations": []
+    }
+  ]
+}
