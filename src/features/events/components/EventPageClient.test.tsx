@@ -62,7 +62,7 @@ describe('EventPageClient access policies', () => {
     expect(screen.getByRole('button', { name: 'Choisir' })).toBeEnabled();
   });
 
-  it('présente honnêtement les billets payants comme indisponibles', () => {
+  it('propose l’achat d’un billet payant disponible', () => {
     renderClient(
       <EventPageClient
         event={{
@@ -72,7 +72,7 @@ describe('EventPageClient access policies', () => {
         }}
       />,
     );
-    expect(screen.getByRole('button', { name: 'Bientôt disponible' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Acheter mon billet' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'Choisir' })).not.toBeInTheDocument();
   });
 
@@ -173,5 +173,20 @@ describe('EventPageClient access policies', () => {
       'href',
       '/inscription/etape-1?redirect=%2Fevenements%2Fgala-elintys',
     );
+  });
+
+  it('décompte la capacité réservée par les paiements en cours', () => {
+    renderClient(
+      <EventPageClient
+        event={{
+          ...baseEvent,
+          admissionModes: ['paid_ticket'],
+          ticketTypes: [
+            { ...tickets[0], isFree: false, price: 4500, quantity: 10, sold: 8, reserved: 2 },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Complet' })).toBeDisabled();
   });
 });

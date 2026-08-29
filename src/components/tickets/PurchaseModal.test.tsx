@@ -70,7 +70,7 @@ describe('PurchaseModal', () => {
     }
   });
 
-  it('n’expose aucun checkout pour un billet payant', () => {
+  it('propose l’achat d’un billet payant sans jamais utiliser le flux gratuit', () => {
     render(
       <PurchaseModal
         ticketType={{ ...freeTicket, isFree: false, price: 4500 }}
@@ -79,8 +79,9 @@ describe('PurchaseModal', () => {
         onClose={vi.fn()}
       />,
     );
-    expect(screen.getByText('Bientôt disponible')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /payer/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Acheter mon billet' })).toBeInTheDocument();
+    expect(screen.getByText(/réservés le temps du paiement/i)).toBeInTheDocument();
+    // Le flux « billet gratuit » ne doit jamais être emprunté pour un payant.
     expect(mocks.mutateAsync).not.toHaveBeenCalled();
   });
 
