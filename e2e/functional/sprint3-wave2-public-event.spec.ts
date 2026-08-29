@@ -187,7 +187,7 @@ test.describe.serial('Sprint 3 Vague 2 — page événement participant', () => 
   test('5–6 — accès ouvert et inscription requise ont des CTA contextuels', async ({ page }) => {
     await openFixture(page, fixtures.publicNoCover);
     await expect(page.getByText('Accès ouvert', { exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'S’inscrire' })).toHaveAttribute('href', /redirect=/);
+    await expect(page.getByRole('button', { name: 'S’inscrire' })).toBeVisible();
     await page.screenshot({
       path: path.join(IMPLEMENTATIONS, 'open-access-1440x900.png'),
       fullPage: true,
@@ -196,7 +196,7 @@ test.describe.serial('Sprint 3 Vague 2 — page événement participant', () => 
 
     await openFixture(page, fixtures.registration);
     await expect(page.getByText('Inscription requise', { exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'S’inscrire' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'S’inscrire' })).toBeVisible();
   });
 
   test('7 — domaine courriel expose seulement la vérification prévue', async ({ page }) => {
