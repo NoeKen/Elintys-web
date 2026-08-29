@@ -60,4 +60,24 @@ describe('ticketsService', () => {
       ticketsService.updateType('ticket-type-1', { name: 'Billet modifié' }),
     ).resolves.toMatchObject({ name: 'Billet modifié', eventId: 'event-1' });
   });
+
+  it('achète un billet gratuit avec idempotence et grant uniquement en headers', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: [], status: 201 });
+
+    await ticketsService.purchaseFree('ticket-type-1', 2, {
+      idempotencyKey: 'purchase-attempt-1',
+      accessGrant: 'signed-grant',
+    });
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/tickets/purchase',
+      { ticketTypeId: 'ticket-type-1', quantity: 2 },
+      {
+        headers: {
+          'Idempotency-Key': 'purchase-attempt-1',
+          'X-Event-Access-Grant': 'signed-grant',
+        },
+      },
+    );
+  });
 });

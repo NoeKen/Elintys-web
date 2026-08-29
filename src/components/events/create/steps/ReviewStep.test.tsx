@@ -153,9 +153,7 @@ describe("ReviewStep — readiness de publication", () => {
         })}
       />,
     );
-    // Deux entrées identiques restent rendues telles quelles : on vérifie
-    // simplement qu'aucune n'est perdue silencieusement.
-    expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
   });
 
   it("ne devrait rien afficher de bloquant sans readiness fournie", () => {

@@ -7,6 +7,7 @@ import { saveRegistrationDraft } from "@/lib/auth/registration-draft";
 interface RegisterStep1ClientProps {
   emailTakenError: string | null;
   initialEmail: string;
+  redirectTo?: string;
 }
 
 /**
@@ -16,12 +17,13 @@ interface RegisterStep1ClientProps {
  * local. Les valeurs issues de l'URL sont résolues côté serveur et reçues en
  * props, ce qui permet de rendre le formulaire dans le HTML initial.
  */
-export function RegisterStep1Client({ emailTakenError, initialEmail }: RegisterStep1ClientProps) {
+export function RegisterStep1Client({ emailTakenError, initialEmail, redirectTo }: RegisterStep1ClientProps) {
   const router = useRouter();
 
   const handleStep1Success = (data: Step1Data) => {
     saveRegistrationDraft(data);
-    router.push("/inscription/etape-2");
+    const params = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+    router.push(`/inscription/etape-2${params}`);
   };
 
   return (

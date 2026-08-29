@@ -12,19 +12,31 @@ vi.mock('@/features/invitations/services/invitations.service', () => ({
 describe('InvitationRedemption', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('refuse un lien sans token sans appeler le backend', () => {
+  it("refuse un lien sans token sans appeler le backend", () => {
     render(<InvitationRedemption />);
-    expect(screen.getByText('Ce lien d’invitation est incomplet.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Accepter l’invitation' })).toBeDisabled();
+    expect(screen.getByText(/Ce lien d.invitation est incomplet/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Accepter l.invitation/ })).toBeDisabled();
   });
 
-  it('accepte une invitation une seule fois depuis une action explicite', async () => {
+  it("accepte une invitation une seule fois depuis une action explicite", async () => {
     const user = userEvent.setup({ delay: null });
     mocks.accept.mockResolvedValue({});
     render(<InvitationRedemption token="raw-token" />);
-    await user.click(screen.getByRole('button', { name: 'Accepter l’invitation' }));
+    await user.click(screen.getByRole('button', { name: /Accepter l.invitation/ }));
     expect(await screen.findByText(/Votre accès est maintenant confirmé/)).toBeInTheDocument();
     expect(mocks.accept).toHaveBeenCalledWith('raw-token');
-    expect(screen.queryByRole('button', { name: 'Accepter l’invitation' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Accepter l.invitation/ })).not.toBeInTheDocument();
+  });
+
+  it("affiche le lien vers mes invitations après acceptation", async () => {
+    const user = userEvent.setup({ delay: null });
+    mocks.accept.mockResolvedValue({});
+    render(<InvitationRedemption token="raw-token" />);
+    await user.click(screen.getByRole('button', { name: /Accepter l.invitation/ }));
+    await screen.findByText(/Votre accès est maintenant confirmé/);
+    expect(screen.getByRole('link', { name: 'Voir mes invitations' })).toHaveAttribute(
+      'href',
+      '/tableau-de-bord/participation#invitations',
+    );
   });
 });

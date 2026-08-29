@@ -53,4 +53,16 @@ describe("buildNavSections", () => {
       });
     });
   });
+
+  it("la section Participant expose un espace unifié Ma participation", () => {
+    const sections = buildNavSections(["participant"]);
+    const participantSection = sections.find((s) => s.label === "Participant");
+    expect(participantSection).toBeDefined();
+    expect(participantSection!.items).toEqual([
+      expect.objectContaining({
+        label: "Ma participation",
+        href: "/tableau-de-bord/participation",
+      }),
+    ]);
+  });
 });

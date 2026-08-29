@@ -47,9 +47,20 @@ export function InvitationRedemption({ token }: { token?: string }) {
             {status === 'loading' ? copy.accepting : copy.accept}
           </button>
         )}
-        <Link href="/evenements" className="mt-5 inline-flex text-sm font-semibold text-event-petrol underline-offset-4 hover:underline">
-          {copy.back}
-        </Link>
+        {status === 'success' ? (
+          <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link href="/tableau-de-bord/participation#invitations" className="premium-button px-6 py-3">
+              {copy.viewInvitations}
+            </Link>
+            <Link href="/evenements" className="text-sm font-semibold text-event-petrol underline-offset-4 hover:underline">
+              {copy.back}
+            </Link>
+          </div>
+        ) : (
+          <Link href="/evenements" className="mt-5 inline-flex text-sm font-semibold text-event-petrol underline-offset-4 hover:underline">
+            {copy.back}
+          </Link>
+        )}
       </section>
     </main>
   );

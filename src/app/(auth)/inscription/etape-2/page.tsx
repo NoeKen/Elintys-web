@@ -1,99 +1,11 @@
-"use client";
+import { RegisterStep2Client } from "@/features/auth/components/RegisterStep2Client";
+import { sanitizeRedirectPath } from "@/lib/auth/redirects";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { AuthSplitLayout } from "@/features/auth/components/AuthSplitLayout";
-import {
-  RegisterStep2RoleSelector,
-  type RegisterStep2Data,
-} from "@/features/auth/components/RegisterStep2RoleSelector";
-import { authService } from "@/features/auth/client/auth.service";
-import { useAuth } from "@/shared/hooks/useAuth";
-import {
-  clearRegistrationDraft,
-  readRegistrationDraft,
-} from "@/lib/auth/registration-draft";
-import { getFirstOnboardingPath } from "@/lib/auth/redirects";
-import {
-  getUserFacingError,
-  type UserFacingError,
-} from "@/shared/lib/user-facing-error";
-import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+interface InscriptionEtape2PageProps {
+  searchParams: Promise<{ redirect?: string }>;
+}
 
-export default function InscriptionEtape2Page() {
-  const router = useRouter();
-  const { login } = useAuth();
-  const [draftReady, setDraftReady] = useState(false);
-  const [globalError, setGlobalError] = useState<UserFacingError | null>(null);
-
-  useEffect(() => {
-    const draft = readRegistrationDraft();
-    if (!draft) {
-      router.replace("/inscription/etape-1");
-      return;
-    }
-    setDraftReady(true);
-  }, [router]);
-
-  const handleRegister = async (profile: RegisterStep2Data) => {
-    const draft = readRegistrationDraft();
-    if (!draft) {
-      router.replace("/inscription/etape-1");
-      return;
-    }
-
-    setGlobalError(null);
-    const fullName = `${profile.firstName} ${profile.lastName}`.trim();
-
-    try {
-      const session = await authService.register({
-        ...draft,
-        fullName,
-        roles: [profile.role],
-      });
-      clearRegistrationDraft();
-      login(session);
-
-      const nextPath = getFirstOnboardingPath([profile.role]);
-      router.push(
-        `/verification-email?email=${encodeURIComponent(draft.email)}&next=${encodeURIComponent(nextPath)}`,
-      );
-    } catch (err: unknown) {
-      const authErr = err as { code?: string; message?: string };
-      if (authErr?.code === "EMAIL_TAKEN") {
-        clearRegistrationDraft();
-        const params = new URLSearchParams({
-          error: "email-taken",
-          email: draft.email,
-        });
-        router.push(`/inscription/etape-1?${params.toString()}`);
-        return;
-      }
-      setGlobalError(
-        getUserFacingError(err, {
-          fallback:
-            "Impossible de créer le compte pour le moment. Vérifiez vos informations, puis réessayez.",
-        }),
-      );
-    }
-  };
-
-  return (
-    <AuthSplitLayout
-      headline="Créez des moments d'exception."
-      subheadline="Un profil clair, des accès adaptés, une suite fluide."
-      progressStep={2}
-      progressTotal={2}
-      backHref="/inscription/etape-1"
-      backLabel="Retour à l'étape 1"
-    >
-      {globalError && (
-        <FormErrorAlert
-          error={globalError}
-          className="mb-5 bg-white/75 shadow-card"
-        />
-      )}
-      {draftReady && <RegisterStep2RoleSelector onSubmit={handleRegister} />}
-    </AuthSplitLayout>
-  );
+export default async function InscriptionEtape2Page({ searchParams }: InscriptionEtape2PageProps) {
+  const { redirect } = await searchParams;
+  return <RegisterStep2Client redirectTo={sanitizeRedirectPath(redirect ?? null) ?? undefined} />;
 }

@@ -133,7 +133,11 @@ export function ReviewStep({
           </p>
           {readiness && readiness.errors.length > 0 && (
             <ul className="mt-3 space-y-1.5">
-              {readiness.errors.map(({ code, field }) => (
+              {Array.from(
+                new Map(
+                  readiness.errors.map((error) => [`${error.code}:${error.field}`, error]),
+                ).values(),
+              ).map(({ code, field }) => (
                 <li key={`${code}:${field}`}>• {copy.review.readinessErrors[code as keyof typeof copy.review.readinessErrors] ?? code}</li>
               ))}
             </ul>

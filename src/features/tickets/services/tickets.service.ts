@@ -40,6 +40,20 @@ export interface UpdateTicketTypeDto {
   quantity?: number;
 }
 
+export interface PurchaseFreeTicketOptions {
+  idempotencyKey: string;
+  accessGrant?: string;
+}
+
+export interface TicketPurchaseResult {
+  _id: string;
+  event: string;
+  ticketType: string;
+  price: number;
+  qrCode?: string;
+  status: string;
+}
+
 export const ticketsService = {
   async listByEvent(eventId: string, page = 1, perPage = 50): Promise<PaginatedResponse<Ticket>> {
     const res = await api.get<PaginatedResponse<Ticket>>(`/events/${eventId}/tickets`, {
@@ -69,6 +83,24 @@ export const ticketsService = {
 
   async validate(code: string): Promise<Ticket> {
     const res = await api.post<Ticket>("/tickets/validate", { code });
+    return res.data;
+  },
+
+  async purchaseFree(
+    ticketTypeId: string,
+    quantity: number,
+    options: PurchaseFreeTicketOptions,
+  ): Promise<TicketPurchaseResult[]> {
+    const res = await api.post<TicketPurchaseResult[]>(
+      "/tickets/purchase",
+      { ticketTypeId, quantity },
+      {
+        headers: {
+          "Idempotency-Key": options.idempotencyKey,
+          ...(options.accessGrant ? { "X-Event-Access-Grant": options.accessGrant } : {}),
+        },
+      },
+    );
     return res.data;
   },
 };

@@ -1,16 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { cn } from "@/shared/lib/utils";
-import api from "@/shared/lib/api";
-import { useAuth } from "@/shared/hooks/useAuth";
-import { ApiClientError } from "@/shared/lib/api";
-import {
-  getUserFacingError,
-  type UserFacingError,
-} from "@/shared/lib/user-facing-error";
-import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
-import { Modal } from "@/shared/ui/Modal";
+import Link from 'next/link';
+import { useRef, useState } from 'react';
+import { CheckCircle2, Minus, Plus } from 'lucide-react';
+import { ApiClientError } from '@/shared/lib/api';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { getLoginPath } from '@/lib/auth/redirects';
+import { getParticipationError, participationCopy as copy } from '@/features/events/lib/participation-error';
+import { usePurchaseFreeTicket } from '@/features/tickets/hooks/useTickets';
+import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
+import { Modal } from '@/shared/ui/Modal';
 
 interface TicketType {
   _id: string;
@@ -24,184 +23,150 @@ interface TicketType {
 interface Props {
   ticketType: TicketType;
   eventTitle: string;
+  eventSlug: string;
   accessGrant?: string;
   onClose: () => void;
 }
 
-export function PurchaseModal({ ticketType, eventTitle, accessGrant, onClose }: Props) {
-  const { user } = useAuth();
-  const [quantity, setQuantity] = useState(1);
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestName, setGuestName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<UserFacingError | null>(null);
+function shouldRotateKey(error: unknown): boolean {
+  if (!(error instanceof ApiClientError)) return false;
+  return error.status >= 400 && error.status < 500 && error.status !== 429;
+}
 
-  const available = ticketType.quantity - ticketType.sold;
-  const totalCAD = ((ticketType.price * quantity) / 100).toFixed(2);
+export function PurchaseModal({ ticketType, eventTitle, eventSlug, accessGrant, onClose }: Props) {
+  const { user, isLoading: authLoading } = useAuth();
+  const purchase = usePurchaseFreeTicket(ticketType._id);
+  const attemptKey = useRef<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [purchasedCount, setPurchasedCount] = useState<number | null>(null);
+  const available = Math.max(0, ticketType.quantity - ticketType.sold);
+  const returnPath = `/evenements/${eventSlug}#billets`;
+  const registerHref = `/inscription/etape-1?redirect=${encodeURIComponent(returnPath)}`;
 
   const handlePurchase = async () => {
-    if (!user && !guestEmail) {
-      setError({
-        message:
-          "Votre adresse courriel est obligatoire pour réserver un billet.",
-        details: [],
-      });
-      return;
-    }
-    setLoading(true);
-    setError(null);
-
+    if (!ticketType.isFree || purchase.isPending || !user) return;
+    const idempotencyKey = attemptKey.current ?? crypto.randomUUID();
+    attemptKey.current = idempotencyKey;
     try {
-      if (ticketType.isFree) {
-        await api.post("/tickets/purchase", {
-          ticketTypeId: ticketType._id,
-          quantity,
-          accessGrant,
-          guestEmail: user ? undefined : guestEmail || undefined,
-          guestName: user ? undefined : guestName || undefined,
-        });
-        alert(
-          `${quantity} billet${quantity > 1 ? "s" : ""} réservé${quantity > 1 ? "s" : ""} avec succès !`,
-        );
-        onClose();
-      } else {
-        const res = await api.post<{ sessionUrl: string }>(
-          "/payments/checkout",
-          {
-            ticketTypeId: ticketType._id,
-            quantity,
-            accessGrant,
-            guestEmail: user ? undefined : guestEmail || undefined,
-            guestName: user ? undefined : guestName || undefined,
-          },
-        );
-        window.location.href = res.data.sessionUrl;
-      }
-    } catch (err: unknown) {
-      if (err instanceof ApiClientError && err.status === 503) {
-        setError({
-          message:
-            "Le paiement en ligne est temporairement indisponible. Contactez l’organisateur pour réserver.",
-          details: [],
-          requestId: err.requestId,
-        });
-      } else {
-        setError(
-          getUserFacingError(err, {
-            fallback:
-              "Impossible de finaliser cette réservation. Vérifiez les informations saisies, puis réessayez.",
-          }),
-        );
-      }
-    } finally {
-      setLoading(false);
+      const tickets = await purchase.mutateAsync({ quantity, accessGrant, idempotencyKey });
+      setPurchasedCount(tickets.length);
+    } catch (error) {
+      if (shouldRotateKey(error)) attemptKey.current = null;
     }
   };
 
   return (
     <Modal
       open
-      onOpenChange={(open) => !open && onClose()}
-      title={ticketType.name}
-      description={eventTitle}
-      className="max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto"
+      onOpenChange={(open) => {
+        if (!open && !purchase.isPending) onClose();
+      }}
+      title={ticketType.isFree ? copy.freeTicketTitle : copy.paidUnavailableTitle}
+      description={`${ticketType.name} — ${eventTitle}`}
+      className="mx-4 max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto"
     >
-        <p className="text-sm text-muted mb-4">{eventTitle}</p>
-
-        {/* Quantity selector */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-navy mb-2">
-            Quantité
-          </label>
-          <div className="flex items-center gap-3">
+      {!ticketType.isFree ? (
+        <div className="rounded-2xl border border-amber/25 bg-amber/10 p-4" role="status">
+          <p className="font-bold text-navy">{copy.paidUnavailableBadge}</p>
+          <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+            {copy.paidUnavailableDescription}
+          </p>
+        </div>
+      ) : purchasedCount !== null ? (
+        <div className="rounded-2xl border border-teal/20 bg-teal/5 p-5" role="status" aria-live="polite">
+          <CheckCircle2 className="h-8 w-8 text-teal" aria-hidden="true" />
+          <p className="mt-3 font-bold text-navy">
+            {copy.reserveSuccess.replace('{count}', String(purchasedCount))}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-on-surface-variant">{copy.reserveSuccessHint}</p>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link href="/tableau-de-bord/participation" className="premium-button min-h-12 px-5">
+              {copy.viewMyParticipation}
+            </Link>
             <button
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              aria-label="Réduire la quantité"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-navy hover:bg-surface"
+              type="button"
+              onClick={onClose}
+              className="min-h-12 cursor-pointer rounded-full border border-outline px-5 text-sm font-bold text-navy transition-colors hover:border-teal"
             >
-              −
+              {copy.close}
             </button>
-            <span className="w-8 text-center font-semibold text-navy">
-              {quantity}
-            </span>
-            <button
-              onClick={() => setQuantity((q) => Math.min(available, q + 1))}
-              aria-label="Augmenter la quantité"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-navy hover:bg-surface"
-            >
-              +
-            </button>
-            <span className="text-sm text-muted">
-              ({available} disponible{available > 1 ? "s" : ""})
-            </span>
           </div>
         </div>
-
-        {/* Guest fields */}
-        {!user && (
-          <div className="mb-4 space-y-2">
-            <div>
-              <label
-                htmlFor="guestEmail"
-                className="block text-sm font-medium text-navy mb-1"
-              >
-                Courriel <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="guestEmail"
-                type="email"
-                placeholder="votre@courriel.com"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="guestName"
-                className="block text-sm font-medium text-navy mb-1"
-              >
-                Prénom et nom
-              </label>
-              <input
-                id="guestName"
-                type="text"
-                placeholder="Marie Tremblay"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal"
-              />
-            </div>
+      ) : authLoading ? (
+        <div className="h-28 animate-pulse rounded-2xl bg-surface-low" aria-busy="true" />
+      ) : !user ? (
+        <div>
+          <p className="text-sm leading-6 text-on-surface-variant">{copy.signInToReserve}</p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <Link href={getLoginPath(returnPath)} className="premium-button min-h-12 px-5">
+              {copy.signInToReserve}
+            </Link>
+            <Link
+              href={registerHref}
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-outline px-5 text-sm font-bold text-navy transition-colors hover:border-teal hover:text-teal"
+            >
+              {copy.createAccount}
+            </Link>
           </div>
-        )}
-
-        {error && <FormErrorAlert error={error} className="mb-3" />}
-
-        {/* Footer */}
-        <div className="flex justify-between items-center pt-2 border-t border-border">
+        </div>
+      ) : (
+        <>
           <div>
-            {ticketType.isFree ? (
-              <span className="font-semibold text-teal">Gratuit</span>
-            ) : (
-              <span className="font-semibold text-navy">{totalCAD} $ CAD</span>
-            )}
-            {!ticketType.isFree && (
-              <p className="text-xs text-muted">+ 1,49 $ frais de service</p>
-            )}
+            <label className="block text-sm font-bold text-navy" htmlFor="free-ticket-quantity">
+              {copy.quantityLabel}
+            </label>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                disabled={quantity <= 1 || purchase.isPending}
+                aria-label={copy.decreaseQuantity}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-outline text-navy transition-colors hover:border-teal disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Minus className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <output id="free-ticket-quantity" className="min-w-10 text-center text-lg font-bold text-navy" aria-live="polite">
+                {quantity}
+              </output>
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => Math.min(available, current + 1))}
+                disabled={quantity >= available || purchase.isPending}
+                aria-label={copy.increaseQuantity}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-outline text-navy transition-colors hover:border-teal disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <span className="text-sm text-on-surface-variant">
+                {copy.availableCount.replace('{count}', String(available))}
+              </span>
+            </div>
           </div>
-          <button
-            onClick={handlePurchase}
-            disabled={loading || available === 0}
-            className={cn(
-              "min-h-11 rounded-lg px-5 py-2 text-sm font-medium transition-colors",
-              loading || available === 0
-                ? "bg-surface text-muted cursor-not-allowed"
-                : "bg-teal text-white hover:bg-teal/90",
-            )}
-          >
-            {loading ? "Chargement…" : ticketType.isFree ? "Réserver" : "Payer"}
-          </button>
-        </div>
+
+          {purchase.isError && (
+            <FormErrorAlert error={getParticipationError(purchase.error)} className="mt-4" />
+          )}
+
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={purchase.isPending}
+              className="min-h-12 cursor-pointer rounded-full border border-outline px-5 text-sm font-bold text-navy transition-colors hover:border-teal disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {copy.close}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handlePurchase()}
+              disabled={purchase.isPending || available === 0}
+              className="premium-button min-h-12 cursor-pointer px-5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {purchase.isPending ? copy.reservePending : copy.reserveCta}
+            </button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 }

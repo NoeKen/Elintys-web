@@ -1,24 +1,35 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiClientError } from '@/shared/lib/api';
 import { EventPageClient } from './EventPageClient';
 
-const mocks = vi.hoisted(() => ({ post: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  post: vi.fn(),
+  get: vi.fn(),
+  useAuth: vi.fn().mockReturnValue({ user: null, isLoading: false }),
+}));
 
 vi.mock('@/shared/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/lib/api')>();
-  return { ...actual, default: { post: mocks.post } };
+  return { ...actual, default: { post: mocks.post, get: mocks.get } };
 });
 vi.mock('@/components/tickets/PurchaseModal', () => ({
   PurchaseModal: () => <div role="dialog">Achat</div>,
 }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => mocks.useAuth() }));
+
+function renderClient(ui: React.ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
 
 const tickets = [{
   _id: 'ticket-1',
   name: 'Admission générale',
-  price: 4500,
-  isFree: false,
+  price: 0,
+  isFree: true,
   quantity: 100,
   sold: 10,
 }];
@@ -33,24 +44,42 @@ const baseEvent = {
   dateIsTentative: false,
   discoverability: 'public' as const,
   accessPolicy: { type: 'open' as const },
-  admissionModes: ['paid_ticket' as const],
+  admissionModes: ['free_ticket' as const],
   providers: [],
   ticketTypes: tickets,
   relatedEvents: [],
 };
 
 describe('EventPageClient access policies', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.useAuth.mockReturnValue({ user: null, isLoading: false });
+  });
+  afterEach(() => mocks.useAuth.mockReturnValue({ user: null, isLoading: false }));
 
-  it('laisse un événement public ouvert acheter un billet', () => {
-    render(<EventPageClient event={baseEvent} />);
+  it('laisse un événement public ouvert réserver un billet gratuit', () => {
+    renderClient(<EventPageClient event={baseEvent} />);
     expect(screen.getByRole('button', { name: 'Choisir' })).toBeEnabled();
+  });
+
+  it('présente honnêtement les billets payants comme indisponibles', () => {
+    renderClient(
+      <EventPageClient
+        event={{
+          ...baseEvent,
+          admissionModes: ['paid_ticket'],
+          ticketTypes: [{ ...tickets[0], isFree: false, price: 4500 }],
+        }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Bientôt disponible' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Choisir' })).not.toBeInTheDocument();
   });
 
   it('bloque l’achat avant validation du code puis transmet le grant', async () => {
     const user = userEvent.setup({ delay: null });
     mocks.post.mockResolvedValue({ data: { authorized: true, accessGrant: 'signed-grant' } });
-    render(
+    renderClient(
       <EventPageClient
         event={{ ...baseEvent, accessPolicy: { type: 'access_code', hasAccessCode: true } }}
       />,
@@ -67,7 +96,7 @@ describe('EventPageClient access policies', () => {
   it('explique un code invalide sans afficher le message générique 403', async () => {
     const user = userEvent.setup({ delay: null });
     mocks.post.mockRejectedValue(new ApiClientError(403, { message: 'ACCESS_CODE_INVALID' }));
-    render(
+    renderClient(
       <EventPageClient
         event={{ ...baseEvent, accessPolicy: { type: 'access_code', hasAccessCode: true } }}
       />,
@@ -81,8 +110,9 @@ describe('EventPageClient access policies', () => {
 
   it('ne déverrouille pas les billets lorsqu’un domaine est refusé', async () => {
     const user = userEvent.setup({ delay: null });
+    mocks.useAuth.mockReturnValue({ user: { sub: 'user-1', email: 'u@test.com' }, isLoading: false });
     mocks.post.mockResolvedValue({ data: { authorized: false, reason: 'EMAIL_DOMAIN_NOT_ALLOWED' } });
-    render(
+    renderClient(
       <EventPageClient
         event={{ ...baseEvent, accessPolicy: { type: 'email_domain' } }}
       />,
@@ -95,16 +125,20 @@ describe('EventPageClient access policies', () => {
 
   it('expose une demande d’approbation et une invitation avec des CTA distincts', async () => {
     const user = userEvent.setup({ delay: null });
-    mocks.post.mockResolvedValue({ data: {} });
-    const { rerender } = render(
+    mocks.useAuth.mockReturnValue({ user: { sub: 'user-1', email: 'u@test.com' }, isLoading: false });
+    mocks.post.mockResolvedValue({ data: { status: 'pending' } });
+    mocks.get.mockResolvedValue({ data: { status: 'none' } });
+    const { unmount } = renderClient(
       <EventPageClient
         event={{ ...baseEvent, accessPolicy: { type: 'manual_approval' }, ticketTypes: [] }}
       />,
     );
-    await user.click(screen.getByRole('button', { name: 'Demander l’accès' }));
+    await user.click(await screen.findByRole('button', { name: 'Demander l’accès' }));
     expect(mocks.post).toHaveBeenCalledWith('/events/event-1/access/request', {});
+    expect(await screen.findByText(/en attente d/)).toBeInTheDocument();
 
-    rerender(
+    unmount();
+    renderClient(
       <EventPageClient
         event={{ ...baseEvent, accessPolicy: { type: 'invitation_token' }, admissionModes: ['invitation'], ticketTypes: [] }}
       />,
@@ -113,7 +147,7 @@ describe('EventPageClient access policies', () => {
   });
 
   it('ne rend aucune billetterie quand le mode d’admission ne l’active pas', () => {
-    render(
+    renderClient(
       <EventPageClient
         event={{ ...baseEvent, admissionModes: ['free'], ticketTypes: [] }}
       />,
@@ -121,5 +155,23 @@ describe('EventPageClient access policies', () => {
 
     expect(screen.queryByRole('heading', { name: 'Billets disponibles' })).not.toBeInTheDocument();
     expect(screen.getByText(/accessible sans condition supplémentaire/)).toBeInTheDocument();
+  });
+
+  it('préserve un retour interne pour la connexion et la création de compte', () => {
+    renderClient(
+      <EventPageClient
+        event={{ ...baseEvent, accessPolicy: { type: 'email_domain', allowedDomains: ['elintys.ca'] } }}
+      />,
+    );
+
+    expect(screen.getByText(/@elintys.ca/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Se connecter pour continuer' })).toHaveAttribute(
+      'href',
+      '/connexion?redirect=%2Fevenements%2Fgala-elintys',
+    );
+    expect(screen.getByRole('link', { name: 'Créer un compte' })).toHaveAttribute(
+      'href',
+      '/inscription/etape-1?redirect=%2Fevenements%2Fgala-elintys',
+    );
   });
 });

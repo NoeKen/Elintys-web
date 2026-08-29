@@ -93,6 +93,32 @@ export interface EventAccessRequest {
   reviewedAt?: string;
 }
 
+export type EventRegistrationStatus = 'active' | 'cancelled';
+
+export interface EventRegistrationSummary {
+  _id: string;
+  title: string;
+  slug: string;
+  startDate?: string;
+  endDate?: string;
+  status?: EventStatus;
+}
+
+export interface EventRegistration {
+  _id: string;
+  eventId: EventRegistrationSummary | string | null;
+  status: EventRegistrationStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedEventRegistrations {
+  data: EventRegistration[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface Event {
   _id: string;
   id?: string;
@@ -224,6 +250,7 @@ export interface PublicEventDetail {
     type: EventAccessPolicyType;
     requiresAuthentication?: boolean;
     hasAccessCode?: boolean;
+    allowedDomains?: string[];
   };
   admissionModes: AdmissionMode[];
   organizer?: { name: string };
