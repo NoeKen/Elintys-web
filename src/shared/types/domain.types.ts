@@ -173,6 +173,7 @@ export interface Invitation {
 
 export type NotificationType =
   | 'VENDOR_RESPONDED'
+  | 'VENDOR_REQUEST_RECEIVED'
   | 'TICKET_SOLD'
   | 'VENUE_CONFIRMED'
   | 'INVITATION_ACCEPTED'

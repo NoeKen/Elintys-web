@@ -4,6 +4,7 @@ export interface AppNotification {
   _id: string;
   type:
     | 'VENDOR_RESPONDED'
+    | 'VENDOR_REQUEST_RECEIVED'
     | 'TICKET_SOLD'
     | 'VENUE_CONFIRMED'
     | 'INVITATION_ACCEPTED'

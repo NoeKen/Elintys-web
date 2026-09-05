@@ -11,6 +11,7 @@ import {
 
 const TYPE_LABELS: Record<string, string> = {
   VENDOR_RESPONDED: 'Réponse prestataire',
+  VENDOR_REQUEST_RECEIVED: 'Nouvelle demande',
   TICKET_SOLD: 'Billet vendu',
   VENUE_CONFIRMED: 'Lieu confirmé',
   INVITATION_ACCEPTED: 'Invitation acceptée',
