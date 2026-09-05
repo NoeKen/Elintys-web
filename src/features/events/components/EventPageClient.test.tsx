@@ -32,6 +32,7 @@ const tickets = [{
   isFree: true,
   quantity: 100,
   sold: 10,
+  reserved: 0,
 }];
 
 const baseEvent = {

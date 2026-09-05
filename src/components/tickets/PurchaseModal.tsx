@@ -19,6 +19,7 @@ interface TicketType {
   isFree: boolean;
   quantity: number;
   sold: number;
+  reserved: number;
 }
 
 interface Props {
@@ -44,7 +45,7 @@ function shouldRotateKey(error: unknown): boolean {
 export function isTrustedApprovalUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' && /(^|\.)paypal\.com$/.test(parsed.hostname);
+    return parsed.protocol === 'https:' && /(^|\.)sandbox\.paypal\.com$/.test(parsed.hostname);
   } catch {
     return false;
   }
@@ -58,7 +59,7 @@ export function PurchaseModal({ ticketType, eventTitle, eventSlug, accessGrant, 
   const [purchasedCount, setPurchasedCount] = useState<number | null>(null);
   const [paidPending, setPaidPending] = useState(false);
   const [paidError, setPaidError] = useState<unknown>(null);
-  const available = Math.max(0, ticketType.quantity - ticketType.sold);
+  const available = Math.max(0, ticketType.quantity - ticketType.sold - ticketType.reserved);
   const returnPath = `/evenements/${eventSlug}#billets`;
   const registerHref = `/inscription/etape-1?redirect=${encodeURIComponent(returnPath)}`;
 

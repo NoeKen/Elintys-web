@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CheckoutPage from '../checkout/[eventId]/page';
 import PaymentCancelPage from './annule/page';
 import PaymentSuccessPage from './succes/page';
+import { SYNC_INTERVAL_MS } from '@/features/payments/components/PaymentStatusClient';
 
 vi.mock('next/link', () => ({
   default: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
@@ -140,5 +141,46 @@ describe('Routes de retour de paiement', () => {
 
     const live = screen.getByLabelText('État de votre commande');
     expect(live).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('redémarre un cycle de polling borné après une reprise manuelle', async () => {
+    vi.useFakeTimers();
+    try {
+      syncTicketOrder
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order())
+        .mockResolvedValueOnce(order({ status: 'PAID', admissionIds: ['a1'] }));
+
+      render(await PaymentSuccessPage(params({ order_id: ORDER_ID })));
+      await act(async () => Promise.resolve());
+
+      for (let attempt = 1; attempt < 6; attempt += 1) {
+        await act(async () => {
+          vi.advanceTimersByTime(SYNC_INTERVAL_MS);
+          await Promise.resolve();
+        });
+      }
+
+      expect(screen.getByRole('button', { name: 'Vérifier à nouveau' })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Vérifier à nouveau' }));
+      await act(async () => Promise.resolve());
+      expect(syncTicketOrder).toHaveBeenCalledTimes(7);
+
+      await act(async () => {
+        vi.advanceTimersByTime(SYNC_INTERVAL_MS);
+        await Promise.resolve();
+      });
+
+      expect(screen.getByRole('heading', { name: 'Votre paiement est confirmé' }))
+        .toBeInTheDocument();
+      expect(syncTicketOrder).toHaveBeenCalledTimes(8);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

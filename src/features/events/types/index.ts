@@ -216,7 +216,7 @@ export interface PublicEventTicketType {
   quantity: number;
   sold: number;
   /** Capacité bloquée par des paiements en cours (Vague 5/6). */
-  reserved?: number;
+  reserved: number;
   description?: string;
 }
 

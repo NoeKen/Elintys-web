@@ -130,7 +130,7 @@ test.describe.serial('Sprint 3 Vague 4 — parcours participant', () => {
     await expect(page.getByText('Vous êtes déjà inscrit à cet événement.')).toBeVisible();
   });
 
-  test('billet gratuit réel et paiement non simulé', async ({ page }) => {
+  test('billet gratuit réel et paiement payant fail-closed', async ({ page }) => {
     await openEvent(page, ticketEvent);
     await page.getByRole('button', { name: 'Choisir' }).click();
     await expect(page.getByRole('dialog', { name: 'Réserver un billet gratuit' })).toBeVisible();
@@ -138,7 +138,12 @@ test.describe.serial('Sprint 3 Vague 4 — parcours participant', () => {
     await expect(page.getByText(/billet.*réservé/i)).toBeVisible();
     await page.getByRole('dialog').getByText('Fermer', { exact: true }).click();
 
-    await expect(page.getByRole('button', { name: 'Bientôt disponible' })).toBeDisabled();
+    await page.getByRole('button', { name: 'Acheter mon billet' }).click();
+    await expect(page.getByRole('dialog', { name: 'Acheter mon billet' })).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Acheter mon billet' }).dblclick();
+    await expect(
+      page.getByText("Le paiement des billets n'est pas encore ouvert pour cet événement."),
+    ).toBeVisible();
   });
 
   test('espace unifié retrouve inscriptions et billets sans secret', async ({ page }) => {

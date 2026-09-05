@@ -54,6 +54,7 @@ export function PaymentStatusClient({ orderId, introTitle, introDescription }: P
   const [order, setOrder] = useState<TicketOrderView | null>(null);
   const [state, setState] = useState<PaymentDisplayState>(orderId ? 'checking' : 'missingOrder');
   const [exhausted, setExhausted] = useState(false);
+  const [syncCycle, setSyncCycle] = useState(0);
   const attempts = useRef(0);
   const cancelled = useRef(false);
 
@@ -105,13 +106,12 @@ export function PaymentStatusClient({ orderId, introTitle, introDescription }: P
       cancelled.current = true;
       clearTimeout(timer);
     };
-  }, [orderId, runSync]);
+  }, [orderId, runSync, syncCycle]);
 
   const handleRetry = () => {
-    attempts.current = 0;
     setExhausted(false);
     setState('checking');
-    void runSync();
+    setSyncCycle((cycle) => cycle + 1);
   };
 
   const { title, description } = STATE_COPY[state];

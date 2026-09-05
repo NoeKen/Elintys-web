@@ -11,20 +11,23 @@ const VIEWPORTS = [
   { name: '1538x1100', width: 1538, height: 1100 },
 ] as const;
 
-const DISABLED_ROUTES = [
-  '/checkout/wave5-qa',
-  '/paiement/succes?session_id=cs_secret_should_not_render',
-  '/paiement/annule',
+const FAIL_CLOSED_ROUTES = [
+  { path: '/checkout/wave5-qa', heading: "L’achat en ligne n’est pas encore ouvert" },
+  {
+    path: '/paiement/succes?session_id=cs_secret_should_not_render',
+    heading: 'Commande introuvable',
+  },
+  { path: '/paiement/annule', heading: 'Commande introuvable' },
 ] as const;
 
-test.describe('Sprint 3 Vague 5 — paiement participant désactivé', () => {
+test.describe('Sprint 3 Vague 5 — paiement participant fail-closed', () => {
   for (const viewport of VIEWPORTS) {
     test(`reste honnête et sans overflow en ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport);
 
-      for (const route of DISABLED_ROUTES) {
-        await page.goto(route, { waitUntil: 'load' });
-        await expect(page.getByRole('heading', { level: 1, name: "L’achat en ligne n’est pas encore ouvert" })).toBeVisible();
+      for (const route of FAIL_CLOSED_ROUTES) {
+        await page.goto(route.path, { waitUntil: 'load' });
+        await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible();
         await expect(page.getByText(/paiement confirmé|paiement annulé|aucun montant n.*a été débité/i)).toHaveCount(0);
         await expect(page.getByText('cs_secret_should_not_render')).toHaveCount(0);
 
@@ -39,13 +42,13 @@ test.describe('Sprint 3 Vague 5 — paiement participant désactivé', () => {
   }
 
   test('reste sans violation Axe critical/serious', async ({ page }) => {
-    for (const route of DISABLED_ROUTES) {
-      await page.goto(route, { waitUntil: 'load' });
+    for (const route of FAIL_CLOSED_ROUTES) {
+      await page.goto(route.path, { waitUntil: 'load' });
       const result = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
         .analyze();
       const blocking = result.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious');
-      expect(blocking, `${route}: axe critical/serious`).toEqual([]);
+      expect(blocking, `${route.path}: axe critical/serious`).toEqual([]);
     }
   });
 
@@ -55,10 +58,10 @@ test.describe('Sprint 3 Vague 5 — paiement participant désactivé', () => {
     for (let attempt = 0; attempt < 12; attempt += 1) {
       await page.keyboard.press('Tab');
       const label = await page.evaluate(() => document.activeElement?.textContent?.trim() ?? '');
-      if (label === 'Découvrir des événements') break;
+      if (label === 'Voir mes billets') break;
     }
 
-    const action = page.getByRole('link', { name: 'Découvrir des événements' });
+    const action = page.getByRole('link', { name: 'Voir mes billets' });
     await expect(action).toBeFocused();
     const focusStyle = await action.evaluate((element) => {
       const style = getComputedStyle(element);

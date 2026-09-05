@@ -33,6 +33,7 @@ const freeTicket = {
   isFree: true,
   quantity: 10,
   sold: 0,
+  reserved: 0,
 };
 
 describe('PurchaseModal', () => {
@@ -83,6 +84,23 @@ describe('PurchaseModal', () => {
     expect(screen.getByText(/réservés le temps du paiement/i)).toBeInTheDocument();
     // Le flux « billet gratuit » ne doit jamais être emprunté pour un payant.
     expect(mocks.mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('soustrait les réservations actives du stock affiché et sélectionnable', async () => {
+    const user = userEvent.setup();
+    render(
+      <PurchaseModal
+        ticketType={{ ...freeTicket, quantity: 5, sold: 1, reserved: 3 }}
+        eventTitle="Gala Elintys"
+        eventSlug="gala-elintys"
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('1 disponible(s)')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Augmenter le nombre de billets' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Réserver' }));
+    expect(mocks.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ quantity: 1 }));
   });
 
   it('demande une session sans collecter de courriel invité', () => {
