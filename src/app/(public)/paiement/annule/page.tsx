@@ -1,45 +1,40 @@
-import Link from 'next/link';
-import { participationCopy as copy } from '@/features/events/lib/participation-error';
+import { participationCopy } from '@/features/events/lib/participation-error';
+import { PaymentStatusClient } from '@/features/payments/components/PaymentStatusClient';
+
+const copy = participationCopy.payment;
 
 export const metadata = {
-  title: copy.paidUnavailableTitle,
+  title: copy.cancelTitle,
 };
 
-export default function PaymentCancelPage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function readOrderId(params: Record<string, string | string[] | undefined>): string | null {
+  const raw = params.order_id;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === 'string' && /^[0-9a-f]{24}$/i.test(value) ? value : null;
+}
+
+/**
+ * Retour « annulation » du fournisseur de paiement.
+ *
+ * Quitter la fenêtre du fournisseur ne prouve PAS qu'aucun montant n'a été
+ * capturé. Aucun message absolu du type « aucun montant n'a été débité »
+ * n'est affiché : l'état réel est demandé au serveur.
+ */
+export default async function PaymentCancelledPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
   return (
     <div className="public-detail-shell mesh-gradient">
       <section className="container-public">
-        <div className="glass-card mx-auto max-w-2xl p-7 text-center sm:p-10">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gold-pale">
-            <svg
-              aria-hidden="true"
-              className="h-8 w-8 text-amber"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </div>
-
-          <p className="section-eyebrow">{copy.paidUnavailableBadge}</p>
-          <h1 className="premium-heading mt-3">{copy.paidUnavailableTitle}</h1>
-
-          <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-on-surface-variant">
-            {copy.paidUnavailableDescription}
-          </p>
-
-          <div className="mt-8">
-            <Link href="/evenements" className="premium-button">
-              {copy.discoverEvents}
-            </Link>
-          </div>
-        </div>
+        <PaymentStatusClient
+          orderId={readOrderId(params)}
+          introTitle={copy.cancelTitle}
+          introDescription={copy.cancelDescription}
+        />
       </section>
     </div>
   );

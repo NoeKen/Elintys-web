@@ -1,45 +1,37 @@
-import Link from 'next/link';
-import { participationCopy as copy } from '@/features/events/lib/participation-error';
+import { participationCopy } from '@/features/events/lib/participation-error';
+import { PaymentStatusClient } from '@/features/payments/components/PaymentStatusClient';
+
+const copy = participationCopy.payment;
 
 export const metadata = {
-  title: copy.paidUnavailableTitle,
+  title: copy.statusTitle,
 };
 
-export default function PaymentSuccessPage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function readOrderId(params: Record<string, string | string[] | undefined>): string | null {
+  const raw = params.order_id;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  // Seul un ObjectId Mongo est accepté : l'URL de retour ne doit pas pouvoir
+  // servir de vecteur d'injection vers une ressource arbitraire.
+  return typeof value === 'string' && /^[0-9a-f]{24}$/i.test(value) ? value : null;
+}
+
+/**
+ * Retour du fournisseur de paiement.
+ *
+ * IMPORTANT : atterrir sur cette page ne prouve RIEN. L'état affiché provient
+ * exclusivement du serveur, qui interroge lui-même le fournisseur.
+ */
+export default async function PaymentSuccessPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+
   return (
     <div className="public-detail-shell mesh-gradient">
       <section className="container-public">
-        <div className="glass-card mx-auto max-w-2xl p-7 text-center sm:p-10">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal-pale">
-            <svg
-              aria-hidden="true"
-              className="h-8 w-8 text-teal"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-
-          <p className="section-eyebrow">{copy.paidUnavailableBadge}</p>
-          <h1 className="premium-heading mt-3">{copy.paidUnavailableTitle}</h1>
-
-          <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-on-surface-variant">
-            {copy.paidUnavailableDescription}
-          </p>
-
-          <div className="mt-8 flex justify-center">
-            <Link href="/evenements" className="premium-button-secondary">
-              {copy.discoverEvents}
-            </Link>
-          </div>
-        </div>
+        <PaymentStatusClient orderId={readOrderId(params)} introTitle={copy.statusTitle} />
       </section>
     </div>
   );

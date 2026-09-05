@@ -1,5 +1,26 @@
 import api from "@/shared/lib/api";
-import type { Event, CreateEventInput, UpdateEventInput, EventAccessRequest, EventAccessRequestStatus } from "../types";
+import type {
+  Event,
+  CreateEventInput,
+  UpdateEventInput,
+  EventAccessRequest,
+  EventAccessRequestStatus,
+  EventDiscoverability,
+  EventAccessPolicy,
+  AdmissionMode,
+} from "../types";
+
+/**
+ * Payload du PUT /events/:id/access-configuration.
+ * Le endpoint est un remplacement complet : les trois champs sont requis.
+ * `accessPolicy.code` n'est envoyé que lorsqu'un nouveau code est saisi ;
+ * omis, le serveur conserve le hash existant.
+ */
+export interface UpdateEventAccessConfigurationInput {
+  discoverability: EventDiscoverability;
+  accessPolicy: EventAccessPolicy;
+  admissionModes: AdmissionMode[];
+}
 
 export interface EventPublishReadinessError {
   code: string;
@@ -190,6 +211,11 @@ export const eventsService = {
 
   async reviewAccessRequest(id: string, requestId: string, status: EventAccessRequestStatus): Promise<EventAccessRequest> {
     const res = await api.patch<EventAccessRequest>(`/events/${id}/access/requests/${requestId}`, { status });
+    return res.data;
+  },
+
+  async updateAccessConfiguration(id: string, data: UpdateEventAccessConfigurationInput): Promise<Event> {
+    const res = await api.put<Event>(`/events/${id}/access-configuration`, data);
     return res.data;
   },
 

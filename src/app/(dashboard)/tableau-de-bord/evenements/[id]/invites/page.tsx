@@ -6,13 +6,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, ShieldCheck } from 'lucide-react';
 import { eventsService } from '@/features/events/services/events.service';
 import {
   invitationsService,
   type OrganizerInvitation,
 } from '@/features/invitations/services/invitations.service';
-import { organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
+import { organizerCopy, organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
 import { getUserFacingError } from '@/shared/lib/user-facing-error';
 import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
 import { cn } from '@/shared/lib/utils';
@@ -191,6 +192,7 @@ export default function EventInvitationsPage() {
   }
 
   const event = eventQuery.data;
+  const invitationsEnabled = event.admissionModes?.includes('invitation') ?? false;
   const invitations = listQuery.data?.data ?? [];
   const total = listQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -211,6 +213,23 @@ export default function EventInvitationsPage() {
       </section>
 
       {/* ── Send invitation form ────────────────────────────────────────────── */}
+      {!invitationsEnabled ? (
+        <section className="rounded-3xl border border-amber/35 bg-amber/5 p-6 shadow-event-soft sm:p-8">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-amber/15 text-amber" aria-hidden="true">
+            <Lock size={20} />
+          </span>
+          <h2 className="mt-5 font-serif text-2xl text-event-petrol">{copy.access.invitationsLockedTitle}</h2>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-event-muted">
+            {organizerCopy(copy.access.invitationsLockedBody, { title: event.title })}
+          </p>
+          <Link
+            href={`/tableau-de-bord/evenements/${id}/acces-et-inscriptions`}
+            className="premium-button mt-6 inline-flex min-h-[44px] items-center px-7"
+          >
+            {copy.access.invitationsLockedCta}
+          </Link>
+        </section>
+      ) : (
       <section className="rounded-3xl bg-white p-6 shadow-event-soft">
         <h2 className="font-serif text-2xl text-event-petrol mb-5">Envoyer une invitation</h2>
 
@@ -296,6 +315,7 @@ export default function EventInvitationsPage() {
           )}
         </form>
       </section>
+      )}
 
       {/* ── Sent invitations list ───────────────────────────────────────────── */}
       <section className="rounded-3xl bg-white p-6 shadow-event-soft">

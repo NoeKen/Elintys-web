@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Eye, ShieldCheck, Ticket, UserCheck, X } from 'lucide-react';
+import { Check, Eye, Pencil, ShieldCheck, Ticket, UserCheck, X } from 'lucide-react';
 import { eventsService } from '@/features/events/services/events.service';
+import type { UpdateEventAccessConfigurationInput } from '@/features/events/services/events.service';
+import { AccessConfigurationForm } from '@/components/events/organizer/AccessConfigurationForm';
 import type { EventAccessRequestStatus } from '@/features/events/types';
 import { organizerCopy, organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
 import { getUserFacingError } from '@/shared/lib/user-facing-error';
@@ -18,6 +21,15 @@ export default function EventAccessManagementPage() {
   const eventQuery = useQuery({ queryKey: ['event', id], queryFn: () => eventsService.get(id), staleTime: 30_000 });
   const requestsQuery = useQuery({ queryKey: ['event-access-requests', id], queryFn: () => eventsService.listAccessRequests(id), staleTime: 10_000 });
   const guestsQuery = useQuery({ queryKey: ['guests', id, 'access-summary'], queryFn: () => guestsService.list(token, id), enabled: Boolean(token), staleTime: 15_000 });
+  const [isEditing, setIsEditing] = useState(false);
+  const saveConfiguration = useMutation({
+    mutationFn: (payload: UpdateEventAccessConfigurationInput) => eventsService.updateAccessConfiguration(id, payload),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['event', id], updated);
+      void queryClient.invalidateQueries({ queryKey: ['event', id] });
+      setIsEditing(false);
+    },
+  });
   const review = useMutation({ mutationFn: ({ requestId, status }: { requestId: string; status: EventAccessRequestStatus }) => eventsService.reviewAccessRequest(id, requestId, status), onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['event-access-requests', id] }) });
   if (eventQuery.isLoading || requestsQuery.isLoading) return <div className="p-6"><div className="premium-skeleton h-80 rounded-3xl" /></div>;
   if (eventQuery.isError || requestsQuery.isError || !eventQuery.data) return <section className="m-6 rounded-3xl border border-destructive/20 bg-white p-7 text-center"><h1 className="font-serif text-3xl text-event-petrol">{copy.access.loadError}</h1><button type="button" onClick={() => { void eventQuery.refetch(); void requestsQuery.refetch(); }} className="premium-button mt-5 px-6">{copy.access.retry}</button></section>;
@@ -31,7 +43,26 @@ export default function EventAccessManagementPage() {
       <AccessMetric label={copy.access.reserved} value={reserved} icon={<UserCheck size={22} />} />
       <AccessMetric label={copy.access.remaining} value={remaining} icon={<Ticket size={22} />} strong />
     </section>
-    <section className="mt-5 grid gap-4 md:grid-cols-3"><PolicyCard icon={<Eye size={21} />} title={copy.access.visibility} value={visibilityLabel(event.discoverability)} description={copy.access.visibilityDescription} /><PolicyCard icon={<ShieldCheck size={21} />} title={copy.access.control} value={accessLabel(event.accessPolicy?.type)} description={copy.access.controlDescription} warm /><PolicyCard icon={<Ticket size={21} />} title={copy.access.admission} value={(event.admissionModes?.length ? event.admissionModes : ['registration_only']).map(admissionLabel).join(', ')} description={copy.access.admissionDescription} /></section>
+    {isEditing ? (
+      <AccessConfigurationForm
+        discoverability={event.discoverability}
+        accessPolicy={event.accessPolicy}
+        admissionModes={event.admissionModes}
+        isSaving={saveConfiguration.isPending}
+        isSaved={saveConfiguration.isSuccess}
+        saveError={saveConfiguration.isError ? saveConfiguration.error : null}
+        onSubmit={(payload) => saveConfiguration.mutate(payload)}
+        onCancel={() => { saveConfiguration.reset(); setIsEditing(false); }}
+      />
+    ) : <>
+      <div className="mt-5 flex justify-end">
+        <button type="button" onClick={() => { saveConfiguration.reset(); setIsEditing(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-event-outline-subtle/60 px-5 font-bold text-event-petrol">
+          <Pencil size={16} aria-hidden="true" />{copy.access.edit}
+        </button>
+      </div>
+      <section className="mt-3 grid gap-4 md:grid-cols-3"><PolicyCard icon={<Eye size={21} />} title={copy.access.visibility} value={visibilityLabel(event.discoverability)} description={copy.access.visibilityDescription} /><PolicyCard icon={<ShieldCheck size={21} />} title={copy.access.control} value={accessLabel(event.accessPolicy?.type)} description={copy.access.controlDescription} warm /><PolicyCard icon={<Ticket size={21} />} title={copy.access.admission} value={(event.admissionModes?.length ? event.admissionModes : ['registration_only']).map(admissionLabel).join(', ')} description={copy.access.admissionDescription} /></section>
+      {saveConfiguration.isSuccess ? <p role="status" className="mt-3 text-sm font-bold text-event-teal">{copy.access.saved}</p> : null}
+    </>}
     <section className="mt-6 overflow-hidden rounded-3xl bg-white shadow-event-soft">
       <div className="flex flex-col gap-2 border-b border-event-outline-subtle/40 p-6 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="font-serif text-3xl text-event-petrol">{copy.access.pending}</h2><p className="mt-2 text-sm text-event-muted">{organizerCopy(copy.access.pendingDescription, { count: pending.length })}</p></div></div>
       {review.isError ? <FormErrorAlert className="m-5" error={getUserFacingError(review.error, { fallback: copy.access.reviewError })} /> : null}

@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-09-04",
+  "build": "Next.js production build passed",
+  "surface": "/paiement/succes without order_id",
+  "viewport": "390x844",
+  "overflowPx": 0,
+  "documentScrollHeightPx": 1691,
+  "sdkPayPalLoaded": false,
+  "polling": {
+    "intervalMs": 2500,
+    "maximumAutomaticAttempts": 6,
+    "manualRetryRestartsBoundedCycle": true
+  },
+  "webVitals": null,
+  "webVitalsReason": "The in-app browser did not expose PerformanceEntry timing data; no value was fabricated."
+}

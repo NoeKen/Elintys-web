@@ -290,9 +290,14 @@ export function EventPageClient({ event }: Props) {
           ) : (
             <div className="mt-5 space-y-3">
               {event.ticketTypes.map((ticketType) => {
-                const available = Math.max(0, ticketType.quantity - ticketType.sold);
-                const paidUnavailable = !ticketType.isFree;
-                const disabled = available === 0 || !ticketAccessAllowed || paidUnavailable;
+                // La disponibilité tient compte de la capacité RÉSERVÉE par des
+                // paiements en cours : deux acheteurs ne se voient pas proposer
+                // le même dernier billet.
+                const available = Math.max(
+                  0,
+                  ticketType.quantity - ticketType.sold - (ticketType.reserved ?? 0),
+                );
+                const disabled = available === 0 || !ticketAccessAllowed;
                 return (
                   <div key={ticketType._id} className="ticket-card">
                     <div>
@@ -319,9 +324,9 @@ export function EventPageClient({ event }: Props) {
                       >
                         {available === 0
                           ? copy.soldOut
-                          : paidUnavailable
-                            ? participationCopy.paidUnavailableBadge
-                            : copy.choose}
+                          : ticketType.isFree
+                            ? copy.choose
+                            : participationCopy.payment.buyCta}
                       </button>
                     </div>
                   </div>

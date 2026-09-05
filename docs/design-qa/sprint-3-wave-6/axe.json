@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-04",
+  "scope": [
+    "/paiement/succes",
+    "/paiement/annule",
+    "event paid admission",
+    "participant fail-closed"
+  ],
+  "critical": 0,
+  "serious": 0,
+  "evidence": {
+    "wave6Playwright": "13/13 passed",
+    "participantE2E": "22/22 passed"
+  }
+}
