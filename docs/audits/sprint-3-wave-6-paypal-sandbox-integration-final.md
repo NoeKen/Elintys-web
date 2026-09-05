@@ -1,8 +1,8 @@
 # Sprint 3 / Vague 6 — revue indépendante PayPal Sandbox
 
-Date : 2026-09-04  
+Date : 2026-09-05
 Reviewer : Codex  
-Verdict : **PARTIELLE — intégration locale validée, Sandbox externe non exécuté**
+Verdict : **PARTIELLE — intégration locale et API Sandbox validées, parcours acheteur/webhook externe incomplet**
 
 ## 1. Branche
 
@@ -15,7 +15,8 @@ force-push.
 Claude a livré un adaptateur PayPal Orders v2, OAuth en mémoire, création et
 capture serveur, vérification officielle des webhooks, déduplication persistée,
 index de règlement, pages de retour et documentation. Son rapport annonçait
-honnêtement que le Sandbox externe n'avait pas été exécuté faute d'identifiants.
+honnêtement que le Sandbox externe n'avait pas été exécuté faute d'identifiants
+au moment de son handoff initial.
 
 ## 3. Revue architecture Codex
 
@@ -36,7 +37,7 @@ honnêtement que le Sandbox externe n'avait pas été exécuté faute d'identifi
 |---|---:|---:|---|
 | P0 | 0 | 0 | — |
 | P1 | 5 | 0 | garde live incomplète, règlement insuffisamment attesté, course expiration/capture, bail webhook stale, bootstrap Nest cassé |
-| P2 | 3 | 0 | stock public sans `reserved`, retry polling inopérant, URL d'approbation trop permissive |
+| P2 | 4 | 0 | stock public sans `reserved`, retry polling inopérant, URL d'approbation trop permissive, injection HTML dans le nouveau courriel prestataire |
 | P3 | 2 | 0 | diagnostic du script de concurrence, commentaire `.env.example` obsolète |
 
 Le scan de sécurité immuable a retenu un finding Low/P3 sur la course
@@ -54,6 +55,7 @@ horloge contrôlée.
 - La reprise utilisateur redémarre un nouveau cycle de polling borné.
 - Les redirections n'acceptent que `https://*.sandbox.paypal.com`.
 - Les E2E Vagues 4/5 ont été alignés sur le nouveau comportement fail-closed.
+- Les noms et titres transmis au nouveau courriel prestataire sont échappés avant rendu HTML, avec test de non-régression.
 
 ## 6. PayPal provider
 
@@ -121,6 +123,10 @@ règlement tardif. La recherche locale n'a trouvé aucun secret PayPal committé
 Rapport du scan :
 `/private/var/folders/hs/9kmczy7971dbsdpd26r35dqw0000gn/T/codex-security-scans-jf61HP/Elintys-api/c5fa30f519ca46f05b8e034bdb1edba0adaff113_20260904T204528Z_dcwx0qed/report.md`.
 
+La revue finale du diff prestataire a également produit un scan complet sans
+finding résiduel après correction :
+`/private/var/folders/hs/9kmczy7971dbsdpd26r35dqw0000gn/T/codex-security-scans-jQ7oTd/Elintys-api/2fdcf7befbad41939ed62c4d9f6dfef145f4fb75_20260905T120906Z_ei15ra80/report.md`.
+
 ## 16. Preuve Sandbox
 
 | Niveau de preuve | Résultat |
@@ -128,8 +134,10 @@ Rapport du scan :
 | TestPaymentProvider | Validé, dont 10 scénarios MongoDB réels. |
 | Contrats API PayPal mockés | Validés. |
 | Vérification webhook mockée | Validée. |
-| Vraie API PayPal Sandbox | **NON EXÉCUTÉE : credentials absentes.** |
-| Approbation acheteur + webhook externe | **NON EXÉCUTÉS.** |
+| OAuth réel PayPal Sandbox | Validé avec les credentials serveur, sans exposition dans Git ou les logs. |
+| Création et relecture Order v2 réelles | Validées ; état `PAYER_ACTION_REQUIRED` et URL d'approbation `www.sandbox.paypal.com`. |
+| Webhook configuré dans l'application Sandbox | **NON : aucun webhook enregistré ; le `PAYPAL_WEBHOOK_ID` local ne correspond à aucun webhook actif.** |
+| Approbation acheteur + capture + webhook externe | **NON EXÉCUTÉS : aucun compte acheteur QA disponible et endpoint feature non déployé.** |
 
 En conséquence, ce rapport ne déclare pas « PayPal Sandbox validated ».
 
@@ -164,13 +172,14 @@ Dry-run sur `elintys-dev` uniquement : replica set et transactions disponibles,
 
 ## 22. Tests
 
-- API unitaires : 75 suites, 1 092/1 092.
+- API unitaires : 75 suites, 1 098/1 098 lors de la dernière revue.
 - API E2E : 4 suites, 49/49.
 - API concurrence réelle : 10/10.
-- Web unitaires : 44 fichiers, 257/257.
+- Web unitaires : 46 fichiers, 269/269 lors de la dernière revue.
 - Web E2E Vague 6 : 13/13.
 - Web E2E participant/fail-closed : 22/22.
-- Total exécuté et vert : 1 443 assertions/scénarios comptabilisés.
+- Les batteries E2E Wave 6 (13/13), participant/fail-closed (22/22), API
+  (49/49) et concurrence (10/10) restent les preuves fonctionnelles de la vague.
 
 ## 23. Gates
 
@@ -179,8 +188,8 @@ Dry-run sur `elintys-dev` uniquement : replica set et transactions disponibles,
 | lint | Vert, 0 warning | Vert, 0 erreur, 9 warnings préexistants |
 | typecheck | Vert | Vert |
 | build | Vert | Vert, production |
-| unit | 1 092/1 092 | 257/257 |
-| coverage | 74,71 % stmts / 68,19 % branches | 45,71 % stmts / 43,39 % branches |
+| unit | 1 098/1 098 | 269/269 |
+| coverage | 74,82 % stmts / 68,23 % branches | 45,57 % stmts / 42,43 % branches |
 | E2E | 49/49 | 35/35 ciblés |
 | concurrency | 10/10 | n/a |
 | migration dry-run | Vert | n/a |
@@ -193,8 +202,8 @@ P0 ouverts : 0. P1 ouverts : 0. P2 ouverts : 0. P3 ouverts : 0.
 
 ## 25. Risques résiduels
 
-- absence de preuve contre les contrats et délais du vrai PayPal Sandbox ;
-- aucune preuve de livraison d'un webhook signé externe ;
+- absence de preuve de bout en bout pour l'approbation/capture par un acheteur Sandbox ;
+- aucun webhook PayPal enregistré et aucune preuve de livraison d'un webhook signé externe ;
 - décision produit et console opérateur pour la revue manuelle encore hors périmètre ;
 - politique Refund non implémentée.
 
@@ -217,11 +226,11 @@ Aucun commit ne cible `dev`.
 
 ## 28. PR
 
-PR vers `dev` : **non ouverte**. Le gate explicite exige que tout soit vert et
-interdit de déclarer le Sandbox validé sans un vrai flow externe. La PR pourra
-être ouverte après exécution documentée : création Order Sandbox, approbation
-acheteur, capture, webhook signé, état PAID, TicketPurchase et participation.
+La revue locale autorise la publication des branches et l'ouverture de PR vers
+`dev`, mais uniquement en **draft** tant que l'approbation acheteur, la capture,
+le webhook signé, l'état PAID, TicketPurchase et la participation ne sont pas
+attestés de bout en bout. Ce document ne constitue pas une autorisation de merge.
 
 ## Verdict
 
-**SPRINT 3 / VAGUE 6 — PARTIELLE — gates locaux verts, PayPal Sandbox externe non exécuté faute de credentials**
+**SPRINT 3 / VAGUE 6 — PARTIELLE — gates locaux verts et API Sandbox réelle validée ; merge bloqué par le parcours acheteur/webhook externe**
