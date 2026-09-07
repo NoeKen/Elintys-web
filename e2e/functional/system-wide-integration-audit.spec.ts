@@ -14,17 +14,37 @@ async function firstPublicEventId(request: import('@playwright/test').APIRequest
 }
 
 test.describe('audit transversal — contrats réseau', () => {
-  test('le contrat Favoris utilisé par la carte événement existe côté API', async ({ request }) => {
+  /**
+   * Ces deux tests ont été RETOURNÉS pendant la vague corrective A.
+   *
+   * Rédigés pendant l'audit, ils supposaient que la correction consisterait à
+   * ajouter `/favorites/check/:id` et `/favorites/me` côté API. La résolution
+   * retenue est l'inverse : le contrat canonique est celui du contrôleur
+   * existant, et c'est le client web qui a été réaligné. Ils vérifient donc
+   * désormais que ces routes n'existent PAS et que la route canonique existe —
+   * ce qui protège contre une réintroduction du contrat fantôme.
+   */
+  test('les routes Favoris fantômes n’existent pas et ne doivent pas revenir', async ({ request }) => {
     const eventId = await firstPublicEventId(request);
-    const response = await request.get(`${API_URL}/favorites/check/${eventId}?type=event`);
 
-    expect(response.status(), await response.text()).toBe(200);
+    const check = await request.get(`${API_URL}/favorites/check/${eventId}?type=event`);
+    const me = await request.get(`${API_URL}/favorites/me`);
+    const byPath = await request.delete(`${API_URL}/favorites/${eventId}?type=event`);
+
+    expect(check.status()).toBe(404);
+    expect(me.status()).toBe(404);
+    expect(byPath.status()).toBe(404);
   });
 
-  test('le contrat de la page Mes favoris existe côté API', async ({ request }) => {
-    const response = await request.get(`${API_URL}/favorites/me`);
+  test('la route Favoris canonique existe et est protégée', async ({ request }) => {
+    // 401 (et non 404) prouve que la route existe et exige une session.
+    const list = await request.get(`${API_URL}/favorites`);
+    const add = await request.post(`${API_URL}/favorites`, {
+      data: { targetType: 'event', targetId: '507f1f77bcf86cd799439011' },
+    });
 
-    expect(response.status(), await response.text()).toBe(200);
+    expect(list.status()).toBe(401);
+    expect(add.status()).toBe(401);
   });
 
   test('le payload réellement envoyé par le scanner est accepté par son DTO', async () => {
@@ -48,17 +68,41 @@ test.describe('audit transversal — contrats réseau', () => {
     }
   });
 
-  test('les verbes des réponses prestataire et lieu correspondent aux contrôleurs', async () => {
+  /**
+   * Également RETOURNÉ : la version d'audit supposait l'ajout d'alias `PUT`.
+   * La résolution retenue est d'aligner le client sur le verbe du contrôleur.
+   */
+  test('les réponses prestataire et lieu passent par PATCH, pas par PUT', async () => {
     const api = await anonymousApi();
     try {
-      const vendor = await api.put('/vendors/requests/507f1f77bcf86cd799439011/respond', {
-        data: { status: 'accepted', message: 'diagnostic' },
+      const vendorPatch = await api.patch('/vendors/requests/507f1f77bcf86cd799439011/respond', {
+        data: { status: 'accepted', responseMessage: 'diagnostic' },
       });
-      const venue = await api.put('/venues/bookings/507f1f77bcf86cd799439011/respond', {
-        data: { status: 'confirmed', message: 'diagnostic' },
+      const venuePatch = await api.patch('/venues/bookings/507f1f77bcf86cd799439011/respond', {
+        data: { status: 'confirmed', responseMessage: 'diagnostic' },
+      });
+      const vendorPut = await api.put('/vendors/requests/507f1f77bcf86cd799439011/respond', {
+        data: { status: 'accepted', responseMessage: 'diagnostic' },
       });
 
-      // Une route protégée existante doit refuser l'anonyme avec 401/403, pas 404.
+      // Route existante et protégée : 401/403, jamais 404.
+      expect([401, 403]).toContain(vendorPatch.status());
+      expect([401, 403]).toContain(venuePatch.status());
+      // Le verbe fantôme reste absent : aucun alias n'a été ajouté.
+      expect(vendorPut.status()).toBe(404);
+    } finally {
+      await api.dispose();
+    }
+  });
+
+  test('les profils prestataire et lieu ont leur route /me explicite', async () => {
+    const api = await anonymousApi();
+    try {
+      // 401 prouve que PUT /vendors/me est déclaré. Avant la vague, la requête
+      // tombait sur PUT /vendors/:id avec id="me" et produisait une 500.
+      const vendor = await api.put('/vendors/me', { data: { businessName: 'diagnostic' } });
+      const venue = await api.put('/venues/me', { data: { name: 'diagnostic' } });
+
       expect([401, 403]).toContain(vendor.status());
       expect([401, 403]).toContain(venue.status());
     } finally {
@@ -80,8 +124,8 @@ test.describe('audit transversal — affordances anonymes', () => {
   });
 
   for (const entry of [
-    { route: '/prestataires', label: /sauvegarder ce prestataire/i },
-    { route: '/lieux', label: /sauvegarder ce lieu/i },
+    { route: '/prestataires', label: /ajouter ce prestataire aux favoris/i },
+    { route: '/lieux', label: /ajouter ce lieu aux favoris/i },
   ]) {
     test(`l'action ${entry.route} ne reste pas muette`, async ({ page }) => {
       await page.goto(entry.route);

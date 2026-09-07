@@ -86,9 +86,11 @@ export function FavoriteButton({
         title={user ? undefined : "Connectez-vous pour sauvegarder"}
         data-testid="favorite-button"
       >
+        {/* `pointer-events-none` : l'icône ne doit jamais être la cible du
+            clic, sinon elle intercepte l'événement destiné au bouton. */}
         <Heart
           size={iconSize}
-          className={cn("transition-colors", isFavorite && "fill-current")}
+          className={cn("pointer-events-none transition-colors", isFavorite && "fill-current")}
           aria-hidden="true"
         />
       </button>
