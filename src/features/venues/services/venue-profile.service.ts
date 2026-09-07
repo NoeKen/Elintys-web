@@ -1,16 +1,18 @@
-import api, { apiErrorFromResponse } from "@/shared/lib/api";
-import { API_URL } from "@/shared/config/api-url";
+import api, { ApiClientError } from "@/shared/lib/api";
+
+export interface VenueAddress {
+  street: string;
+  city: string;
+  province?: string;
+  postalCode?: string;
+}
 
 export interface VenueProfile {
   _id: string;
   name: string;
+  type?: string;
   description?: string;
-  address: {
-    street: string;
-    city: string;
-    province: string;
-    postalCode?: string;
-  };
+  address: VenueAddress;
   capacity: number;
   photos: string[];
   amenities: string[];
@@ -22,17 +24,16 @@ export interface VenueProfile {
   isActive: boolean;
 }
 
-export interface VenueBooking {
-  _id: string;
-  event: { _id: string; title: string; startDate: string };
-  organizer: { _id: string; firstName: string; lastName: string };
-  status: "pending" | "confirmed" | "refused" | "cancelled";
-  bookingStart: string;
-  bookingEnd: string;
-  message?: string;
-  totalPrice?: number;
-  currency: string;
-  createdAt: string;
+/** Champs éditables depuis l'écran « Ma fiche lieu ». */
+export interface VenueProfileInput {
+  name: string;
+  type?: string;
+  description?: string;
+  address: VenueAddress;
+  capacity: number;
+  pricePerDay?: number;
+  contactEmail?: string;
+  contactPhone?: string;
 }
 
 export interface VenueCatalogResponse {
@@ -42,33 +43,11 @@ export interface VenueCatalogResponse {
   limit: number;
 }
 
-async function authFetch<T>(
-  url: string,
-  token: string,
-  options?: RequestInit,
-): Promise<T> {
-  const authHeader: Record<string, string> = {};
-  if (token && token !== "cookie-session")
-    authHeader.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${url}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...options?.headers,
-    },
-  });
+export const VENUE_PROFILE_NOT_FOUND = "VENUE_PROFILE_NOT_FOUND";
 
-  if (!res.ok) {
-    throw await apiErrorFromResponse(res);
-  }
-
-  if (res.status === 204) {
-    return undefined as unknown as T;
-  }
-
-  return res.json() as Promise<T>;
+/** Voir `isMissingProfileError` côté prestataire : même raison, même contrat. */
+export function isMissingProfileError(error: unknown): boolean {
+  return error instanceof ApiClientError && error.status === 404;
 }
 
 export const venueProfileService = {
@@ -79,40 +58,19 @@ export const venueProfileService = {
     return response.data;
   },
 
-  async getMyProfile(token: string): Promise<VenueProfile> {
-    return authFetch<VenueProfile>("/venues/me", token);
+  async getMyProfile(): Promise<VenueProfile> {
+    const res = await api.get<VenueProfile>("/venues/me");
+    return res.data;
   },
 
-  async updateProfile(
-    token: string,
-    data: Partial<VenueProfile>,
-  ): Promise<VenueProfile> {
-    return authFetch<VenueProfile>("/venues/me", token, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+  async createProfile(input: VenueProfileInput): Promise<VenueProfile> {
+    const res = await api.post<VenueProfile>("/venues", input);
+    return res.data;
   },
 
-  async getMyBookings(token: string): Promise<VenueBooking[]> {
-    return authFetch<VenueBooking[]>("/venues/bookings/my", token);
-  },
-
-  async respondToBooking(
-    token: string,
-    bookingId: string,
-    status: "confirmed" | "refused",
-    message?: string,
-  ): Promise<VenueBooking> {
-    return authFetch<VenueBooking>(
-      `/venues/bookings/${bookingId}/respond`,
-      token,
-      {
-        method: "PUT",
-        body: JSON.stringify({
-          status,
-          ...(message !== undefined && { message }),
-        }),
-      },
-    );
+  /** `PUT /venues/me` — identité serveur, aucun id transmis par le client. */
+  async updateProfile(input: Partial<VenueProfileInput>): Promise<VenueProfile> {
+    const res = await api.put<VenueProfile>("/venues/me", input);
+    return res.data;
   },
 };

@@ -1,10 +1,10 @@
-import { API_URL } from "@/shared/config/api-url";
-import { apiErrorFromResponse } from "@/shared/lib/api";
+import api, { ApiClientError } from "@/shared/lib/api";
+import type { VendorCategory } from "@/features/vendors/types";
 
 export interface VendorProfile {
   _id: string;
   businessName: string;
-  category: string;
+  category: VendorCategory;
   description?: string;
   serviceArea?: string;
   photos: string[];
@@ -15,80 +15,50 @@ export interface VendorProfile {
   isActive: boolean;
 }
 
-export interface VendorRequest {
-  _id: string;
-  event: { _id: string; title: string; startDate: string };
-  organizer: { _id: string; firstName: string; lastName: string };
-  status: "pending" | "accepted" | "declined" | "cancelled";
-  message?: string;
-  source: "platform" | "manual" | "external";
-  createdAt: string;
+/** Champs éditables depuis l'écran « Mon profil prestataire ». */
+export interface VendorProfileInput {
+  businessName: string;
+  category: VendorCategory;
+  description?: string;
+  serviceArea?: string;
+  contactEmail?: string;
+  contactPhone?: string;
 }
 
-async function authFetch<T>(
-  url: string,
-  token: string,
-  options?: RequestInit,
-): Promise<T> {
-  const authHeader: Record<string, string> = {};
-  if (token && token !== "cookie-session")
-    authHeader.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${url}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...options?.headers,
-    },
-  });
+/** Code métier renvoyé par l'API quand le compte n'a pas encore de profil. */
+export const VENDOR_PROFILE_NOT_FOUND = "VENDOR_PROFILE_NOT_FOUND";
 
-  if (!res.ok) {
-    throw await apiErrorFromResponse(res);
-  }
-
-  if (res.status === 204) {
-    return undefined as unknown as T;
-  }
-
-  return res.json() as Promise<T>;
+/**
+ * Distingue « ce compte n'a pas encore de profil » d'une panne.
+ *
+ * Sans cette distinction, l'écran affichait un formulaire d'édition vide sur
+ * un 404 comme sur une erreur réseau : l'utilisateur remplissait un formulaire
+ * qui ne pouvait pas aboutir.
+ */
+export function isMissingProfileError(error: unknown): boolean {
+  return error instanceof ApiClientError && error.status === 404;
 }
 
 export const vendorProfileService = {
-  async getMyProfile(token: string): Promise<VendorProfile> {
-    return authFetch<VendorProfile>("/vendors/me", token);
+  async getMyProfile(): Promise<VendorProfile> {
+    const res = await api.get<VendorProfile>("/vendors/me");
+    return res.data;
   },
 
-  async updateProfile(
-    token: string,
-    data: Partial<VendorProfile>,
-  ): Promise<VendorProfile> {
-    return authFetch<VendorProfile>("/vendors/me", token, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+  /** Création du profil du compte connecté. L'identité vient du serveur. */
+  async createProfile(input: VendorProfileInput): Promise<VendorProfile> {
+    const res = await api.post<VendorProfile>("/vendors", input);
+    return res.data;
   },
 
-  async getMyRequests(token: string): Promise<VendorRequest[]> {
-    return authFetch<VendorRequest[]>("/vendors/requests/my", token);
-  },
-
-  async respondToRequest(
-    token: string,
-    requestId: string,
-    status: "accepted" | "declined",
-    message?: string,
-  ): Promise<VendorRequest> {
-    return authFetch<VendorRequest>(
-      `/vendors/requests/${requestId}/respond`,
-      token,
-      {
-        method: "PUT",
-        body: JSON.stringify({
-          status,
-          ...(message !== undefined && { message }),
-        }),
-      },
-    );
+  /**
+   * Mise à jour du profil du compte connecté.
+   *
+   * `PUT /vendors/me` — et non `PUT /vendors/:id` : le client ne transmet
+   * jamais l'identifiant du profil comme autorité.
+   */
+  async updateProfile(input: Partial<VendorProfileInput>): Promise<VendorProfile> {
+    const res = await api.put<VendorProfile>("/vendors/me", input);
+    return res.data;
   },
 };
