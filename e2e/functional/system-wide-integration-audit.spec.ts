@@ -26,25 +26,37 @@ test.describe('audit transversal — contrats réseau', () => {
    */
   test('les routes Favoris fantômes n’existent pas et ne doivent pas revenir', async ({ request }) => {
     const eventId = await firstPublicEventId(request);
+    // Client explicitement anonyme : depuis que le projet fournit une session
+    // par défaut, la fixture `request` est authentifiée et un 403 d'origine
+    // masquerait le 404 qu'on cherche à prouver.
+    const api = await anonymousApi();
+    try {
+      const check = await api.get(`/favorites/check/${eventId}?type=event`);
+      const me = await api.get('/favorites/me');
+      const byPath = await api.delete(`/favorites/${eventId}?type=event`);
 
-    const check = await request.get(`${API_URL}/favorites/check/${eventId}?type=event`);
-    const me = await request.get(`${API_URL}/favorites/me`);
-    const byPath = await request.delete(`${API_URL}/favorites/${eventId}?type=event`);
-
-    expect(check.status()).toBe(404);
-    expect(me.status()).toBe(404);
-    expect(byPath.status()).toBe(404);
+      expect(check.status()).toBe(404);
+      expect(me.status()).toBe(404);
+      expect(byPath.status()).toBe(404);
+    } finally {
+      await api.dispose();
+    }
   });
 
-  test('la route Favoris canonique existe et est protégée', async ({ request }) => {
+  test('la route Favoris canonique existe et est protégée', async () => {
     // 401 (et non 404) prouve que la route existe et exige une session.
-    const list = await request.get(`${API_URL}/favorites`);
-    const add = await request.post(`${API_URL}/favorites`, {
-      data: { targetType: 'event', targetId: '507f1f77bcf86cd799439011' },
-    });
+    const api = await anonymousApi();
+    try {
+      const list = await api.get('/favorites');
+      const add = await api.post('/favorites', {
+        data: { targetType: 'event', targetId: '507f1f77bcf86cd799439011' },
+      });
 
-    expect(list.status()).toBe(401);
-    expect(add.status()).toBe(401);
+      expect(list.status()).toBe(401);
+      expect(add.status()).toBe(401);
+    } finally {
+      await api.dispose();
+    }
   });
 
   test('le payload réellement envoyé par le scanner est accepté par son DTO', async () => {

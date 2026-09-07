@@ -45,6 +45,14 @@ export function venueCredentials(): Credentials {
   return { email, password };
 }
 
+/** Compte QA multi-rôles (organisateur + prestataire). */
+export function multiRoleCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_MULTI ?? 'qa-multi@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
 export function secondaryCredentials(): Credentials {
   const email = process.env.E2E_TEST_EMAIL_SECONDARY;
   const password = process.env.E2E_TEST_PASSWORD;
@@ -111,17 +119,49 @@ export async function anonymousApi(): Promise<ApiClient> {
   return wrap(context);
 }
 
-/** Client API authentifié (cookies httpOnly) pour un compte donné. */
-export async function apiContextFor(credentials: Credentials): Promise<ApiClient> {
+/**
+ * Sessions déjà obtenues dans ce processus, par compte.
+ *
+ * Le tier AUTH_STRICT plafonne à 5 connexions par minute et par IP. Sans ce
+ * cache, chaque `describe` qui appelle `apiContextFor` rouvre une session et
+ * la suite complète sature le quota — les échecs deviennent alors des 429
+ * indiscernables d'une vraie régression.
+ */
+type StorageState = Awaited<ReturnType<APIRequestContext['storageState']>>;
+const sessionCache = new Map<string, Promise<StorageState>>();
+
+async function loginAndCapture(credentials: Credentials) {
   const context = await request.newContext({
     extraHTTPHeaders: { Origin: 'http://localhost:3000' },
   });
-  const client = wrap(context);
-  const response = await client.post('/auth/login', { data: credentials });
+  const response = await context.post(`${API_URL}/auth/login`, { data: credentials });
   if (!response.ok()) {
     throw new Error(`Connexion API échouée (${response.status()}) pour ${credentials.email}`);
   }
-  return client;
+  const state = await context.storageState();
+  await context.dispose();
+  return state;
+}
+
+/**
+ * Client API authentifié (cookies httpOnly) pour un compte donné.
+ *
+ * La connexion n'a lieu qu'UNE fois par compte et par processus : les appels
+ * suivants réutilisent l'état de session capturé.
+ */
+export async function apiContextFor(credentials: Credentials): Promise<ApiClient> {
+  let pending = sessionCache.get(credentials.email);
+  if (!pending) {
+    pending = loginAndCapture(credentials);
+    sessionCache.set(credentials.email, pending);
+  }
+
+  const storageState = await pending;
+  const context = await request.newContext({
+    storageState,
+    extraHTTPHeaders: { Origin: 'http://localhost:3000' },
+  });
+  return wrap(context);
 }
 
 /** Crée un événement brouillon via l'API et retourne son identifiant. */

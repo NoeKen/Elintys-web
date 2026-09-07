@@ -68,7 +68,9 @@ function NavLink({
         transition={{ type: 'spring', stiffness: 500, damping: 20 }}
         className="flex flex-col items-center gap-0.5"
       >
-        <div className="relative">
+        {/* `pointer-events-none` : l'icône ne doit jamais être la cible du
+            clic, sinon elle intercepte l'événement destiné au lien. */}
+        <div className="pointer-events-none relative">
           <NavIcon name={item.icon} size={20} />
           <AnimatePresence>
             {active && (
@@ -80,7 +82,9 @@ function NavLink({
             )}
           </AnimatePresence>
         </div>
-        <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+        <span className="pointer-events-none text-[10px] font-semibold leading-none">
+          {item.label}
+        </span>
       </motion.div>
     </Link>
   );
@@ -185,8 +189,10 @@ export function MobileNav() {
               moreOpen ? 'text-teal-dark' : 'text-on-surface-variant hover:text-on-surface',
             )}
           >
-            <MoreHorizontal size={20} aria-hidden="true" />
-            <span className="text-[10px] font-semibold leading-none">Plus</span>
+            <MoreHorizontal size={20} aria-hidden="true" className="pointer-events-none" />
+            <span className="pointer-events-none text-[10px] font-semibold leading-none">
+              Plus
+            </span>
           </button>
         )}
       </nav>
