@@ -30,6 +30,9 @@ let venue: ApiClient;
 let multiRole: ApiClient;
 
 test.beforeAll(async () => {
+  // La connexion peut attendre la fenêtre du rate-limit lors d'un démarrage
+  // à froid : le hook doit pouvoir dépasser le délai par défaut.
+  test.setTimeout(180_000);
   organizer = await apiContextFor(ownerCredentials());
   vendor = await apiContextFor(vendorCredentials());
   venue = await apiContextFor(venueCredentials());
@@ -38,10 +41,10 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   await Promise.all([
-    organizer.dispose(),
-    vendor.dispose(),
-    venue.dispose(),
-    multiRole.dispose(),
+    organizer?.dispose(),
+    vendor?.dispose(),
+    venue?.dispose(),
+    multiRole?.dispose(),
   ]);
 });
 

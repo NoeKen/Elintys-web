@@ -17,6 +17,9 @@ let session: Awaited<ReturnType<ApiClient["storageState"]>>;
 const targets: Array<{ targetType: string; targetId: string }> = [];
 
 test.beforeAll(async () => {
+  // La connexion peut attendre la fenêtre du rate-limit lors d'un démarrage
+  // à froid : le hook doit pouvoir dépasser le délai par défaut.
+  test.setTimeout(180_000);
   api = await apiContextFor(ownerCredentials());
   // Session obtenue via l'API puis injectée dans le navigateur : une seule
   // authentification, le tier AUTH_STRICT plafonne à 5 tentatives/minute.
@@ -38,7 +41,7 @@ test.afterAll(async () => {
       api.delete("/favorites", { data: target }).catch(() => undefined),
     ),
   );
-  await api.dispose();
+  await api?.dispose();
 });
 
 test.describe("Vague A — favoris authentifiés", () => {

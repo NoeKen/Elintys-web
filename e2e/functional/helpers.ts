@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import { request } from '@playwright/test';
@@ -142,35 +143,90 @@ export async function anonymousApi(): Promise<ApiClient> {
 }
 
 /**
- * Sessions déjà obtenues dans ce processus, par compte.
+ * Sessions réutilisées entre exécutions, par compte.
  *
- * Le tier AUTH_STRICT plafonne à 5 connexions par minute et par IP. Sans ce
- * cache, chaque `describe` qui appelle `apiContextFor` rouvre une session et
- * la suite complète sature le quota — les échecs deviennent alors des 429
- * indiscernables d'une vraie régression.
+ * Le tier AUTH_STRICT plafonne à 5 connexions par minute et par IP. La suite
+ * utilise cinq comptes distincts : sans réutilisation, le seul démarrage des
+ * specs sature déjà le quota et les échecs deviennent des 429 indiscernables
+ * d'une vraie régression.
+ *
+ * L'état est donc caché sur disque (dans `.e2e/`, ignoré par Git) et renouvelé
+ * par rafraîchissement plutôt que par une nouvelle connexion.
  */
 type StorageState = Awaited<ReturnType<APIRequestContext['storageState']>>;
 const sessionCache = new Map<string, Promise<StorageState>>();
 
-async function loginAndCapture(credentials: Credentials) {
+function statePathFor(email: string): string {
+  return path.join(E2E_DIR, `session-${email.replace(/[^a-z0-9]/gi, '-')}.json`);
+}
+
+/** Vrai si l'état stocké donne encore accès (après rafraîchissement éventuel). */
+async function reuseStoredState(statePath: string): Promise<StorageState | null> {
+  if (!fs.existsSync(statePath)) return null;
+  const client = await apiFromState(statePath);
+  try {
+    const response = await client.get('/auth/me');
+    if (response.status() !== 200) return null;
+    const state = await client.storageState();
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    return state;
+  } catch {
+    return null;
+  } finally {
+    await client.dispose();
+  }
+}
+
+async function loginAndCapture(credentials: Credentials): Promise<StorageState> {
+  const statePath = statePathFor(credentials.email);
+  fs.mkdirSync(E2E_DIR, { recursive: true });
+
+  const reused = await reuseStoredState(statePath);
+  if (reused) return reused;
+
+  return loginWithBackoff(credentials, statePath);
+}
+
+/** Fenêtre du tier AUTH_STRICT, plus une marge. */
+const AUTH_WINDOW_MS = 61_000;
+
+/**
+ * Connexion respectant le rate-limit plutôt que le contournant.
+ *
+ * La suite utilise cinq comptes ; un démarrage à froid dépasse donc le quota
+ * de 5 connexions par minute. Plutôt que d'affaiblir la protection pour les
+ * tests, on attend la fenêtre et on réessaie : les démarrages à froid sont
+ * plus lents, les suivants réutilisent l'état sur disque et n'ouvrent aucune
+ * connexion.
+ */
+async function loginWithBackoff(
+  credentials: Credentials,
+  statePath: string,
+  attempt = 0,
+): Promise<StorageState> {
   const context = await request.newContext({
     extraHTTPHeaders: { Origin: 'http://localhost:3000' },
   });
   const response = await context.post(`${API_URL}/auth/login`, { data: credentials });
-  if (!response.ok()) {
-    throw new Error(`Connexion API échouée (${response.status()}) pour ${credentials.email}`);
+
+  if (response.status() === 429 && attempt < 2) {
+    await context.dispose();
+    await new Promise((resolve) => setTimeout(resolve, AUTH_WINDOW_MS));
+    return loginWithBackoff(credentials, statePath, attempt + 1);
   }
+
+  if (!response.ok()) {
+    const status = response.status();
+    await context.dispose();
+    throw new Error(`Connexion API échouée (${status}) pour ${credentials.email}`);
+  }
+
   const state = await context.storageState();
   await context.dispose();
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
   return state;
 }
 
-/**
- * Client API authentifié (cookies httpOnly) pour un compte donné.
- *
- * La connexion n'a lieu qu'UNE fois par compte et par processus : les appels
- * suivants réutilisent l'état de session capturé.
- */
 export async function apiContextFor(credentials: Credentials): Promise<ApiClient> {
   let pending = sessionCache.get(credentials.email);
   if (!pending) {

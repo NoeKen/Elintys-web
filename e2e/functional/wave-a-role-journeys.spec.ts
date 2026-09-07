@@ -28,6 +28,9 @@ let venue: ApiClient;
 const createdEvents: string[] = [];
 
 test.beforeAll(async () => {
+  // La connexion peut attendre la fenêtre du rate-limit lors d'un démarrage
+  // à froid : le hook doit pouvoir dépasser le délai par défaut.
+  test.setTimeout(180_000);
   organizer = await apiContextFor(ownerCredentials());
   vendor = await apiContextFor(vendorCredentials());
   venue = await apiContextFor(venueCredentials());
@@ -37,7 +40,7 @@ test.afterAll(async () => {
   await Promise.all(
     createdEvents.map((id) => organizer.delete(`/events/${id}`).catch(() => undefined)),
   );
-  await Promise.all([organizer.dispose(), vendor.dispose(), venue.dispose()]);
+  await Promise.all([organizer?.dispose(), vendor?.dispose(), venue?.dispose()]);
 });
 
 async function createEvent(title: string): Promise<string> {

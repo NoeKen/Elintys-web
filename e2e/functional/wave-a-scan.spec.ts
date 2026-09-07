@@ -21,6 +21,9 @@ let stranger: ApiClient;
 const createdEvents: string[] = [];
 
 test.beforeAll(async () => {
+  // La connexion peut attendre la fenêtre du rate-limit lors d'un démarrage
+  // à froid : le hook doit pouvoir dépasser le délai par défaut.
+  test.setTimeout(180_000);
   organizer = await apiContextFor(ownerCredentials());
   stranger = await apiContextFor(secondaryCredentials());
 });
@@ -29,7 +32,7 @@ test.afterAll(async () => {
   await Promise.all(
     createdEvents.map((id) => organizer.delete(`/events/${id}`).catch(() => undefined)),
   );
-  await Promise.all([organizer.dispose(), stranger.dispose()]);
+  await Promise.all([organizer?.dispose(), stranger?.dispose()]);
 });
 
 /** Événement publié avec un billet gratuit, acheté par l'organisateur. */

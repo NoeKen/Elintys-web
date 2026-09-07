@@ -18,11 +18,14 @@ test.describe.configure({ mode: 'serial' });
 let owner: ApiClient;
 
 test.beforeAll(async () => {
+  // La connexion peut attendre la fenêtre du rate-limit lors d'un démarrage
+  // à froid : le hook doit pouvoir dépasser le délai par défaut.
+  test.setTimeout(180_000);
   owner = await apiContextFor(ownerCredentials());
 });
 
 test.afterAll(async () => {
-  await owner.dispose();
+  await owner?.dispose();
 });
 
 async function authenticatedPage(browser: import('@playwright/test').Browser) {
