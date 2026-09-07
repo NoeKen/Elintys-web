@@ -164,6 +164,8 @@ Commits Codex Web :
 - `ee8c525` — `fix(web): complete Wave B navigation and discovery review`
 - `b55b7c7` — `test(navigation): extend Wave B mobile QA`
 - `40939b7` — `docs(audit): finalize Sprint 3 Wave B`
+- `11e2c47` — `fix(a11y): describe the mobile overflow dialog`
+- `73f6391` — `docs(audit): close Wave A smoke evidence`
 
 ## 26. PR readiness
 
@@ -171,6 +173,8 @@ Les deux branches ont été poussées sans force push et proposées vers `dev`. 
 
 - API : [PR #56](https://github.com/NoeKen/Elintys-api/pull/56)
 - Web : [PR #103](https://github.com/NoeKen/Elintys-web/pull/103)
+
+La PR API est ouverte avec un état de fusion `CLEAN`. Le déploiement preview Vercel et son check de commentaires sont verts sur la PR Web.
 
 ## Verdict
 
