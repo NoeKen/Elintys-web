@@ -62,7 +62,7 @@ describe("LoginForm", () => {
     expect(authServiceLoginMock).not.toHaveBeenCalled();
   });
 
-  it("connecte l'utilisateur et redirige vers le post-auth path par défaut", async () => {
+  it("connecte l'utilisateur et redirige vers l'accueil de SON rôle", async () => {
     const session = {
       user: {
         id: "u1",
@@ -86,7 +86,11 @@ describe("LoginForm", () => {
     await submit();
 
     await waitFor(() => expect(loginMock).toHaveBeenCalledWith(session));
-    expect(replaceMock).toHaveBeenCalledWith("/tableau-de-bord");
+    // Auparavant `/tableau-de-bord` pour tous les rôles. Cet écran rend
+    // l'expérience organisateur, dont la source est protégée par
+    // @Roles(ORGANISATEUR, ADMIN) : un participant y recevait un 403 comme
+    // tout premier écran après connexion.
+    expect(replaceMock).toHaveBeenCalledWith("/tableau-de-bord/participation");
   });
 
   it("remplace la page de connexion par la destination de retour", async () => {
