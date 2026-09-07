@@ -169,6 +169,9 @@ export function MobileNav() {
                 exit={prefersReduced ? undefined : { opacity: 0, y: 12 }}
               >
                 <Dialog.Title className="sr-only">Plus de destinations</Dialog.Title>
+                <Dialog.Description className="sr-only">
+                  Navigation complémentaire adaptée à vos rôles.
+                </Dialog.Description>
                 <ul className="space-y-1">
                   {overflow.map((item) => (
                     <li key={item.href}>
