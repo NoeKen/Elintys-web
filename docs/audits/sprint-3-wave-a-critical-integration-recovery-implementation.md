@@ -429,3 +429,291 @@ Elintys-web : fix/s3-wave-a-critical-integration-recovery   7 commits, worktree 
 ```
 
 Aucun merge, aucune PR, aucun push sur `dev`, aucun force push, aucun reset destructif.
+
+---
+
+# Pre-Codex hardening
+
+**Date** : 2026-09-07 (extension de la Vague A, mêmes branches)
+**Objet** : traiter les risques résiduels identifiés au §21 avant la revue Codex.
+Aucune fonctionnalité de la Vague A n'a été réimplémentée.
+
+## A. Risques résiduels de départ
+
+| # | Risque | État initial |
+|---|---|---|
+| F-06 | Allow-list PayPal figée sur Sandbox | Ouvert — bloquant pour la production |
+| F-14 | Navigation mobile sans rôles | Ouvert |
+| — | `/tableau-de-bord` renvoie 403 aux non-organisateurs | Ouvert |
+| — | `/auth/me` en panne ⇒ faux logout | Identifié pendant cette extension |
+| — | `CastError → 500` restants | Ouvert (reviews, notifications annoncés) |
+| — | Harnais Playwright non déterministe | Ouvert |
+| — | E2E Vague 2 rouge | Ouvert, cause non prouvée |
+
+## B. PayPal — architecture avant / après
+
+### Avant
+
+Le choix Sandbox/Live était **inscrit dans le code**, à cinq endroits :
+
+| Fichier | Verrou |
+|---|---|
+| `config/paypal-environment.ts` | `type PayPalEnvironment = 'sandbox'` ; `PAYPAL_ENV=live` refusé au démarrage |
+| `config/paypal-environment.ts` | `baseUrl` codé en dur sur l'hôte Sandbox |
+| `paypal-payment.provider.ts` | `assertSandbox()` sur `createPayment`, `getPaymentStatus`, `confirmPayment` |
+| `paypal-payment.provider.ts` | `isTrustedSandboxApprovalUrl` — regex figée |
+| `PurchaseModal.tsx` (web) | `isTrustedApprovalUrl` — regex figée sur `sandbox.paypal.com` |
+
+Passer en production aurait demandé de modifier cinq fichiers, dont deux
+portant des règles de sécurité.
+
+### Après
+
+```
+Ticketing Domain          ← ne connaît ni Sandbox ni Live
+       ↓
+PaymentProvider           ← contrat agnostique
+       ↓
+PayPalPaymentProvider     ← consomme http.config, sans savoir lequel
+       ↓
+PayPalConfiguration       ← SOURCE DE VÉRITÉ unique : PAYPAL_ENV → endpoints
+```
+
+Vérifié : `grep` sur `sandbox|live|environment` dans `ticket-orders.service.ts`,
+`ticketing-environment.ts` et `payment-provider.registry.ts` ne retourne
+**rien**. Le domaine était déjà découplé ; c'est l'adaptateur qui ne l'était pas.
+
+### Config matrix
+
+| `PAID_CHECKOUT_ENABLED` | `PAYPAL_PROVIDER_ENABLED` | `PAYPAL_ENV` | Credentials | Résultat |
+|---|---|---|---|---|
+| `false` | `false` | `sandbox` | — | paiements fermés |
+| `false` | `true` | `sandbox` | complètes | fournisseur prêt, caisse fermée (503) |
+| `true` | `false` | `sandbox` | — | caisse ouverte, repli test/Stripe ou 503 |
+| `true` | `true` | `sandbox` | complètes | encaissement Sandbox |
+| `true` | `true` | `live` | complètes | encaissement réel |
+| toute | `true` | toute | incomplètes | **refus de démarrage** |
+| toute | toute | invalide | — | **refus de démarrage** |
+
+### Variables finales
+
+| Variable | Portée | Rôle |
+|---|---|---|
+| `PAYPAL_ENV` | API | `sandbox` \| `live`. Dérive hôte API et hôtes d'approbation. |
+| `PAYPAL_PROVIDER_ENABLED` | API | Le fournisseur est-il sélectionnable |
+| `PAYPAL_CLIENT_ID` / `_SECRET` | API | Credentials de l'app de CET environnement |
+| `PAYPAL_WEBHOOK_ID` | API | Webhook de CET environnement |
+| `PAID_CHECKOUT_ENABLED` | API | Interrupteur de caisse du domaine |
+| `TEST_PAYMENT_PROVIDER_ENABLED` | API | Fournisseur simulé, dev uniquement |
+| `NEXT_PUBLIC_PAYPAL_ENV` | Web | Valide l'hôte d'approbation avant redirection |
+
+### Garde-fous
+
+- **Aucun repli** : ni live → sandbox, ni sandbox → live, ni dégradation silencieuse.
+- **Fail-closed symétrique** : credentials incomplètes en Live ⇒ refus de démarrage, exactement comme en Sandbox.
+- **`PAYPAL_ENV` validé même fournisseur éteint** : une valeur invalide est une erreur d'exploitation, pas une option ignorable.
+- **Défaut inoffensif** : variable absente ⇒ `sandbox`, des deux côtés.
+- **Indépendance de `NODE_ENV`** : aucune dérivation dans un sens ni dans l'autre ; quatre combinaisons `ELINTYS_ENV × NODE_ENV` testées produisent le même résultat.
+- **Cloisonnement des environnements** : une URL d'approbation Live reçue en Sandbox est refusée, et réciproquement.
+
+### Décision de sécurité — correspondance d'hôte EXACTE
+
+Le mandat demandait de refuser `paypal.com.attacker.tld` en imposant une
+frontière de label. La frontière seule **ne suffit pas ici** :
+`www.sandbox.paypal.com` est un sous-domaine légitime de `paypal.com`, donc une
+liste Live construite sur le domaine aurait accepté les URL Sandbox et
+n'aurait pas cloisonné les environnements.
+
+Une première implémentation par frontière de label a été écrite, puis ses tests
+l'ont mise en défaut sur exactement ce cas. La comparaison est donc **exacte**,
+sur une liste blanche fermée — strictement plus stricte, et elle refuse tous les
+cas demandés : `paypal.com.attacker.tld`, `sandbox.paypal.com.attacker.tld`,
+`fakepaypal.com`, `notpaypal.com`, `xpaypal.com`, plus les sous-domaines non
+listés (`evil.paypal.com`).
+
+### Approval host côté frontend
+
+Le mandat préférait que le backend expose l'information. **Écarté après
+analyse** : le backend valide déjà l'URL avant de la renvoyer, et une
+allow-list transmise **dans la réponse qu'elle est censée valider** n'apporte
+aucune garantie — un attaquant capable d'altérer l'une altère l'autre.
+
+La liste vient donc d'une variable de **build** (`NEXT_PUBLIC_PAYPAL_ENV`),
+indépendante de la réponse. C'est l'alternative explicitement autorisée par le
+mandat, et c'est la seule des deux qui protège réellement. Une abstraction
+unique (`features/payments/lib/paypal-approval.ts`) porte la règle ; aucun
+`if (sandbox)` n'est dispersé dans les composants.
+
+### Live n'est PAS activé
+
+Configuration locale inchangée : `PAYPAL_PROVIDER_ENABLED=false`,
+`PAYPAL_ENV=sandbox`. Aucun credential Live, aucun appel à l'API Live, aucune
+transaction. Tous les tests PayPal utilisent des credentials factices et
+n'émettent aucune requête réseau.
+
+## C. Navigation mobile (F-14)
+
+`MobileNav` est désormais une **projection** de `buildNavSections` — la même
+source que la barre latérale. Aucune seconde logique de rôle n'existe ; un test
+le vérifie en comparant les deux sorties.
+
+Quatre emplacements plus un panneau « Plus » pour le débordement. Les
+placeholders historiques sont marqués dans la source unique et écartés de la
+barre : un emplacement ne se dépense pas sur un écran qui ne fait rien. La
+barre latérale continue de les afficher — comportement desktop inchangé.
+
+Un défaut d'environnement a été découvert au passage : le bouton flottant des
+devtools TanStack occupe le coin inférieur droit et **recouvrait la barre
+mobile sous 400 px**, rendant ses actions littéralement inatteignables au clic.
+Il est désormais retirable par `NEXT_PUBLIC_DISABLE_DEVTOOLS`, posé par la
+configuration Playwright.
+
+## D. Dashboard et post-login
+
+`getPostAuthPath` renvoyait `/tableau-de-bord` pour tous les rôles ; cet écran
+rend l'expérience organisateur, dont la source est protégée par
+`@Roles(ORGANISATEUR, ADMIN)`. Prestataires, gestionnaires et participants
+recevaient donc un **403 comme premier écran après connexion**.
+
+La destination est dérivée du rôle dominant, et la racine du tableau de bord
+redirige les autres rôles vers leur accueil au lieu de leur servir une erreur.
+La priorité `returnUrl > accueil de rôle` est préservée : `LoginForm` passe
+toujours `redirectTo` en premier, les deep-links protégés sont intacts.
+
+**Priorité de rôle** : l'ordre appliqué est celui que `getFirstOnboardingPath`
+utilisait déjà — organisateur, prestataire, gestionnaire — étendu de
+`participant` en dernier position, ce rôle étant le défaut de tout compte.
+Aucune seconde politique n'a été inventée. Un compte QA multi-rôles la vérifie
+en E2E.
+
+## E. Restauration de session
+
+`refreshSession` capturait **toute** erreur et renvoyait `null` ; le provider
+en concluait « pas de session » et le garde redirigeait vers la connexion. Un
+500, un 429 ou une coupure réseau déconnectait un utilisateur authentifié.
+
+La restauration renvoie un état à trois branches :
+
+| Réponse `/auth/me` | État | Conséquence |
+|---|---|---|
+| `200` | `authenticated` | session établie |
+| `401` | `anonymous` | absence CONFIRMÉE — redirection légitime |
+| `429`, `5xx`, réseau | `unavailable` | état INCONNU — aucune redirection, aucune session détruite |
+
+Un 401 qui parvient jusque-là est bien une absence : le client partagé a déjà
+tenté un rafraîchissement transparent avant de le remonter.
+
+Le réessai est **à la demande**, jamais automatique — rejouer en boucle contre
+une API déjà en difficulté l'aggrave et déclenche le rate-limit. Un test
+vérifie qu'aucun second appel ne part tout seul.
+
+## F. ObjectId
+
+L'audit citait deux modules ; l'inspection en a trouvé **six**, dont trois
+routes publiques :
+
+| Route | Avant | Après |
+|---|---|---|
+| `GET /reviews/:type/:id` | 500 | 400 `INVALID_OBJECT_ID` |
+| `DELETE /reviews/:id` | 500 | 400 |
+| `POST /reviews` (body) | 500 | 400 `targetId must be a mongodb id` |
+| `PATCH /notifications/:id/read` | 500 | 400 |
+| `GET /events/:eventId/guests` | 500 | 400 |
+| `POST /payments/refund/:purchaseId` | 500 | 400 |
+
+Les deux mécanismes déjà en usage sont appliqués selon la position du champ :
+`ParseObjectIdPipe` sur les paramètres de route, `@IsMongoId()` sur le corps.
+
+Le filtre de notifications est aligné au passage : le client envoyait
+`unreadOnly`, le contrôleur lisait `unread`. Le filtre était silencieusement
+ignoré et la liste complète renvoyée.
+
+## G. Harnais Playwright
+
+`playwright.config.ts` n'avait ni projet `setup`, ni dépendance, ni
+`storageState`. Le `testMatch` par défaut ne retenant que `*.spec.ts`,
+**`auth.setup.ts` n'était jamais exécuté** : les specs authentifiées
+reposaient sur des fichiers `.e2e/*.json` laissés par une exécution manuelle
+antérieure, dont le jeton expire en 15 minutes.
+
+| | Avant | Après |
+|---|---|---|
+| Specs fonctionnels exécutés | 55 | **200** |
+| Specs réussis | 55 | **199** |
+
+Le projet `setup` est scopé au dossier fonctionnel : `e2e/visual/auth.setup.ts`
+appartient à `playwright.visual.config.ts`.
+
+**Le nombre de connexions diminue**, conformément au §32 : le setup réutilise
+un état encore valide au lieu de se reconnecter, et `apiContextFor` met la
+session en cache par compte et par processus. Aucune sécurité n'a été
+désactivée pour les tests ; `AUTH_STRICT` reste à 5/min.
+
+## H. E2E Vague 2 — cause prouvée
+
+`sprint3-wave2-public-event.spec.ts:187` cherchait
+`getByRole('button', { name: 'S’inscrire' })`. `EventRegistrationAction` ne
+rend ce bouton **que pour un utilisateur connecté** ; un visiteur anonyme reçoit
+un `<Link>` « Se connecter pour s'inscrire ».
+
+Le spec s'exécutait donc anonyme, faute de `storageState` dans la
+configuration. **Ce n'était pas un bug produit mais un symptôme du défaut G** :
+la correction du harnais l'a rendu vert sans toucher au produit — 30/30.
+
+Vérifié avant conclusion : tous les fichiers exercés par ce spec
+(`src/features/events/**`, page publique) sont intacts dans le diff de la
+Vague A comme dans celui de cette extension.
+
+## I. Tests ajoutés
+
+| Suite | Avant extension | Après |
+|---|---|---|
+| API unitaires | 1135 | **1175** (+40) |
+| API E2E (Jest) | 49 | **70** (+21) |
+| Web unitaires | 331 | **379** (+48) |
+| E2E fonctionnels exécutés | 55 | **200** |
+| Concurrence Vague A | 7/7 | **7/7** |
+| Concurrence Vague 5 | — | **10/10** |
+
+Nouveaux fichiers : `paypal-environment.spec.ts` (réécrit, 37 cas),
+`host-matching.spec.ts`, `object-id-validation.e2e-spec.ts`,
+`paypal-approval.test.ts`, `wave-a-mobile-roles.spec.ts`,
+`wave-a-auth-degradation.spec.ts`.
+
+## J. Revue de sécurité ciblée
+
+| Vecteur | Vérification | Résultat |
+|---|---|---|
+| Activation Live accidentelle | `PAYPAL_ENV` absent, vide, `staging`, `prod` | `sandbox` ou refus de démarrage |
+| Confusion Sandbox/Live | URL d'approbation croisée | refusée dans les deux sens |
+| Hôte d'approbation hostile | 6 domaines sosies + sous-domaine non listé | tous refusés |
+| Open redirect | `http:`, `javascript:`, `data:`, `//evil` | tous refusés |
+| Fuite de credentials | `describePayPalConfig` | drapeaux de présence uniquement |
+| Webhook du mauvais environnement | webhook par variable, distinct par env | documenté et testé |
+| Repli silencieux | live → sandbox et inverse | aucun |
+| Faux logout | 500 / 503 / 429 / réseau sur `/auth/me` | pas de déconnexion |
+| Boucle de redirection | racine dashboard pour un organisateur | pas de redirection vers soi-même |
+| `returnUrl` non sûr | `sanitizeRedirectPath` inchangé | conservé |
+| Route inter-rôles | prestataire sur `/tableau-de-bord` | redirigé, pas 403 |
+| ObjectId malformé | 6 routes | 400 stable, plus aucune 500 |
+| Fuite d'information | message d'erreur interne | plus de « erreur interne » sur une faute de frappe |
+
+## K. Performance
+
+- `MobileNav` n'ajoute **aucune** requête : la résolution de rôle est locale, à partir de la session déjà chargée.
+- La redirection du dashboard racine est locale également — pas de cascade.
+- Le harnais E2E **réduit** le nombre de connexions (réutilisation + cache).
+- `/auth/me` reste appelé une seule fois au montage ; le réessai est manuel.
+- PayPal n'ajoute aucun SDK global : la validation d'hôte est une fonction pure.
+- Aucune nouvelle boucle de polling.
+
+## L. Risques réellement ouverts après cette extension
+
+| Risque | Sévérité | Note |
+|---|---|---|
+| Prérequis produit du passage Live | Bloquant avant activation | Politique de règlement tardif (Vague 5 §8), `PAID_TICKET_HOLD_MINUTES` à aligner, remboursement à ajouter au contrat `PaymentProvider`. **Décisions produit, pas techniques.** |
+| Écrans placeholders | P3 | `messages`, `ententes`, `avis`, `calendrier`, `/parametres`, `/tableau-de-bord/prestataires` restent des placeholders. Ils sont désormais marqués comme tels dans la source de navigation. |
+| Arbre de routes legacy | P3 | `/(dashboard)/organisateur|prestataire|gestionnaire` toujours atteignable par URL, dont cinq pages en squelette infini. Hors périmètre. |
+| Copies d'`authFetch` | P3 | Trois subsistent (`notifications`, `guests`, et l'utilitaire favoris supprimé). Aucun module touché par cette extension n'en utilise ; aucune nouvelle copie n'a été créée. |
+| Suite E2E longue | — | ~11 min en `--workers=1`. La parallélisation reste limitée par `AUTH_STRICT`. |
+| Couverture API | — | 73 % global. Les modules touchés par les deux vagues sont au-dessus. |
