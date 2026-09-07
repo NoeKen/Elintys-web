@@ -6,15 +6,20 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { getLoginPath } from "@/lib/auth/redirects";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isSessionUnavailable, retrySession } = useAuth();
   const router = useRouter();
 
+  // Redirection UNIQUEMENT sur une absence de session confirmée. Une panne de
+  // restauration ne doit pas déconnecter un utilisateur qui a une session
+  // valide : c'est une panne d'API, pas une fin de session.
+  const shouldRedirect = !isLoading && !isAuthenticated && !isSessionUnavailable;
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (shouldRedirect) {
       const returnPath = `${window.location.pathname}${window.location.search}`;
       router.replace(getLoginPath(returnPath));
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [shouldRedirect, router]);
 
   if (isLoading) {
     return (
@@ -31,7 +36,34 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) return null;
+  if (isAuthenticated) return <>{children}</>;
 
-  return <>{children}</>;
+  if (isSessionUnavailable) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div
+          className="max-w-md rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+          role="alert"
+          data-testid="session-unavailable"
+        >
+          <p className="font-medium text-navy">
+            Impossible de vérifier votre session pour le moment.
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            Vous n’avez pas été déconnecté : le service est momentanément indisponible.
+          </p>
+          <button
+            type="button"
+            onClick={retrySession}
+            className="mt-4 min-h-11 rounded-lg bg-teal px-6 py-2 text-sm font-medium text-white"
+            data-testid="session-retry"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
