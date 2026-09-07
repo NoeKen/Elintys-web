@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Heart, Star } from 'lucide-react';
+import { Check, Star } from 'lucide-react';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 
 export interface PublicVenue {
   _id: string;
@@ -28,6 +29,7 @@ export function VenueCard({ venue }: VenueCardProps) {
   const reviewCount = venue.reviewsCount ?? venue.reviewCount;
 
   return (
+    <div className="catalog-card-shell">
     <Link href={`/lieux/${venue._id}`} className="venue-card">
       <div className="venue-card-image">
         {photo ? (
@@ -62,17 +64,6 @@ export function VenueCard({ venue }: VenueCardProps) {
             Vérifié
           </span>
         )}
-        <button
-          type="button"
-          className="btn-favorite"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          aria-label="Sauvegarder ce lieu"
-        >
-          <Heart className="h-4 w-4" aria-hidden="true" />
-        </button>
       </div>
       <div className="venue-card-body">
         {venue.rating != null && venue.rating > 0 && (
@@ -105,5 +96,11 @@ export function VenueCard({ venue }: VenueCardProps) {
         <div className="venue-card-cta">Réserver</div>
       </div>
     </Link>
+      {/* Hors du <Link> : un <button> imbriqué dans un <a> est invalide et
+          rend l'action inatteignable au clavier. */}
+      <div className="btn-favorite-slot">
+        <FavoriteButton targetId={venue._id} targetType="venue" size="sm" />
+      </div>
+    </div>
   );
 }
