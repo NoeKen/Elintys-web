@@ -92,7 +92,7 @@ La QA Wave B porte sur 320×720, 375×812, 390×844, 768×1024 et 1024 px pour l
 
 ## 17. Accessibilité limitée
 
-Le menu dispose d'un nom accessible, d'un état exposé, d'une relation vers le panneau, d'une navigation clavier, d'un focus visible et d'une restitution du focus après Escape. Le scénario Axe Wave B est vert avec zéro violation critical/serious. La revue UI/UX a suivi le design system Elintys et a renforcé les cibles à 44 px sans introduire de nouveau mini design system.
+Le menu dispose d'un nom accessible, d'un état exposé, d'une relation vers le panneau, d'une navigation clavier, d'un focus visible et d'une restitution du focus après Escape. Le smoke Wave A a révélé un avertissement Radix sur la description du dialogue « Plus » ; une `Dialog.Description` réservée aux lecteurs d'écran a été ajoutée, puis le smoke a été rejoué sans cet avertissement. Le scénario Axe Wave B est vert avec zéro violation critical/serious. La revue UI/UX a suivi le design system Elintys et a renforcé les cibles à 44 px sans introduire de nouveau mini design system.
 
 ## 18. Tests et gates
 
@@ -106,12 +106,10 @@ Le menu dispose d'un nom accessible, d'un état exposé, d'une relation vers le 
 | Web typecheck / build production | vert ; build rejoué avec réseau pour les polices Google |
 | Web unitaires + coverage | 58 fichiers, 385 tests ; 50,06 % statements, 46,11 % branches, 43,51 % functions, 51,47 % lines |
 | Web E2E menu Wave B | 11/11 tests verts, Axe inclus |
-| Web E2E rôles Wave A | 2 tests de setup verts, puis bloqué par l'absence de `E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD` ; 16 cas non exécutés |
+| Web E2E rôles Wave A | 19/19 tests verts après provisionnement idempotent des cinq comptes QA, mot de passe temporaire non persisté |
 | npm audit API/Web | 0 vulnérabilité |
 | `git diff --check` / scan secrets | propre / aucun secret détecté |
 | Services locaux | ports 3000 et 3001 libérés |
-
-Le blocage du smoke rôles ne masque pas une régression B : le test autonome Wave B exerce le composant réel à tous les viewports requis. Il reste néanmoins une preuve QA à compléter dès que les comptes multi-rôles sont reprovisionnés.
 
 ## 19. Régressions
 
@@ -128,6 +126,7 @@ Les suites complètes unitaires, E2E API, build production Web, E2E Wave B et co
 - **P2 corrigé :** commentaire d'avis vide après trim et recherche courte incohérente.
 - **P2 corrigé :** contrat de pagination Discovery incorrect côté Web.
 - **P3 corrigé :** ARIA, focus et taille tactile du burger.
+- **P3 corrigé :** description accessible manquante sur le dialogue mobile Wave A.
 
 ## 21. Corrections Codex
 
@@ -140,18 +139,18 @@ Les corrections sont réparties dans quatre commits atomiques : logique/sécurit
 | P0 | 0 | 0 |
 | P1 | 2 | 0 |
 | P2 | 6 | 0 |
-| P3 | 1 | 0 |
+| P3 | 2 | 0 |
 
 ## 23. Registre hors périmètre
 
 - Vague C : clients `authFetch` dupliqués, routes dashboard legacy, hook Discovery sans consommateur, UI Reviews absente, recherche publique encore placeholder.
 - Vague D : écrans placeholders atteignables directement et décision produit sur l'exposition de `contactEmail`.
 - Vague E : optimisation de la durée E2E et extension de la couverture globale.
-- Produit/ops : compte QA ADMIN et comptes QA prestataire/gestionnaire multi-rôles à provisionner ; prérequis PayPal Live inchangés.
+- Produit/ops : compte QA ADMIN à provisionner ; les comptes multi-rôles peuvent être recréés avec le provisionneur idempotent ; prérequis PayPal Live inchangés.
 
 ## 24. Risques restants
 
-Le risque principal est une lacune de preuve, pas un défaut confirmé : le parcours HTTP ADMIN et le smoke mobile multi-rôles ne peuvent pas être rejoués sans comptes QA correspondants. Les protections fail-closed, métadonnées, tests unitaires et E2E Wave B sont vertes. `contactEmail` public reste une décision produit explicitement assumée à réévaluer.
+Le parcours HTTP ADMIN réel reste à rejouer lorsqu'un compte dédié sera provisionné ; les protections fail-closed et les métadonnées de rôle sont néanmoins couvertes. Les comptes QA multi-rôles ont été provisionnés avec un mot de passe temporaire non persisté : un prochain run devra relancer le provisionneur. `contactEmail` public reste une décision produit explicitement assumée à réévaluer.
 
 ## 25. Commits
 
@@ -175,4 +174,4 @@ Les deux branches ont été poussées sans force push et proposées vers `dev`. 
 
 ## Verdict
 
-**VALIDÉE avec une réserve de preuve non bloquante :** B-01 à B-08 et le burger mobile sont implémentés, revus et couverts ; P0/P1/P2 ouverts = 0. Le smoke mobile multi-rôles devra être rejoué dès que les identifiants QA absents seront fournis.
+**VALIDÉE :** B-01 à B-08 et le burger mobile sont implémentés, revus et couverts ; le smoke critique Wave A est vert 19/19 et P0/P1/P2 ouverts = 0.
