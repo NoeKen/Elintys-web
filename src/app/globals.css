@@ -1482,26 +1482,22 @@ body::before {
     backdrop-filter: blur(var(--blur-soft));
     -webkit-backdrop-filter: blur(var(--blur-soft));
   }
-  .btn-favorite {
+  /* Conteneur de carte : porte le contexte de positionnement du bouton
+     favori, qui doit rester HORS du <Link> (un <button> imbriqué dans un
+     <a> est invalide et piège la navigation clavier). */
+  .catalog-card-shell {
+    position: relative;
+  }
+  /* Emplacement du bouton favori sur une carte catalogue.
+     Le bouton lui-même porte sa taille (44px, cible tactile minimale) et son
+     état ; ce conteneur ne fait que le positionner. L'ancienne .btn-favorite
+     mesurait 32px et n'avait aucune action attachée. */
+  .btn-favorite-slot {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.40);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    font-size: 16px;
-    color: var(--color-navy);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(6px);
-    box-shadow: var(--shadow-soft-line);
-    transition: transform var(--motion-base) var(--ease-premium), background var(--motion-base) var(--ease-premium);
+    z-index: 1;
   }
-  .btn-favorite:hover { background: white; transform: translateY(-1px); }
   .vendor-card-body,
   .venue-card-body { padding: 18px; }
   .rating-row {

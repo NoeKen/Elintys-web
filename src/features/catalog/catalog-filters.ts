@@ -11,23 +11,44 @@ export const EVENT_CATEGORIES = [
   { label: 'Autre', value: 'other', color: '#5D6670' },
 ] as const;
 
-export const VENDOR_CATEGORIES = [
+/**
+ * Énumération `VendorCategory` du backend, EN ENTIER.
+ *
+ * Source unique pour tout formulaire qui écrit une catégorie : le champ est
+ * validé par `@IsEnum(VendorCategory)` côté API, une saisie libre y est
+ * systématiquement refusée en 400.
+ */
+export const VENDOR_CATEGORY_OPTIONS = [
   { label: 'Photographie', value: 'photographe' },
   { label: 'Traiteur', value: 'traiteur' },
   { label: 'Musique & DJ', value: 'dj' },
   { label: 'Décoration', value: 'decorateur' },
   { label: 'Animation', value: 'animateur' },
   { label: 'Sonorisation', value: 'sonorisation' },
+  { label: 'Autre', value: 'autre' },
 ] as const;
 
-export const VENUE_TYPES = [
+/** Énumération `VenueType` du backend, EN ENTIER. */
+export const VENUE_TYPE_OPTIONS = [
   { label: 'Salle de conférence', value: 'conference' },
   { label: 'Espace de réception', value: 'reception' },
   { label: 'Studio', value: 'studio' },
   { label: 'Restaurant privatif', value: 'restaurant' },
   { label: 'Rooftop', value: 'rooftop' },
   { label: 'Salle de spectacle', value: 'spectacle' },
+  { label: 'Autre', value: 'other' },
 ] as const;
+
+/**
+ * Filtres du catalogue public — sous-ensemble volontaire des énumérations
+ * ci-dessus : « Autre » n'est pas un critère de recherche exploitable.
+ * Dérivés, pour ne pas diverger de l'énumération backend.
+ */
+export const VENDOR_CATEGORIES = VENDOR_CATEGORY_OPTIONS.filter(
+  (option) => option.value !== 'autre',
+);
+
+export const VENUE_TYPES = VENUE_TYPE_OPTIONS.filter((option) => option.value !== 'other');
 
 export const CITIES = ['Montréal', 'Québec', 'Laval', 'Longueuil'] as const;
 export const PRICE_RANGES = ['$', '$$', '$$$', '$$$$'] as const;

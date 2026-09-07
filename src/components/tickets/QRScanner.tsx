@@ -3,8 +3,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import api from '@/shared/lib/api';
 import { cn } from '@/shared/lib/utils';
+import { getUserFacingError } from '@/shared/lib/user-facing-error';
+
+/**
+ * Issue décidée par le SERVEUR.
+ *
+ * On ne la dérive plus de `purchase.status` : après une admission réussie le
+ * billet vaut `used`, ce qui faisait afficher « Déjà utilisé » sur un scan
+ * pourtant valide.
+ */
+type ScanOutcome = 'admitted' | 'already_used';
 
 interface ScanResult {
+  outcome: ScanOutcome;
   message: string;
   purchase: {
     _id: string;
@@ -38,10 +49,16 @@ export function QRScanner({ eventId }: Props) {
     stopCamera();
     setError(null);
     try {
+      // `eventId` fait partie du contrat : le serveur s'en sert pour autoriser
+      // le scanneur ET pour refuser un billet appartenant à un autre événement.
       const res = await api.post<ScanResult>('/tickets/scan', { eventId, qrCode });
       setResult(res.data);
-    } catch {
-      setError('Code QR invalide ou erreur de validation.');
+    } catch (scanError) {
+      setError(
+        getUserFacingError(scanError, {
+          fallback: 'Billet non reconnu pour cet événement.',
+        }).message,
+      );
     }
   }, [eventId, stopCamera]);
 
@@ -103,8 +120,9 @@ export function QRScanner({ eventId }: Props) {
     <div className="max-w-sm mx-auto">
       {!scanning && !result && (
         <button
+          type="button"
           onClick={startCamera}
-          className="w-full bg-teal text-white py-3 rounded-xl font-medium hover:bg-teal/90 transition-colors"
+          className="min-h-12 w-full bg-teal text-white py-3 rounded-xl font-medium hover:bg-teal/90 transition-colors"
         >
           Activer la caméra
         </button>
@@ -126,14 +144,19 @@ export function QRScanner({ eventId }: Props) {
       )}
 
       {result && (
-        <div className={cn(
-          'p-4 rounded-xl mt-4 border',
-          result.purchase.status === 'used'
-            ? 'bg-amber/10 border-amber'
-            : 'bg-teal/10 border-teal'
-        )}>
-          <p className="font-semibold text-lg text-white">
-            {result.purchase.status === 'valid' ? 'Valide' : result.purchase.status === 'used' ? 'Déjà utilisé' : result.purchase.status}
+        <div
+          className={cn(
+            'p-4 rounded-xl mt-4 border',
+            result.outcome === 'already_used'
+              ? 'bg-amber/10 border-amber'
+              : 'bg-teal/10 border-teal'
+          )}
+          role="status"
+          aria-live="polite"
+          data-testid="scan-result"
+        >
+          <p className="font-semibold text-lg text-white" data-testid="scan-outcome">
+            {result.outcome === 'admitted' ? 'Valide' : 'Déjà utilisé'}
           </p>
           <p className="text-sm text-white/80 mt-1">{result.message}</p>
           <button
@@ -146,7 +169,7 @@ export function QRScanner({ eventId }: Props) {
       )}
 
       {error && (
-        <div className="mt-4 p-4 bg-red-900/30 border border-red-500 rounded-xl">
+        <div className="mt-4 p-4 bg-red-900/30 border border-red-500 rounded-xl" role="alert" data-testid="scan-error">
           <p className="text-red-300 text-sm">{error}</p>
           <button onClick={startCamera} className="mt-2 text-sm text-teal hover:underline">Réessayer</button>
         </div>

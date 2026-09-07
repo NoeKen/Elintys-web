@@ -1,11 +1,14 @@
+import fs from 'node:fs';
 import path from 'node:path';
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import { request } from '@playwright/test';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 export const E2E_DIR = path.resolve('.e2e');
 export const OWNER_STATE = path.join(E2E_DIR, 'owner.json');
 export const TIERS_STATE = path.join(E2E_DIR, 'tiers.json');
+export const VENDOR_STATE = path.join(E2E_DIR, 'vendor.json');
+export const VENUE_STATE = path.join(E2E_DIR, 'venue.json');
 export const QA_TITLE_PREFIX = '[E2E]';
 
 export interface Credentials {
@@ -19,6 +22,35 @@ export function ownerCredentials(): Credentials {
   if (!email || !password) {
     throw new Error('E2E_TEST_EMAIL et E2E_TEST_PASSWORD sont requis.');
   }
+  return { email, password };
+}
+
+/**
+ * Comptes QA prestataire et gestionnaire.
+ *
+ * Provisionnés SANS profil métier par `npm run qa:provision` : c'est l'état
+ * d'un utilisateur réel après son onboarding, celui que le parcours
+ * « créer ma fiche » doit savoir traiter.
+ */
+export function vendorCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_VENDOR ?? 'qa-prestataire@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+export function venueCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_VENUE ?? 'qa-gestionnaire@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+/** Compte QA multi-rôles (organisateur + prestataire). */
+export function multiRoleCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_MULTI ?? 'qa-multi@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
   return { email, password };
 }
 
@@ -44,17 +76,42 @@ export interface ApiClient {
   put(path: string, options?: Parameters<APIRequestContext['put']>[1]): ReturnType<APIRequestContext['put']>;
   patch(path: string, options?: Parameters<APIRequestContext['patch']>[1]): ReturnType<APIRequestContext['patch']>;
   delete(path: string, options?: Parameters<APIRequestContext['delete']>[1]): ReturnType<APIRequestContext['delete']>;
+  /** Session courante, réinjectable dans un contexte navigateur. */
+  storageState(): ReturnType<APIRequestContext['storageState']>;
   dispose(): Promise<void>;
 }
 
 function wrap(context: APIRequestContext): ApiClient {
   const url = (path: string) => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+  /**
+   * Rejoue une requête après rafraîchissement, comme le fait le client web.
+   *
+   * Le jeton d'accès vit 15 minutes ; une suite complète dure plus longtemps.
+   * Sans ce rejeu, une session parfaitement valide expirait EN COURS
+   * d'exécution et les specs échouaient sur des 401 — indiscernables d'une
+   * régression, alors que le produit, lui, rafraîchit de façon transparente.
+   * Le client de test reproduit donc le comportement du client réel.
+   */
+  const withRefresh = async (
+    send: () => ReturnType<APIRequestContext['get']>,
+  ): ReturnType<APIRequestContext['get']> => {
+    const response = await send();
+    if (response.status() !== 401) return response;
+
+    const refreshed = await context.post(url('/auth/refresh'));
+    if (!refreshed.ok()) return response;
+
+    return send();
+  };
+
   return {
-    get: (path, options) => context.get(url(path), options),
-    post: (path, options) => context.post(url(path), options),
-    put: (path, options) => context.put(url(path), options),
-    patch: (path, options) => context.patch(url(path), options),
-    delete: (path, options) => context.delete(url(path), options),
+    get: (path, options) => withRefresh(() => context.get(url(path), options)),
+    post: (path, options) => withRefresh(() => context.post(url(path), options)),
+    put: (path, options) => withRefresh(() => context.put(url(path), options)),
+    patch: (path, options) => withRefresh(() => context.patch(url(path), options)),
+    delete: (path, options) => withRefresh(() => context.delete(url(path), options)),
+    storageState: () => context.storageState(),
     dispose: () => context.dispose(),
   };
 }
@@ -85,17 +142,104 @@ export async function anonymousApi(): Promise<ApiClient> {
   return wrap(context);
 }
 
-/** Client API authentifié (cookies httpOnly) pour un compte donné. */
-export async function apiContextFor(credentials: Credentials): Promise<ApiClient> {
+/**
+ * Sessions réutilisées entre exécutions, par compte.
+ *
+ * Le tier AUTH_STRICT plafonne à 5 connexions par minute et par IP. La suite
+ * utilise cinq comptes distincts : sans réutilisation, le seul démarrage des
+ * specs sature déjà le quota et les échecs deviennent des 429 indiscernables
+ * d'une vraie régression.
+ *
+ * L'état est donc caché sur disque (dans `.e2e/`, ignoré par Git) et renouvelé
+ * par rafraîchissement plutôt que par une nouvelle connexion.
+ */
+type StorageState = Awaited<ReturnType<APIRequestContext['storageState']>>;
+const sessionCache = new Map<string, Promise<StorageState>>();
+
+function statePathFor(email: string): string {
+  return path.join(E2E_DIR, `session-${email.replace(/[^a-z0-9]/gi, '-')}.json`);
+}
+
+/** Vrai si l'état stocké donne encore accès (après rafraîchissement éventuel). */
+async function reuseStoredState(statePath: string): Promise<StorageState | null> {
+  if (!fs.existsSync(statePath)) return null;
+  const client = await apiFromState(statePath);
+  try {
+    const response = await client.get('/auth/me');
+    if (response.status() !== 200) return null;
+    const state = await client.storageState();
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    return state;
+  } catch {
+    return null;
+  } finally {
+    await client.dispose();
+  }
+}
+
+async function loginAndCapture(credentials: Credentials): Promise<StorageState> {
+  const statePath = statePathFor(credentials.email);
+  fs.mkdirSync(E2E_DIR, { recursive: true });
+
+  const reused = await reuseStoredState(statePath);
+  if (reused) return reused;
+
+  return loginWithBackoff(credentials, statePath);
+}
+
+/** Fenêtre du tier AUTH_STRICT, plus une marge. */
+const AUTH_WINDOW_MS = 61_000;
+
+/**
+ * Connexion respectant le rate-limit plutôt que le contournant.
+ *
+ * La suite utilise cinq comptes ; un démarrage à froid dépasse donc le quota
+ * de 5 connexions par minute. Plutôt que d'affaiblir la protection pour les
+ * tests, on attend la fenêtre et on réessaie : les démarrages à froid sont
+ * plus lents, les suivants réutilisent l'état sur disque et n'ouvrent aucune
+ * connexion.
+ */
+async function loginWithBackoff(
+  credentials: Credentials,
+  statePath: string,
+  attempt = 0,
+): Promise<StorageState> {
   const context = await request.newContext({
     extraHTTPHeaders: { Origin: 'http://localhost:3000' },
   });
-  const client = wrap(context);
-  const response = await client.post('/auth/login', { data: credentials });
-  if (!response.ok()) {
-    throw new Error(`Connexion API échouée (${response.status()}) pour ${credentials.email}`);
+  const response = await context.post(`${API_URL}/auth/login`, { data: credentials });
+
+  if (response.status() === 429 && attempt < 2) {
+    await context.dispose();
+    await new Promise((resolve) => setTimeout(resolve, AUTH_WINDOW_MS));
+    return loginWithBackoff(credentials, statePath, attempt + 1);
   }
-  return client;
+
+  if (!response.ok()) {
+    const status = response.status();
+    await context.dispose();
+    throw new Error(`Connexion API échouée (${status}) pour ${credentials.email}`);
+  }
+
+  const state = await context.storageState();
+  await context.dispose();
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  return state;
+}
+
+export async function apiContextFor(credentials: Credentials): Promise<ApiClient> {
+  let pending = sessionCache.get(credentials.email);
+  if (!pending) {
+    pending = loginAndCapture(credentials);
+    sessionCache.set(credentials.email, pending);
+  }
+
+  const storageState = await pending;
+  const context = await request.newContext({
+    storageState,
+    extraHTTPHeaders: { Origin: 'http://localhost:3000' },
+  });
+  return wrap(context);
 }
 
 /** Crée un événement brouillon via l'API et retourne son identifiant. */
@@ -125,6 +269,25 @@ export async function cleanupEvents(api: ApiClient, ids: string[]): Promise<void
 export async function waitForHydration(page: Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('networkidle').catch(() => undefined);
+}
+
+/**
+ * Neutralise le bouton flottant des devtools TanStack.
+ *
+ * Il occupe le coin inférieur droit et recouvre la barre de navigation mobile
+ * sous 400 px : les actions de l'application y deviennent inatteignables au
+ * clic. `NEXT_PUBLIC_DISABLE_DEVTOOLS` les retire quand Playwright démarre
+ * lui-même le serveur, mais un serveur de développement déjà lancé est
+ * réutilisé tel quel — d'où cette garde, qui rend le test indépendant de la
+ * façon dont le serveur a été démarré.
+ */
+export async function hideDevtoolsOverlay(context: BrowserContext): Promise<void> {
+  await context.addInitScript(() => {
+    const style = document.createElement('style');
+    style.textContent = '.tsqd-parent-container { display: none !important; }';
+    document.addEventListener('DOMContentLoaded', () => document.head.append(style));
+    queueMicrotask(() => document.head?.append(style));
+  });
 }
 
 /** Petite image PNG valide (1×1) pour les tests d'upload. */

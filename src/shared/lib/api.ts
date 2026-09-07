@@ -192,3 +192,18 @@ const api = {
 };
 
 export default api;
+
+/**
+ * Politique de réessai partagée pour TanStack Query.
+ *
+ * Une réponse 4xx est une décision du serveur : la rejouer ne change rien et
+ * ne fait que retarder l'affichage de l'état correspondant (mode création sur
+ * un 404, message d'erreur sur un 400). Seuls les échecs transitoires — 5xx et
+ * erreurs réseau — méritent un réessai.
+ */
+export function retryOnTransientError(failureCount: number, error: unknown): boolean {
+  if (error instanceof ApiClientError && error.status >= 400 && error.status < 500) {
+    return false;
+  }
+  return failureCount < 2;
+}

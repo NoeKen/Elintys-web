@@ -29,7 +29,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* Les devtools sont retirés quand NEXT_PUBLIC_DISABLE_DEVTOOLS est posé.
+          Leur bouton flottant occupe le coin inférieur droit et recouvre la
+          barre de navigation mobile sous 400 px : il rendait certaines actions
+          de l'application inatteignables pendant les tests. */}
+      {process.env.NEXT_PUBLIC_DISABLE_DEVTOOLS === "true" ? null : (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
     </QueryClientProvider>
   );
 }

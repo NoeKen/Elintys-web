@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Sparkles, Star } from 'lucide-react';
+import { Sparkles, Star } from 'lucide-react';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 
 export interface PublicVendor {
   _id: string;
@@ -31,6 +32,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
   const startingPrice = vendor.startingPrice ?? vendor.priceRange?.min;
 
   return (
+    <div className="catalog-card-shell">
     <Link href={`/prestataires/${vendor._id}`} className="vendor-card">
       <div className="vendor-card-image">
         {photo ? (
@@ -65,17 +67,6 @@ export function VendorCard({ vendor }: VendorCardProps) {
             Recommandé
           </span>
         )}
-        <button
-          type="button"
-          className="btn-favorite"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          aria-label="Sauvegarder ce prestataire"
-        >
-          <Heart className="h-4 w-4" aria-hidden="true" />
-        </button>
       </div>
       <div className="vendor-card-body">
         {vendor.rating != null && vendor.rating > 0 && (
@@ -105,5 +96,11 @@ export function VendorCard({ vendor }: VendorCardProps) {
         <div className="vendor-card-cta">Réserver</div>
       </div>
     </Link>
+      {/* Hors du <Link> : un <button> imbriqué dans un <a> est invalide et
+          rend l'action inatteignable au clavier. */}
+      <div className="btn-favorite-slot">
+        <FavoriteButton targetId={vendor._id} targetType="vendor" size="sm" />
+      </div>
+    </div>
   );
 }

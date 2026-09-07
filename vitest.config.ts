@@ -43,6 +43,31 @@ export default defineConfig({
         lines: 12,
         // Modules critiques déjà couverts à 100% — ce seuil verrouille leur
         // couverture pour empêcher toute régression future.
+        // ── Vague A — modules réécrits, verrouillés à 100% ──
+        "src/features/favorites/favorites.service.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
+        },
+        "src/features/vendors/services/vendor-profile.service.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
+        },
+        "src/features/venues/services/venue-profile.service.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
+        },
+        "src/features/catalog/catalog-filters.ts": {
+          statements: 100,
+          branches: 100,
+          functions: 100,
+          lines: 100,
+        },
         "src/lib/auth/redirects.ts": {
           statements: 100,
           branches: 100,

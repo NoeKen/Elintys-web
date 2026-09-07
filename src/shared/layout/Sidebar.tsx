@@ -4,12 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import {
-  Building2, Calendar, CalendarCheck, CalendarDays, Handshake,
-  Heart, Inbox, LayoutGrid, MapPin, MessageSquare, Search,
-  Settings, Star, Ticket, Users, LogOut,
-} from 'lucide-react';
-import type { ComponentType } from 'react';
+import { LogOut } from 'lucide-react';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Tooltip } from '@/shared/ui/Tooltip';
@@ -17,30 +12,11 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { IconSidebarCollapse, IconSidebarExpand } from '@/lib/icons';
 import { buildNavSections, type SidebarIconName } from '@/shared/layout/sidebar-nav';
+import { NavIcon } from '@/shared/layout/nav-icons';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
-const ICON_MAP: Record<SidebarIconName, ComponentType<{ className?: string; size?: number }>> = {
-  grid: LayoutGrid,
-  calendar: Calendar,
-  users: Users,
-  building: Building2,
-  'message-square': MessageSquare,
-  star: Star,
-  inbox: Inbox,
-  handshake: Handshake,
-  'map-pin': MapPin,
-  'calendar-check': CalendarCheck,
-  'calendar-days': CalendarDays,
-  ticket: Ticket,
-  heart: Heart,
-  search: Search,
-  settings: Settings,
-  'star-half': Star,
-};
-
 function SidebarIcon({ name, className }: { name: SidebarIconName; className?: string }) {
-  const Icon = ICON_MAP[name];
-  return <Icon className={className} size={18} />;
+  return <NavIcon name={name} className={className} size={18} />;
 }
 
 export function Sidebar() {

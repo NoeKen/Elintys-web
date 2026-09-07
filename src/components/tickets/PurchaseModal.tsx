@@ -9,6 +9,7 @@ import { getLoginPath } from '@/lib/auth/redirects';
 import { getParticipationError, participationCopy as copy } from '@/features/events/lib/participation-error';
 import { usePurchaseFreeTicket } from '@/features/tickets/hooks/useTickets';
 import { createTicketOrder } from '@/features/payments/lib/ticket-order';
+import { isTrustedApprovalUrl } from '@/features/payments/lib/paypal-approval';
 import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
 import { Modal } from '@/shared/ui/Modal';
 
@@ -33,22 +34,6 @@ interface Props {
 function shouldRotateKey(error: unknown): boolean {
   if (!(error instanceof ApiClientError)) return false;
   return error.status >= 400 && error.status < 500 && error.status !== 429;
-}
-
-/**
- * Protection contre la redirection ouverte.
- *
- * L'URL d'approbation vient de notre API, qui la tient du fournisseur. On
- * vérifie malgré tout sa destination avant d'y envoyer l'utilisateur : une URL
- * inattendue n'est jamais suivie.
- */
-export function isTrustedApprovalUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' && /(^|\.)sandbox\.paypal\.com$/.test(parsed.hostname);
-  } catch {
-    return false;
-  }
 }
 
 export function PurchaseModal({ ticketType, eventTitle, eventSlug, accessGrant, onClose }: Props) {

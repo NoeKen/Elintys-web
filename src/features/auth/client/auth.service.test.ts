@@ -21,8 +21,9 @@ vi.mock("@/shared/lib/api", () => ({
 }));
 
 import { authService } from "./auth.service";
+import { ApiClientError } from "@/shared/lib/api";
 
-describe("authService.refreshSession", () => {
+describe("authService.restoreSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -54,6 +55,60 @@ describe("authService.refreshSession", () => {
 
   it("retourne null lorsque l'API ne peut pas restaurer la session", async () => {
     get.mockRejectedValue(new Error("non authentifié"));
+
+    await expect(authService.refreshSession()).resolves.toBeNull();
+  });
+});
+
+describe("authService.restoreSession — distinction absence / indisponibilité", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("retourne `authenticated` avec la session normalisée", async () => {
+    get.mockResolvedValue({
+      data: {
+        _id: "user-1",
+        email: "test@elintys.com",
+        fullName: "Ana Test",
+        roles: ["organisateur"],
+        onboardingCompleted: true,
+      },
+      status: 200,
+    });
+
+    const restored = await authService.restoreSession();
+
+    expect(restored.status).toBe("authenticated");
+  });
+
+  it("retourne `anonymous` sur un 401 — absence confirmée", async () => {
+    // Le client partagé a déjà tenté un rafraîchissement avant de remonter
+    // un 401 : c'est la seule réponse qui prouve l'absence de session.
+    get.mockRejectedValue(new ApiClientError(401, {}));
+
+    await expect(authService.restoreSession()).resolves.toEqual({ status: "anonymous" });
+  });
+
+  it.each([500, 502, 503, 429])(
+    "retourne `unavailable` sur un %s — l'état reste inconnu",
+    async (status) => {
+      get.mockRejectedValue(new ApiClientError(status, {}));
+
+      const restored = await authService.restoreSession();
+
+      expect(restored.status).toBe("unavailable");
+    },
+  );
+
+  it("retourne `unavailable` sur une panne réseau", async () => {
+    get.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    const restored = await authService.restoreSession();
+
+    expect(restored.status).toBe("unavailable");
+  });
+
+  it("refreshSession réduit les deux échecs à null pour les appelants qui redirigent", async () => {
+    get.mockRejectedValue(new ApiClientError(503, {}));
 
     await expect(authService.refreshSession()).resolves.toBeNull();
   });

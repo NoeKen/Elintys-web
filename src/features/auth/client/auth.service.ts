@@ -83,6 +83,17 @@ function toAuthError(error: unknown): { code: string; message?: string } {
   return { code: "UNKNOWN_ERROR" };
 }
 
+/**
+ * Issue d'une tentative de restauration de session.
+ *
+ * `unavailable` est volontairement distinct de `anonymous` : seul le second
+ * autorise une redirection vers la connexion.
+ */
+export type SessionRestoration =
+  | { status: "authenticated"; session: AuthSession }
+  | { status: "anonymous" }
+  | { status: "unavailable"; error: unknown };
+
 export interface LoginData {
   email: string;
   password: string;
@@ -118,13 +129,39 @@ export const authService = {
     }
   },
 
-  async refreshSession(): Promise<AuthSession | null> {
+  /**
+   * Restauration de session au démarrage de l'application.
+   *
+   * Le résultat est un état À TROIS BRANCHES, jamais un simple `null` :
+   * confondre « pas de session » avec « je n'ai pas pu vérifier » transformait
+   * n'importe quelle panne d'API en déconnexion de l'utilisateur.
+   *
+   * Un 401 qui arrive ici est une absence CONFIRMÉE : le client partagé a déjà
+   * tenté un rafraîchissement transparent avant de le remonter.
+   */
+  async restoreSession(): Promise<SessionRestoration> {
     try {
       const response = await api.get<ApiUser>("/auth/me");
-      return buildSession(response.data);
-    } catch {
-      return null;
+      return { status: "authenticated", session: buildSession(response.data) };
+    } catch (error) {
+      if (error instanceof ApiClientError && error.status === 401) {
+        return { status: "anonymous" };
+      }
+      // 429, 5xx, panne réseau : l'état d'authentification reste INCONNU.
+      return { status: "unavailable", error };
     }
+  },
+
+  /**
+   * Session courante, ou `null` si elle n'a pas pu être établie.
+   *
+   * Réservé aux appelants pour qui « absente » et « indisponible » ont la même
+   * conséquence — typiquement un écran qui va rediriger de toute façon. La
+   * restauration au démarrage doit utiliser `restoreSession`.
+   */
+  async refreshSession(): Promise<AuthSession | null> {
+    const restored = await authService.restoreSession();
+    return restored.status === "authenticated" ? restored.session : null;
   },
 
   async forgotPassword(email: string): Promise<void> {

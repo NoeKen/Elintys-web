@@ -1,4 +1,5 @@
 import type { User, UserRole } from "@/shared/types";
+import { getRoleHomePath } from "@/shared/layout/sidebar-nav";
 
 const ONBOARDING_ROUTES: Record<Exclude<UserRole, "participant">, string> = {
   organisateur: "/onboarding/organisateur",
@@ -13,12 +14,24 @@ export function getFirstOnboardingPath(roles: UserRole[]): string {
   return "/tableau-de-bord";
 }
 
+/**
+ * Écran d'atterrissage après connexion.
+ *
+ * Renvoyait `/tableau-de-bord` pour tous les rôles. Or cet écran rend
+ * l'expérience ORGANISATEUR, protégée par `@Roles(ORGANISATEUR, ADMIN)` côté
+ * API : un prestataire ou un gestionnaire recevait donc un 403 comme PREMIER
+ * écran après s'être connecté.
+ *
+ * La destination est désormais dérivée du rôle dominant, via la même source
+ * que la navigation. La priorité entre rôles est celle qu'applique déjà
+ * `getFirstOnboardingPath` ; aucune seconde politique n'est introduite.
+ */
 export function getPostAuthPath(user: User): string {
   if (!user.onboardingCompleted) {
     return getFirstOnboardingPath(user.roles);
   }
 
-  return "/tableau-de-bord";
+  return getRoleHomePath(user.roles);
 }
 
 export function sanitizeRedirectPath(value: string | null): string | null {

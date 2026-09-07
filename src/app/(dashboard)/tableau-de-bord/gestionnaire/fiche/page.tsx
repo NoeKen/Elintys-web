@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/shared/lib/utils";
-import { useAuthToken } from "@/shared/hooks/useAuthToken";
-import { venueProfileService } from "@/features/venues/services/venue-profile.service";
+import { useForm, type Resolver, type SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  venueProfileService,
+  isMissingProfileError,
+  type VenueProfileInput,
+} from "@/features/venues/services/venue-profile.service";
+import { VENUE_TYPE_OPTIONS } from "@/features/catalog/catalog-filters";
+import { retryOnTransientError } from "@/shared/lib/api";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { cn } from "@/shared/lib/utils";
+
+const TYPE_VALUES = VENUE_TYPE_OPTIONS.map((option) => option.value);
 
 const schema = z.object({
-  name: z.string().min(1).max(200),
+  name: z.string().min(1, 'Le nom du lieu est requis').max(200),
+  // Aligné sur l'énumération `VenueType` du backend.
+  type: z.enum(TYPE_VALUES as [string, ...string[]]).optional(),
   description: z.string().max(3000).optional(),
   capacity: z.coerce.number().int().min(1),
   pricePerDay: z.coerce.number().min(0).optional(),
@@ -25,6 +35,7 @@ const schema = z.object({
 
 interface FormValues {
   name: string;
+  type?: string;
   description?: string;
   capacity: number;
   pricePerDay?: number;
@@ -40,20 +51,27 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-1 text-xs text-red-500">{message}</p>;
 }
 
+const VENUE_PROFILE_KEY = ["venue-profile-me"] as const;
+
 export default function GestionnaireFichePage() {
-  const token = useAuthToken();
   const queryClient = useQueryClient();
-  const [successMsg, setSuccessMsg] = useState("");
+  const { user } = useAuth();
 
   const {
     data: profile,
     isLoading,
     isError,
+    error: loadError,
+    refetch,
   } = useQuery({
-    queryKey: ["venue-profile-me"],
-    queryFn: () => venueProfileService.getMyProfile(token),
-    enabled: Boolean(token),
+    queryKey: VENUE_PROFILE_KEY,
+    queryFn: () => venueProfileService.getMyProfile(),
+    // Un 404 est une réponse métier attendue : pas de profil ⇒ mode création.
+    retry: retryOnTransientError,
   });
+
+  const isCreating = isError && isMissingProfileError(loadError);
+  const hasLoadFailure = isError && !isCreating;
 
   const {
     register,
@@ -68,6 +86,7 @@ export default function GestionnaireFichePage() {
     if (profile) {
       reset({
         name: profile.name,
+        type: profile.type,
         description: profile.description ?? "",
         capacity: profile.capacity,
         pricePerDay: profile.pricePerDay,
@@ -77,14 +96,40 @@ export default function GestionnaireFichePage() {
         city: profile.address.city,
         postalCode: profile.address.postalCode ?? "",
       });
+      return;
     }
-  }, [profile, reset]);
 
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: (data: FormValues) =>
-      venueProfileService.updateProfile(token, {
+    // Mode création : préremplissage depuis l'onboarding, sans inventer les
+    // champs que l'onboarding ne collecte pas sous forme canonique
+    // (l'adresse y est une chaîne unique, pas une rue + une ville).
+    if (isCreating) {
+      const onboarding = user?.onboardingData?.gestionnaire_salle;
+      reset({
+        name: typeof onboarding?.venueName === "string" ? onboarding.venueName : "",
+        type: undefined,
+        description: "",
+        capacity: typeof onboarding?.capacity === "number" ? onboarding.capacity : undefined,
+        pricePerDay: undefined,
+        contactEmail: user?.email ?? "",
+        contactPhone: "",
+        street: "",
+        city: "Montréal",
+        postalCode: "",
+      } as FormValues);
+    }
+  }, [profile, isCreating, user, reset]);
+
+  const {
+    mutate,
+    isPending,
+    isSuccess,
+    error,
+  } = useMutation({
+    mutationFn: (data: FormValues) => {
+      const input: VenueProfileInput = {
         name: data.name,
-        description: data.description,
+        type: data.type,
+        description: data.description || undefined,
         capacity: data.capacity,
         pricePerDay: data.pricePerDay,
         contactEmail: data.contactEmail || undefined,
@@ -95,18 +140,17 @@ export default function GestionnaireFichePage() {
           province: "QC",
           postalCode: data.postalCode || undefined,
         },
-      }),
+      };
+      return isCreating
+        ? venueProfileService.createProfile(input)
+        : venueProfileService.updateProfile(input);
+    },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["venue-profile-me"] });
-      setSuccessMsg("Fiche mise a jour avec succes.");
-      setTimeout(() => setSuccessMsg(""), 4000);
+      void queryClient.invalidateQueries({ queryKey: VENUE_PROFILE_KEY });
     },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    setSuccessMsg("");
-    mutate(data);
-  };
+  const onSubmit: SubmitHandler<FormValues> = (data) => mutate(data);
 
   const inputClass = cn(
     "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-navy placeholder:text-muted",
@@ -118,17 +162,30 @@ export default function GestionnaireFichePage() {
   if (isLoading) {
     return (
       <div className="px-4 py-8">
-        <p className="text-sm text-muted">Chargement de la fiche...</p>
+        <p className="text-sm text-muted" role="status">
+          Chargement de la fiche…
+        </p>
       </div>
     );
   }
 
-  if (isError) {
+  // Une panne ne doit pas se présenter comme un formulaire vide éditable.
+  if (hasLoadFailure) {
     return (
-      <div className="px-4 py-8">
-        <p className="text-sm text-red-500">
-          Impossible de charger votre fiche lieu. Veuillez reessayer.
-        </p>
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        <h1 className="mb-4 font-serif text-2xl font-bold text-navy">Ma fiche lieu</h1>
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+          <p className="text-sm text-destructive">
+            Impossible de charger votre fiche lieu pour le moment.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="mt-2 min-h-11 text-sm font-medium text-teal underline"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     );
   }
@@ -137,11 +194,12 @@ export default function GestionnaireFichePage() {
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
       <div>
         <h1 className="font-serif text-2xl font-bold text-navy">
-          Ma fiche lieu
+          {isCreating ? "Créer ma fiche lieu" : "Ma fiche lieu"}
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Mettez a jour la presentation de votre lieu, ses capacites et ses
-          services.
+          {isCreating
+            ? "Votre fiche n’existe pas encore. Complétez-la pour apparaître au catalogue et recevoir des demandes de réservation."
+            : "Mettez à jour la présentation de votre lieu, ses capacités et ses services."}
         </p>
       </div>
 
@@ -149,6 +207,7 @@ export default function GestionnaireFichePage() {
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="space-y-5 rounded-xl border border-border bg-white p-6 shadow-sm"
+        data-testid="venue-profile-form"
       >
         <div>
           <label htmlFor="name" className={labelClass}>
@@ -162,6 +221,22 @@ export default function GestionnaireFichePage() {
             placeholder="Salle Pleyel, Le Balthazar..."
           />
           <FieldError message={errors.name?.message} />
+        </div>
+
+        <div>
+          <label htmlFor="type" className={labelClass}>
+            Type de lieu
+          </label>
+          {/* Select : `VenueType` est une énumération fermée côté API. */}
+          <select id="type" {...register("type")} className={inputClass}>
+            <option value="">Non précisé</option>
+            {VENUE_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <FieldError message={errors.type?.message} />
         </div>
 
         <div>
@@ -298,16 +373,25 @@ export default function GestionnaireFichePage() {
           />
         )}
 
-        {successMsg && (
-          <p className="text-sm font-medium text-teal">{successMsg}</p>
+        {/* Annoncé au lecteur d'écran : un succès purement visuel n'existe
+            pas pour qui n'utilise pas l'écran. */}
+        {isSuccess && !isPending && (
+          <p className="text-sm font-medium text-teal" role="status" aria-live="polite">
+            Fiche enregistrée avec succès.
+          </p>
         )}
 
         <button
           type="submit"
           disabled={isPending || isSubmitting}
-          className="w-full rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+          className="min-h-11 w-full rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+          data-testid="venue-profile-submit"
         >
-          {isPending ? "Enregistrement..." : "Enregistrer les modifications"}
+          {isPending
+            ? "Enregistrement…"
+            : isCreating
+              ? "Créer ma fiche"
+              : "Enregistrer les modifications"}
         </button>
       </form>
     </div>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthToken } from "@/shared/hooks/useAuthToken";
 import {
-  vendorProfileService,
+  vendorRequestsService,
+  eventTitle,
+  organizerName,
   type VendorRequest,
-} from "@/features/vendors/services/vendor-profile.service";
+} from "@/features/vendors/services/vendor-requests.service";
+import { isMissingProfileError } from "@/features/vendors/services/vendor-profile.service";
 import { cn } from "@/shared/lib/utils";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
@@ -25,24 +28,23 @@ const STATUS_CLASSES: Record<VendorRequest["status"], string> = {
   cancelled: "bg-muted text-white",
 };
 
-interface ReplyState {
-  message: string;
-}
+const VENDOR_REQUESTS_KEY = ["vendor-requests-mine"] as const;
 
 export default function PrestataireDemandesPage() {
-  const token = useAuthToken();
   const queryClient = useQueryClient();
   const [openReplyId, setOpenReplyId] = useState<string | null>(null);
-  const [replyState, setReplyState] = useState<ReplyState>({ message: "" });
+  const [replyMessage, setReplyMessage] = useState("");
 
   const {
     data: requests,
     isLoading,
     isError,
+    error,
+    refetch,
   } = useQuery({
-    queryKey: ["vendor-requests-mine"],
-    queryFn: () => vendorProfileService.getMyRequests(token),
-    enabled: !!token,
+    queryKey: VENDOR_REQUESTS_KEY,
+    // Service canonique : PATCH + responseMessage, aligné sur le contrôleur.
+    queryFn: () => vendorRequestsService.listMine(),
   });
 
   const {
@@ -53,153 +55,186 @@ export default function PrestataireDemandesPage() {
     mutationFn: ({
       id,
       status,
-      message,
+      responseMessage,
     }: {
       id: string;
       status: "accepted" | "declined";
-      message?: string;
-    }) => vendorProfileService.respondToRequest(token, id, status, message),
+      responseMessage?: string;
+    }) => vendorRequestsService.respond(id, { status, responseMessage }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vendor-requests-mine"] });
+      void queryClient.invalidateQueries({ queryKey: VENDOR_REQUESTS_KEY });
       setOpenReplyId(null);
-      setReplyState({ message: "" });
+      setReplyMessage("");
     },
   });
 
   const handleRespond = (id: string, status: "accepted" | "declined") => {
-    respond({ id, status, message: replyState.message || undefined });
-  };
-
-  const handleOpenReply = (id: string) => {
-    setOpenReplyId(id);
-    setReplyState({ message: "" });
+    respond({ id, status, responseMessage: replyMessage.trim() || undefined });
   };
 
   if (isLoading) {
     return (
-      <div className="p-8 text-muted text-sm">Chargement des demandes...</div>
+      <div className="p-8 text-sm text-muted" role="status">
+        Chargement des demandes…
+      </div>
+    );
+  }
+
+  // Pas encore de profil prestataire : ce n'est pas une panne, c'est une
+  // étape manquante du parcours. On oriente au lieu d'afficher une erreur.
+  if (isError && isMissingProfileError(error)) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4 p-6">
+        <h1 className="font-serif text-2xl text-navy">Demandes reçues</h1>
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+          <p className="text-sm text-navy">
+            Créez d’abord votre profil prestataire pour recevoir des demandes.
+          </p>
+          <Link
+            href="/tableau-de-bord/prestataire/profil"
+            className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-teal underline"
+          >
+            Créer mon profil
+          </Link>
+        </div>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="p-8 text-red-500 text-sm">
-        Une erreur est survenue lors du chargement des demandes.
+      <div className="mx-auto max-w-3xl space-y-4 p-6">
+        <h1 className="font-serif text-2xl text-navy">Demandes reçues</h1>
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+          <p className="text-sm text-destructive">
+            Impossible de charger vos demandes pour le moment.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="mt-2 min-h-11 text-sm font-medium text-teal underline"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     );
   }
 
+  const items = requests ?? [];
+
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-4">
-      <h1 className="text-2xl font-serif text-navy">Demandes reçues</h1>
-      <p className="text-muted text-sm">
+    <div className="mx-auto max-w-3xl space-y-4 p-6">
+      <h1 className="font-serif text-2xl text-navy">Demandes reçues</h1>
+      <p className="text-sm text-muted">
         Suivez les demandes envoyées par les organisateurs pour vos services.
       </p>
 
-      {!requests || requests.length === 0 ? (
-        <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted text-sm">
+      {items.length === 0 ? (
+        <div
+          className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-muted"
+          data-testid="empty-state"
+        >
           Aucune demande pour le moment.
         </div>
       ) : (
         <ul className="space-y-4">
-          {requests.map((req) => (
+          {items.map((request) => (
             <li
-              key={req._id}
-              className="bg-surface border border-border rounded-xl p-5 space-y-3"
+              key={request._id}
+              className="space-y-3 rounded-xl border border-border bg-surface p-5"
+              data-testid="vendor-request-card"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-medium text-navy">{req.event.title}</p>
-                  <p className="text-sm text-muted">
-                    {req.organizer.firstName} {req.organizer.lastName}
+                  <p className="font-medium text-navy">
+                    {eventTitle(request.event) ?? "Événement"}
                   </p>
-                  {req.message && (
-                    <p className="mt-2 text-sm text-navy border-l-2 border-border pl-3 italic">
-                      {req.message}
+                  {/* `fullName` : le schéma User n'a ni firstName ni lastName. */}
+                  <p className="text-sm text-muted">{organizerName(request.organizer) ?? "—"}</p>
+                  {request.message && (
+                    <p className="mt-2 border-l-2 border-border pl-3 text-sm italic text-navy">
+                      {request.message}
                     </p>
                   )}
                 </div>
                 <span
                   className={cn(
                     "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
-                    STATUS_CLASSES[req.status],
+                    STATUS_CLASSES[request.status],
                   )}
+                  data-testid="vendor-request-status"
                 >
-                  {STATUS_LABELS[req.status]}
+                  {STATUS_LABELS[request.status]}
                 </span>
               </div>
 
-              {req.status === "pending" && (
-                <>
-                  {openReplyId === req._id ? (
-                    <div className="space-y-3 pt-2 border-t border-border">
-                      <label
-                        htmlFor={`reply-msg-${req._id}`}
-                        className="block text-sm font-medium text-navy"
-                      >
-                        Message (optionnel)
-                      </label>
-                      <textarea
-                        id={`reply-msg-${req._id}`}
-                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-teal resize-none"
-                        rows={3}
-                        placeholder="Message optionnel..."
-                        value={replyState.message}
-                        onChange={(e) =>
-                          setReplyState({ message: e.target.value })
-                        }
-                      />
-                      {respondError && (
-                        <FormErrorAlert
-                          error={getUserFacingError(respondError, {
-                            fallback:
-                              "Impossible d’enregistrer votre réponse à cette demande. Réessayez.",
-                          })}
-                        />
-                      )}
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={isResponding}
-                          onClick={() => handleRespond(req._id, "accepted")}
-                          className={cn(
-                            "rounded-lg px-4 py-2 text-sm font-medium bg-teal text-white",
-                            "disabled:opacity-50",
-                          )}
-                        >
-                          Accepter
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isResponding}
-                          onClick={() => handleRespond(req._id, "declined")}
-                          className={cn(
-                            "rounded-lg px-4 py-2 text-sm font-medium bg-red-500 text-white",
-                            "disabled:opacity-50",
-                          )}
-                        >
-                          Refuser
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setOpenReplyId(null)}
-                          className="rounded-lg px-4 py-2 text-sm font-medium border border-border text-muted"
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenReply(req._id)}
-                      className="rounded-lg px-4 py-2 text-sm font-medium border border-teal text-teal"
+              {request.status === "pending" &&
+                (openReplyId === request._id ? (
+                  <div className="space-y-3 border-t border-border pt-2">
+                    <label
+                      htmlFor={`reply-msg-${request._id}`}
+                      className="block text-sm font-medium text-navy"
                     >
-                      Repondre
-                    </button>
-                  )}
-                </>
-              )}
+                      Message (optionnel)
+                    </label>
+                    <textarea
+                      id={`reply-msg-${request._id}`}
+                      className="w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-teal"
+                      rows={3}
+                      placeholder="Message optionnel…"
+                      value={replyMessage}
+                      onChange={(event) => setReplyMessage(event.target.value)}
+                    />
+                    {respondError && (
+                      <FormErrorAlert
+                        error={getUserFacingError(respondError, {
+                          fallback:
+                            "Impossible d’enregistrer votre réponse à cette demande. Réessayez.",
+                        })}
+                      />
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={isResponding}
+                        onClick={() => handleRespond(request._id, "accepted")}
+                        className="min-h-11 rounded-lg bg-teal px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                        data-testid="vendor-request-accept"
+                      >
+                        {isResponding ? "Envoi…" : "Accepter"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isResponding}
+                        onClick={() => handleRespond(request._id, "declined")}
+                        className="min-h-11 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                        data-testid="vendor-request-decline"
+                      >
+                        Refuser
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOpenReplyId(null)}
+                        className="min-h-11 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted"
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenReplyId(request._id);
+                      setReplyMessage("");
+                    }}
+                    className="min-h-11 rounded-lg border border-teal px-4 py-2 text-sm font-medium text-teal"
+                    data-testid="vendor-request-reply"
+                  >
+                    Répondre
+                  </button>
+                ))}
             </li>
           ))}
         </ul>
