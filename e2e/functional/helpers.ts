@@ -82,12 +82,34 @@ export interface ApiClient {
 
 function wrap(context: APIRequestContext): ApiClient {
   const url = (path: string) => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+  /**
+   * Rejoue une requête après rafraîchissement, comme le fait le client web.
+   *
+   * Le jeton d'accès vit 15 minutes ; une suite complète dure plus longtemps.
+   * Sans ce rejeu, une session parfaitement valide expirait EN COURS
+   * d'exécution et les specs échouaient sur des 401 — indiscernables d'une
+   * régression, alors que le produit, lui, rafraîchit de façon transparente.
+   * Le client de test reproduit donc le comportement du client réel.
+   */
+  const withRefresh = async (
+    send: () => ReturnType<APIRequestContext['get']>,
+  ): ReturnType<APIRequestContext['get']> => {
+    const response = await send();
+    if (response.status() !== 401) return response;
+
+    const refreshed = await context.post(url('/auth/refresh'));
+    if (!refreshed.ok()) return response;
+
+    return send();
+  };
+
   return {
-    get: (path, options) => context.get(url(path), options),
-    post: (path, options) => context.post(url(path), options),
-    put: (path, options) => context.put(url(path), options),
-    patch: (path, options) => context.patch(url(path), options),
-    delete: (path, options) => context.delete(url(path), options),
+    get: (path, options) => withRefresh(() => context.get(url(path), options)),
+    post: (path, options) => withRefresh(() => context.post(url(path), options)),
+    put: (path, options) => withRefresh(() => context.put(url(path), options)),
+    patch: (path, options) => withRefresh(() => context.patch(url(path), options)),
+    delete: (path, options) => withRefresh(() => context.delete(url(path), options)),
     storageState: () => context.storageState(),
     dispose: () => context.dispose(),
   };

@@ -5,6 +5,7 @@ import {
   API_URL,
   E2E_DIR,
   OWNER_STATE,
+  apiFromState,
   ownerCredentials,
   secondaryCredentials,
   TIERS_STATE,
@@ -24,17 +25,22 @@ import {
  */
 async function storedSessionIsValid(statePath: string): Promise<boolean> {
   if (!fs.existsSync(statePath)) return false;
-  const context = await request.newContext({
-    storageState: statePath,
-    extraHTTPHeaders: { Origin: 'http://localhost:3000' },
-  });
+
+  // Client rafraîchissant : un jeton d'accès expiré mais dont le cookie de
+  // rafraîchissement reste valide est RENOUVELÉ, sans consommer une connexion.
+  const client = await apiFromState(statePath);
   try {
-    const response = await context.get(`${API_URL}/auth/me`);
-    return response.status() === 200;
+    const response = await client.get('/auth/me');
+    if (response.status() !== 200) return false;
+
+    // Réécrire l'état : il porte peut-être un jeton fraîchement renouvelé, et
+    // il doit rester valide pendant toute la durée de la suite.
+    fs.writeFileSync(statePath, JSON.stringify(await client.storageState(), null, 2));
+    return true;
   } catch {
     return false;
   } finally {
-    await context.dispose();
+    await client.dispose();
   }
 }
 
