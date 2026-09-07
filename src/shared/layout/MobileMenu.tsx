@@ -40,6 +40,7 @@ export function MobileMenu({ open, onOpenChange, returnFocusTo }: MobileMenuProp
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-navy/25 backdrop-blur-[2px] md:hidden" />
         <Dialog.Content
+          id="mobile-dashboard-menu"
           onCloseAutoFocus={(event) => {
             // Sans cela le focus retombe sur <body> : l'utilisateur au clavier
             // perd sa position et doit re-tabuler depuis le début du document.

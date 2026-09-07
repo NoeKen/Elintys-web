@@ -1,13 +1,29 @@
 export interface PublicEvent {
-  id: string;
+  _id: string;
   title: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  location?: string;
-  coverImageUrl?: string;
-  ticketPrice?: number;
-  currency?: string;
+  startDate?: string;
+  location?: {
+    type?: string;
+    name?: string;
+    address?: string;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+  };
+  status?: string;
+  slug?: string;
+  coverImage?: string | {
+    url: string;
+    publicId?: string;
+    width?: number;
+    height?: number;
+  };
+}
+
+/** Réponse réelle de `GET /discovery/events` (`data` + `total`). */
+export interface DiscoveryPage<T> {
+  data: T[];
+  total: number;
 }
 
 /**

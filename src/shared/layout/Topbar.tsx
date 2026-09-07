@@ -34,9 +34,10 @@ interface TopbarProps {
   onMenuClick?: () => void;
   /** Permet au tiroir mobile de rendre le focus à son déclencheur. */
   menuButtonRef?: React.RefObject<HTMLButtonElement | null>;
+  menuOpen?: boolean;
 }
 
-export function Topbar({ onMenuClick, menuButtonRef }: TopbarProps) {
+export function Topbar({ onMenuClick, menuButtonRef, menuOpen = false }: TopbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
@@ -66,7 +67,9 @@ export function Topbar({ onMenuClick, menuButtonRef }: TopbarProps) {
         type="button"
         onClick={onMenuClick}
         aria-label="Ouvrir le menu"
-        className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-teal-pale hover:text-primary md:hidden"
+        aria-expanded={menuOpen}
+        aria-controls="mobile-dashboard-menu"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-teal-pale hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal md:hidden"
       >
         <IconMenu size={18} />
       </button>

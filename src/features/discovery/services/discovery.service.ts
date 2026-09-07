@@ -1,10 +1,9 @@
 import api from "@/shared/lib/api";
-import type { PaginatedResponse } from "@/shared/types";
-import type { PublicEvent, DiscoveryFilters } from "../types";
+import type { DiscoveryPage, PublicEvent, DiscoveryFilters } from "../types";
 
 export const discoveryService = {
-  async search(filters: DiscoveryFilters = {}): Promise<PaginatedResponse<PublicEvent>> {
-    const res = await api.get<PaginatedResponse<PublicEvent>>("/discovery/events", {
+  async search(filters: DiscoveryFilters = {}): Promise<DiscoveryPage<PublicEvent>> {
+    const res = await api.get<DiscoveryPage<PublicEvent>>("/discovery/events", {
       params: filters,
     });
     return res.data;

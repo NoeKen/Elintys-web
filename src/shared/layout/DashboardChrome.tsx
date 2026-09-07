@@ -19,7 +19,11 @@ export function DashboardChrome() {
 
   return (
     <>
-      <Topbar onMenuClick={() => setMenuOpen(true)} menuButtonRef={menuButtonRef} />
+      <Topbar
+        onMenuClick={() => setMenuOpen(true)}
+        menuButtonRef={menuButtonRef}
+        menuOpen={menuOpen}
+      />
       <MobileMenu
         open={menuOpen}
         onOpenChange={setMenuOpen}
