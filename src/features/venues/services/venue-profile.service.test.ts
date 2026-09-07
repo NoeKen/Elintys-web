@@ -43,6 +43,28 @@ describe('venueProfileService', () => {
     });
   });
 
+  it('liste le catalogue public avec pagination', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: { data: [], total: 0, page: 2, limit: 24 },
+      status: 200,
+    });
+
+    await venueProfileService.list(2, 24);
+
+    expect(api.get).toHaveBeenCalledWith('/venues', { params: { page: 2, limit: 24 } });
+  });
+
+  it('applique une pagination par défaut', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: { data: [], total: 0, page: 1, limit: 20 },
+      status: 200,
+    });
+
+    await venueProfileService.list();
+
+    expect(api.get).toHaveBeenCalledWith('/venues', { params: { page: 1, limit: 20 } });
+  });
+
   it('distingue un 404 métier d’une panne', () => {
     expect(isMissingProfileError(new ApiClientError(404, {}))).toBe(true);
     expect(isMissingProfileError(new ApiClientError(503, {}))).toBe(false);
