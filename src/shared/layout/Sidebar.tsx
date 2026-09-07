@@ -4,12 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import {
-  Building2, Calendar, CalendarCheck, CalendarDays, Handshake,
-  Heart, Inbox, LayoutGrid, MapPin, MessageSquare, Search,
-  Settings, Star, Ticket, Users, LogOut,
-} from 'lucide-react';
-import type { ComponentType } from 'react';
+import { LogOut } from 'lucide-react';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Tooltip } from '@/shared/ui/Tooltip';

@@ -5,6 +5,7 @@ import { getOptimizedMediaUrl } from '@/shared/lib/media';
 
 interface WeeklyEvent {
   _id: string;
+  slug: string;
   title: string;
   startDate?: string;
   coverImage?: MediaImageSource;
@@ -43,18 +44,23 @@ export function WeeklySection({ events }: WeeklySectionProps) {
 
         <div className="glass-card px-5 py-2 sm:px-7">
           {events.slice(0, 5).map((event) => (
-            <Link key={event._id} href={`/evenements/${event._id}`} className="weekly-item">
+            <Link key={event._id} href={`/evenements/${event.slug}`} className="weekly-item">
               <div className="weekly-img">
-                <Image
-                  src={
-                    event.coverImage
-                      ? getOptimizedMediaUrl(event.coverImage, 'thumbnail')
-                      : '/placeholder-event.jpg'
-                  }
-                  alt={event.title}
-                  width={64}
-                  height={64}
-                />
+                {event.coverImage ? (
+                  <Image
+                    src={getOptimizedMediaUrl(event.coverImage, 'thumbnail')}
+                    alt={event.title}
+                    width={64}
+                    height={64}
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="flex h-full w-full items-center justify-center bg-teal/10 font-serif text-2xl text-teal-dark"
+                  >
+                    {event.title.trim().charAt(0).toLocaleUpperCase('fr-CA') || 'E'}
+                  </span>
+                )}
               </div>
               <div className="weekly-content">
                 {event.startDate && (

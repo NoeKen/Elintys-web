@@ -126,6 +126,19 @@ test.describe('audit transversal — contrats réseau', () => {
 test.describe('audit transversal — affordances anonymes', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
+  test('les liens de l’agenda utilisent le slug public, pas l’ObjectId', async ({ page }) => {
+    await page.goto('/evenements');
+    const link = page.locator('a.weekly-item').first();
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute('href');
+    expect(href).toMatch(/^\/evenements\/[a-z0-9-]+$/);
+    expect(href).not.toMatch(/\/evenements\/[0-9a-f]{24}$/);
+
+    await link.click();
+    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByText('Événement introuvable')).toHaveCount(0);
+  });
+
   test('le favori événement demande une connexion et préserve le retour', async ({ page }) => {
     await page.goto('/evenements');
     const button = page.getByTestId('favorite-button').first();

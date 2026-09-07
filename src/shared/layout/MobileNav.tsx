@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import * as Dialog from '@radix-ui/react-dialog';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -104,62 +105,15 @@ function NavLink({
 export function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const prefersReduced = useReducedMotion();
   const [moreOpen, setMoreOpen] = useState(false);
-  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { primary, overflow } = buildMobileNav(user?.roles ?? []);
-
-  // Fermer le panneau à la navigation : sans cela il reste ouvert par-dessus
-  // l'écran qu'on vient d'atteindre.
-  useEffect(() => setMoreOpen(false), [pathname]);
-
-  useEffect(() => {
-    if (!moreOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setMoreOpen(false);
-        moreButtonRef.current?.focus();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [moreOpen]);
 
   if (primary.length === 0) return null;
 
   return (
-    <>
-      {moreOpen && (
-        <>
-          <button
-            type="button"
-            aria-label="Fermer le menu"
-            onClick={() => setMoreOpen(false)}
-            className="fixed inset-0 z-40 bg-navy/20 backdrop-blur-[2px] md:hidden"
-          />
-          <div
-            id="mobile-nav-more"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Plus de destinations"
-            className="fixed bottom-24 left-4 right-4 z-50 rounded-2xl border border-white/50 bg-white p-2 shadow-nav md:hidden"
-          >
-            <ul className="space-y-1">
-              {overflow.map((item) => (
-                <li key={item.href}>
-                  <NavLink
-                    item={item}
-                    active={isActive(pathname, item.href)}
-                    onNavigate={() => setMoreOpen(false)}
-                    variant="sheet"
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        </>
-      )}
-
+    <Dialog.Root open={moreOpen} onOpenChange={setMoreOpen}>
       <nav
         className="fixed bottom-4 left-4 right-4 z-40 flex h-16 rounded-full border border-white/50 bg-white/78 shadow-nav backdrop-blur-[24px] md:hidden"
         aria-label="Navigation mobile"
@@ -175,27 +129,63 @@ export function MobileNav() {
         ))}
 
         {overflow.length > 0 && (
-          <button
-            ref={moreButtonRef}
-            type="button"
-            onClick={() => setMoreOpen((open) => !open)}
-            aria-expanded={moreOpen}
-            aria-controls="mobile-nav-more"
-            aria-label="Plus de destinations"
-            data-testid="mobile-nav-more"
-            className={cn(
-              'flex min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-full transition-colors',
-              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal',
-              moreOpen ? 'text-teal-dark' : 'text-on-surface-variant hover:text-on-surface',
-            )}
-          >
-            <MoreHorizontal size={20} aria-hidden="true" className="pointer-events-none" />
-            <span className="pointer-events-none text-[10px] font-semibold leading-none">
-              Plus
-            </span>
-          </button>
+          <Dialog.Trigger asChild>
+            <button
+              type="button"
+              aria-label="Plus de destinations"
+              data-testid="mobile-nav-more"
+              className={cn(
+                'flex min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-full transition-colors',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal',
+                moreOpen ? 'text-teal-dark' : 'text-on-surface-variant hover:text-on-surface',
+              )}
+            >
+              <MoreHorizontal size={20} aria-hidden="true" className="pointer-events-none" />
+              <span className="pointer-events-none text-[10px] font-semibold leading-none">
+                Plus
+              </span>
+            </button>
+          </Dialog.Trigger>
         )}
       </nav>
-    </>
+
+      <AnimatePresence>
+        {moreOpen && (
+          <Dialog.Portal forceMount>
+            <Dialog.Overlay asChild>
+              <motion.div
+                className="fixed inset-0 z-40 bg-navy/20 backdrop-blur-[2px] md:hidden"
+                initial={prefersReduced ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={prefersReduced ? undefined : { opacity: 0 }}
+              />
+            </Dialog.Overlay>
+            <Dialog.Content asChild>
+              <motion.div
+                id="mobile-nav-more"
+                className="fixed bottom-24 left-4 right-4 z-50 rounded-2xl border border-white/50 bg-white p-2 shadow-nav focus:outline-none md:hidden"
+                initial={prefersReduced ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReduced ? undefined : { opacity: 0, y: 12 }}
+              >
+                <Dialog.Title className="sr-only">Plus de destinations</Dialog.Title>
+                <ul className="space-y-1">
+                  {overflow.map((item) => (
+                    <li key={item.href}>
+                      <NavLink
+                        item={item}
+                        active={isActive(pathname, item.href)}
+                        onNavigate={() => setMoreOpen(false)}
+                        variant="sheet"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        )}
+      </AnimatePresence>
+    </Dialog.Root>
   );
 }

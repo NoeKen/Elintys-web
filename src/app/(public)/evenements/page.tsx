@@ -97,7 +97,7 @@ export default async function EvenementsPage({
         initialCity={city}
       />
       {!category && !city && (
-        <WeeklySection events={rawEvents.slice(0, 5) as Parameters<typeof WeeklySection>[0]['events']} />
+        <WeeklySection events={events.slice(0, 5)} />
       )}
     </>
   );

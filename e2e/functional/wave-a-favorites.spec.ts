@@ -42,6 +42,24 @@ test.afterAll(async () => {
 });
 
 test.describe("Vague A — favoris authentifiés", () => {
+  test("un favori ne contourne pas la confidentialité d’un brouillon", async () => {
+    const created = await api.post('/events', {
+      data: { title: `[E2E] Favori privé ${Date.now()}` },
+    });
+    expect(created.status(), await created.text()).toBe(201);
+    const eventId = ((await created.json()) as { _id: string })._id;
+
+    try {
+      const favorite = await api.post('/favorites', {
+        data: { targetType: 'event', targetId: eventId },
+      });
+      expect(favorite.status()).toBe(404);
+      expect(await favorite.text()).toContain('FAVORITE_TARGET_NOT_FOUND');
+    } finally {
+      await api.delete(`/events/${eventId}`).catch(() => undefined);
+    }
+  });
+
   test("cycle complet : ajout depuis le catalogue, persistance, retrait", async ({
     browser,
   }) => {
