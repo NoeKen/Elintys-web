@@ -164,14 +164,14 @@ Commits Codex Web :
 
 - `ee8c525` — `fix(web): complete Wave B navigation and discovery review`
 - `b55b7c7` — `test(navigation): extend Wave B mobile QA`
-- `docs(audit): finalize Sprint 3 Wave B` — commit contenant ce rapport
+- `40939b7` — `docs(audit): finalize Sprint 3 Wave B`
 
 ## 26. PR readiness
 
-Les deux branches sont prêtes à être poussées sans force push, puis proposées vers `dev`. Les PR seront renseignées ici après leur création. Aucune fusion n'est autorisée dans cette vague.
+Les deux branches ont été poussées sans force push et proposées vers `dev`. Aucune fusion n'a été effectuée.
 
-- API : **à ouvrir**
-- Web : **à ouvrir**
+- API : [PR #56](https://github.com/NoeKen/Elintys-api/pull/56)
+- Web : [PR #103](https://github.com/NoeKen/Elintys-web/pull/103)
 
 ## Verdict
 
