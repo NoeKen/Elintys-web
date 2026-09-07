@@ -42,17 +42,28 @@ async function mobilePage(browser: Browser, width: number) {
 }
 
 test.describe('Vague B — précondition : menu mobile', () => {
-  for (const width of [320, 390]) {
+  for (const width of [320, 375, 390]) {
     test(`le bouton menu ouvre réellement la navigation à ${width}px`, async ({ browser }) => {
       const { page, close } = await mobilePage(browser, width);
       try {
         const burger = page.getByRole('button', { name: 'Ouvrir le menu' });
         await expect(burger).toBeVisible();
+        await expect(burger).toHaveAttribute('aria-expanded', 'false');
+
+        const box = await burger.boundingBox();
+        expect(box?.width).toBeGreaterThanOrEqual(44);
+        expect(box?.height).toBeGreaterThanOrEqual(44);
 
         await burger.click();
 
         const menu = page.getByTestId('mobile-menu');
         await expect(menu).toBeVisible();
+        // Radix masque les siblings du dialogue de l'arbre d'accessibilité
+        // pendant l'ouverture. Le déclencheur reste dans le DOM et doit y
+        // refléter l'état contrôlé.
+        await expect(
+          page.locator('button[aria-controls="mobile-dashboard-menu"]'),
+        ).toHaveAttribute('aria-expanded', 'true');
         // Le tiroir doit réellement porter des destinations, pas être vide.
         expect(await menu.getByRole('link').count()).toBeGreaterThan(0);
       } finally {
@@ -137,7 +148,7 @@ test.describe('Vague B — précondition : menu mobile', () => {
   });
 
   test('aucun débordement horizontal, tiroir ouvert', async ({ browser }) => {
-    for (const width of [320, 390, 768]) {
+    for (const width of [320, 375, 390, 768]) {
       const { page, close } = await mobilePage(browser, width);
       try {
         const burger = page.getByRole('button', { name: 'Ouvrir le menu' });
