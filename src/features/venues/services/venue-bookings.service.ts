@@ -1,7 +1,7 @@
 import api from '@/shared/lib/api';
 
-export type VenueBookingEvent = string | { _id: string; title: string; startDate?: string; slug?: string };
-export type VenueBookingOrganizer = string | { _id: string; fullName: string };
+export type VenueBookingEvent = string | null | { _id: string; title: string; startDate?: string; slug?: string };
+export type VenueBookingOrganizer = string | null | { _id: string; fullName: string };
 
 export interface VenueBooking {
   _id: string;
@@ -22,11 +22,14 @@ export interface VenueBooking {
 
 /** Voir vendor-requests.service : le serveur expose `fullName`, pas firstName. */
 export function organizerName(organizer: VenueBookingOrganizer): string | undefined {
-  return typeof organizer === 'object' ? organizer.fullName : undefined;
+  // `typeof null === 'object'` : sans le test de nullité, une référence
+  // supprimée fait planter l'écran au lieu d'afficher un repli.
+  return organizer !== null && typeof organizer === 'object' ? organizer.fullName : undefined;
 }
 
 export function eventTitle(event: VenueBookingEvent): string | undefined {
-  return typeof event === 'object' ? event.title : undefined;
+  // Idem : un événement supprimé arrive à `null`, pas à `undefined`.
+  return event !== null && typeof event === 'object' ? event.title : undefined;
 }
 
 export interface CreateVenueBookingPayload {

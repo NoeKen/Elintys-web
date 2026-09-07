@@ -123,3 +123,23 @@ describe('Page demandes prestataire', () => {
     expect(screen.getByTestId('vendor-request-status')).toHaveTextContent('Accepté');
   });
 });
+
+describe('références supprimées', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("n'explose pas quand l'événement ou l'organisateur a été supprimé", async () => {
+    // `typeof null === 'object'` : sans test de nullité explicite, une
+    // référence supprimée faisait planter tout l'écran au lieu d'afficher
+    // un repli. Le cas se produit dès qu'un événement est supprimé après
+    // l'envoi d'une demande.
+    mocks.listMine.mockResolvedValue([
+      { ...pendingRequest, event: null, organizer: null },
+    ]);
+
+    renderPage();
+
+    expect(await screen.findByTestId('vendor-request-card')).toBeInTheDocument();
+    expect(screen.getByText('Événement')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+});

@@ -113,3 +113,18 @@ describe('Page réservations gestionnaire', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
+
+describe('références supprimées', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("n'explose pas quand l'événement ou l'organisateur a été supprimé", async () => {
+    mocks.listMine.mockResolvedValue([
+      { ...pendingBooking, event: null, organizer: null },
+    ]);
+
+    renderPage();
+
+    expect(await screen.findByTestId('venue-booking-card')).toBeInTheDocument();
+    expect(screen.getByText('Événement')).toBeInTheDocument();
+  });
+});

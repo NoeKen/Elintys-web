@@ -1,8 +1,8 @@
 import api from '@/shared/lib/api';
 
 /** Référence peuplée ou brute selon l'endpoint appelé. */
-export type VendorRequestEvent = string | { _id: string; title: string; startDate?: string; slug?: string };
-export type VendorRequestOrganizer = string | { _id: string; fullName: string };
+export type VendorRequestEvent = string | null | { _id: string; title: string; startDate?: string; slug?: string };
+export type VendorRequestOrganizer = string | null | { _id: string; fullName: string };
 
 export interface VendorRequest {
   _id: string;
@@ -24,11 +24,14 @@ export interface VendorRequest {
  * `lastName` côté serveur. Lire ces champs produisait un nom vide.
  */
 export function organizerName(organizer: VendorRequestOrganizer): string | undefined {
-  return typeof organizer === 'object' ? organizer.fullName : undefined;
+  // `typeof null === 'object'` : sans le test de nullité, une référence
+  // supprimée fait planter l'écran au lieu d'afficher un repli.
+  return organizer !== null && typeof organizer === 'object' ? organizer.fullName : undefined;
 }
 
 export function eventTitle(event: VendorRequestEvent): string | undefined {
-  return typeof event === 'object' ? event.title : undefined;
+  // Idem : un événement supprimé arrive à `null`, pas à `undefined`.
+  return event !== null && typeof event === 'object' ? event.title : undefined;
 }
 
 export interface CreateVendorRequestPayload {
