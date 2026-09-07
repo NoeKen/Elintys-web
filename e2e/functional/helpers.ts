@@ -6,6 +6,8 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001
 export const E2E_DIR = path.resolve('.e2e');
 export const OWNER_STATE = path.join(E2E_DIR, 'owner.json');
 export const TIERS_STATE = path.join(E2E_DIR, 'tiers.json');
+export const VENDOR_STATE = path.join(E2E_DIR, 'vendor.json');
+export const VENUE_STATE = path.join(E2E_DIR, 'venue.json');
 export const QA_TITLE_PREFIX = '[E2E]';
 
 export interface Credentials {
@@ -19,6 +21,27 @@ export function ownerCredentials(): Credentials {
   if (!email || !password) {
     throw new Error('E2E_TEST_EMAIL et E2E_TEST_PASSWORD sont requis.');
   }
+  return { email, password };
+}
+
+/**
+ * Comptes QA prestataire et gestionnaire.
+ *
+ * Provisionnés SANS profil métier par `npm run qa:provision` : c'est l'état
+ * d'un utilisateur réel après son onboarding, celui que le parcours
+ * « créer ma fiche » doit savoir traiter.
+ */
+export function vendorCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_VENDOR ?? 'qa-prestataire@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+export function venueCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_VENUE ?? 'qa-gestionnaire@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
   return { email, password };
 }
 
@@ -44,6 +67,8 @@ export interface ApiClient {
   put(path: string, options?: Parameters<APIRequestContext['put']>[1]): ReturnType<APIRequestContext['put']>;
   patch(path: string, options?: Parameters<APIRequestContext['patch']>[1]): ReturnType<APIRequestContext['patch']>;
   delete(path: string, options?: Parameters<APIRequestContext['delete']>[1]): ReturnType<APIRequestContext['delete']>;
+  /** Session courante, réinjectable dans un contexte navigateur. */
+  storageState(): ReturnType<APIRequestContext['storageState']>;
   dispose(): Promise<void>;
 }
 
@@ -55,6 +80,7 @@ function wrap(context: APIRequestContext): ApiClient {
     put: (path, options) => context.put(url(path), options),
     patch: (path, options) => context.patch(url(path), options),
     delete: (path, options) => context.delete(url(path), options),
+    storageState: () => context.storageState(),
     dispose: () => context.dispose(),
   };
 }
