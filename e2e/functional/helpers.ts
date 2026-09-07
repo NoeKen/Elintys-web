@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import { request } from '@playwright/test';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -213,6 +213,25 @@ export async function cleanupEvents(api: ApiClient, ids: string[]): Promise<void
 export async function waitForHydration(page: Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('networkidle').catch(() => undefined);
+}
+
+/**
+ * Neutralise le bouton flottant des devtools TanStack.
+ *
+ * Il occupe le coin inférieur droit et recouvre la barre de navigation mobile
+ * sous 400 px : les actions de l'application y deviennent inatteignables au
+ * clic. `NEXT_PUBLIC_DISABLE_DEVTOOLS` les retire quand Playwright démarre
+ * lui-même le serveur, mais un serveur de développement déjà lancé est
+ * réutilisé tel quel — d'où cette garde, qui rend le test indépendant de la
+ * façon dont le serveur a été démarré.
+ */
+export async function hideDevtoolsOverlay(context: BrowserContext): Promise<void> {
+  await context.addInitScript(() => {
+    const style = document.createElement('style');
+    style.textContent = '.tsqd-parent-container { display: none !important; }';
+    document.addEventListener('DOMContentLoaded', () => document.head.append(style));
+    queueMicrotask(() => document.head?.append(style));
+  });
 }
 
 /** Petite image PNG valide (1×1) pour les tests d'upload. */

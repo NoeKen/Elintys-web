@@ -4,6 +4,7 @@ import type { Browser, Page } from '@playwright/test';
 import type { ApiClient } from './helpers';
 import {
   apiContextFor,
+  hideDevtoolsOverlay,
   multiRoleCredentials,
   ownerCredentials,
   vendorCredentials,
@@ -53,6 +54,7 @@ async function mobilePage(
     storageState: await client.storageState(),
     viewport,
   });
+  await hideDevtoolsOverlay(context);
   const page = await context.newPage();
   return { page, close: () => context.close() };
 }
