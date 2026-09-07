@@ -32,9 +32,11 @@ function getBreadcrumb(pathname: string): string {
 
 interface TopbarProps {
   onMenuClick?: () => void;
+  /** Permet au tiroir mobile de rendre le focus à son déclencheur. */
+  menuButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export function Topbar({ onMenuClick }: TopbarProps) {
+export function Topbar({ onMenuClick, menuButtonRef }: TopbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
@@ -60,6 +62,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       )}
     >
       <button
+        ref={menuButtonRef}
+        type="button"
         onClick={onMenuClick}
         aria-label="Ouvrir le menu"
         className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-teal-pale hover:text-primary md:hidden"
