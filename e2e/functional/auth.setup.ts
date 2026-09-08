@@ -26,10 +26,14 @@ import {
 async function storedSessionIsValid(statePath: string): Promise<boolean> {
   if (!fs.existsSync(statePath)) return false;
 
-  // Client rafraîchissant : un jeton d'accès expiré mais dont le cookie de
-  // rafraîchissement reste valide est RENOUVELÉ, sans consommer une connexion.
+  // Renouveler systématiquement au début de la suite. Vérifier seulement
+  // `/auth/me` réutilisait parfois un access token encore valide mais proche
+  // de son expiration ; il expirait alors au milieu du run complet et ajoutait
+  // un 401 transitoire au gate console, malgré un refresh produit réussi.
   const client = await apiFromState(statePath);
   try {
+    const refreshed = await client.post('/auth/refresh');
+    if (refreshed.status() !== 200) return false;
     const response = await client.get('/auth/me');
     if (response.status() !== 200) return false;
 
