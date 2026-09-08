@@ -16,7 +16,7 @@ export function FormErrorAlert({ error, className }: FormErrorAlertProps) {
       role="alert"
       aria-live="assertive"
       className={cn(
-        "flex items-start gap-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive",
+        "flex items-start gap-3 rounded-2xl bg-destructive/5 px-4 py-3 text-sm text-destructive shadow-card",
         className,
       )}
     >

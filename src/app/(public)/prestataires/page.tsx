@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { SearchBar } from '@/components/public/SearchBar';
 import { PrestatairesContent } from '@/components/public/PrestatairesContent';
 import type { PublicVendor } from '@/components/public/VendorCard';
 import { buildCatalogQuery } from '@/features/catalog/catalog-filters';
@@ -42,7 +41,6 @@ export default async function PrestatairesPage({
           <p>
             Photographes, traiteurs, DJ, décorateurs — tous vérifiés pour vos événements québécois.
           </p>
-          <SearchBar defaultQuery={category} />
         </div>
       </section>
 

@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return <>{this.props.fallback}</>;
 
       return (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-lg border border-destructive/20 bg-destructive/5 p-8 text-center">
+        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-lg bg-destructive/5 p-8 text-center shadow-card">
           <p className="text-sm font-medium text-destructive">Une erreur est survenue.</p>
           <p className="text-xs text-on-surface-variant">{this.state.error?.message}</p>
           <Button variant="outline" size="sm" onClick={this.handleReset}>

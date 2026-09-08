@@ -137,7 +137,7 @@ export function AuthSplitLayout({
 
               {showSocialProof && (
                 <div
-                  className="reveal flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-4"
+                  className="reveal flex items-center gap-3 rounded-2xl bg-white/65 p-4 shadow-card"
                   style={reveal(4)}
                 >
                   <div className="flex items-center">
@@ -169,7 +169,7 @@ export function AuthSplitLayout({
                   return (
                     <div
                       key={feature.label}
-                      className="flex items-center gap-3 rounded-2xl border border-outline-variant/60 bg-white/65 p-3.5"
+                      className="flex items-center gap-3 rounded-2xl bg-white/65 p-3.5 shadow-card"
                     >
                       <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", feature.tone)}>
                         <Icon size={17} aria-hidden="true" />
@@ -205,7 +205,7 @@ export function AuthSplitLayout({
         <div className="flex justify-center lg:justify-end">
           <div className="glass-card w-full max-w-[560px] p-5 sm:p-8 lg:p-9">
             {progressStep != null && progressTotal != null && (
-              <div className="mb-6 flex items-center justify-between rounded-2xl border border-outline-variant/60 bg-white/65 px-4 py-3 lg:hidden">
+              <div className="mb-6 flex items-center justify-between rounded-2xl bg-white/65 px-4 py-3 shadow-card lg:hidden">
                 <span className="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant">
                   Étape {progressStep} sur {progressTotal}
                 </span>

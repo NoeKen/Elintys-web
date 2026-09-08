@@ -195,11 +195,7 @@ export default function MotDePasseOubliePage() {
                 </button>
               </p>
               <p className="text-sm text-on-surface-variant">
-                Besoin d&apos;aide ? Contactez notre{" "}
-                <a href="#" className="text-accent hover:underline">
-                  support technique
-                </a>
-                .
+                Si le message n&apos;arrive pas, vérifiez vos courriels indésirables avant de réessayer.
               </p>
             </motion.div>
           )}
@@ -211,24 +207,24 @@ export default function MotDePasseOubliePage() {
         <div className="flex items-center justify-center gap-4">
           <span className="font-serif text-lg text-accent">Elintys</span>
           <span className="text-outline-variant">·</span>
-          <a
-            href="#"
+          <Link
+            href="/a-propos"
             className="text-xs text-on-surface-variant hover:text-on-surface"
           >
-            Support
-          </a>
-          <a
-            href="#"
+            À propos
+          </Link>
+          <Link
+            href="/confidentialite"
             className="text-xs text-on-surface-variant hover:text-on-surface"
           >
             Confidentialité
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            href="/conditions"
             className="text-xs text-on-surface-variant hover:text-on-surface"
           >
             Conditions
-          </a>
+          </Link>
         </div>
         <p className="text-xs text-on-surface-variant">
           © 2024 Elintys. Tous droits réservés.

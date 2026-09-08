@@ -1,0 +1,17 @@
+{
+  "wave": "sprint-3-wave-d",
+  "standard": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
+  "critical": 0,
+  "serious": 0,
+  "viewports": [
+    "320x720",
+    "375x812",
+    "390x844",
+    "768x1024",
+    "1024x768",
+    "1440x900",
+    "1538x1100"
+  ],
+  "evidence": "wave-d-ux-truthfulness.spec.ts and full functional E2E suite",
+  "verifiedAt": "2026-09-08"
+}

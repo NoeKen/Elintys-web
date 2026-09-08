@@ -172,7 +172,7 @@ export default function EventInvitationsPage() {
 
   if (eventQuery.isError || listQuery.isError || !eventQuery.data) {
     return (
-      <section className="m-6 rounded-3xl border border-destructive/20 bg-white p-7 text-center">
+      <section className="m-6 rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
         <ShieldCheck className="mx-auto text-destructive" size={32} />
         <h1 className="mt-4 font-serif text-3xl text-event-petrol">
           Impossible de charger les invitations
@@ -214,7 +214,7 @@ export default function EventInvitationsPage() {
 
       {/* ── Send invitation form ────────────────────────────────────────────── */}
       {!invitationsEnabled ? (
-        <section className="rounded-3xl border border-amber/35 bg-amber/5 p-6 shadow-event-soft sm:p-8">
+        <section className="rounded-3xl bg-amber/8 p-6 shadow-event-soft sm:p-8">
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-amber/15 text-amber" aria-hidden="true">
             <Lock size={20} />
           </span>

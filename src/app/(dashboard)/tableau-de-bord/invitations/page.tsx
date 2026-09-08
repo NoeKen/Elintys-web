@@ -87,7 +87,7 @@ export default function InvitationsPage() {
       )}
 
       {isError && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">{copy.invitationsError}</p>
           <button type="button" onClick={() => void refetch()} className="mt-2 text-sm font-medium text-teal underline">
             {copy.retry}
@@ -96,7 +96,7 @@ export default function InvitationsPage() {
       )}
 
       {!isLoading && !isError && invitations.length === 0 && (
-        <div className="rounded-xl border border-border bg-white p-8 text-center" data-testid="empty-state">
+        <div className="rounded-xl bg-white p-8 text-center shadow-card" data-testid="empty-state">
           <Inbox className="mx-auto mb-3 h-10 w-10 text-muted" aria-hidden="true" />
           <p className="font-medium text-navy">{copy.invitationsEmptyTitle}</p>
           <p className="mt-1 text-sm text-muted">{copy.invitationsEmptyDescription}</p>
@@ -116,7 +116,7 @@ export default function InvitationsPage() {
           return (
             <article
               key={inv._id}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4 sm:flex-row sm:items-start sm:justify-between"
+              className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-card sm:flex-row sm:items-start sm:justify-between"
               role="listitem"
               data-testid="invitation-card"
             >

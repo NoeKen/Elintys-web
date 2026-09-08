@@ -92,7 +92,7 @@ export default function EventPrestatairesPage() {
       </div>
 
       {showForm && (
-        <div className="border border-border rounded-xl p-4 mb-6 bg-surface space-y-3">
+        <div className="rounded-xl p-4 mb-6 bg-surface space-y-3 shadow-card">
           <h3 className="font-medium text-navy">Prestataire hors-plateforme</h3>
           <div>
             <label
@@ -169,7 +169,7 @@ export default function EventPrestatairesPage() {
           return (
             <div
               key={req._id}
-              className="border border-border rounded-xl p-4 flex justify-between items-center bg-white"
+              className="rounded-xl p-4 flex justify-between items-center bg-white shadow-card"
             >
               <div>
                 <p className="font-medium text-navy">{vendorName}</p>

@@ -53,7 +53,7 @@ export function EventCard({
     return (
       <article
         className={cn(
-          'group flex items-center gap-4 rounded-xl border border-outline-variant/70 bg-white/80 p-3',
+          'group flex items-center gap-4 rounded-xl bg-white/80 p-3',
           'shadow-[var(--shadow-soft-line)] backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-float',
           className
         )}
@@ -87,7 +87,7 @@ export function EventCard({
     return (
       <article
         className={cn(
-          'group flex items-center gap-3 rounded-xl border border-outline-variant/70 bg-white/80 p-3',
+          'group flex items-center gap-3 rounded-xl bg-white/80 p-3',
           'shadow-[var(--shadow-soft-line)] backdrop-blur-md transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-float',
           className
         )}
@@ -261,7 +261,7 @@ export function EventCard({
 export function EventCardSkeleton() {
   return (
     <div
-      className="premium-skeleton overflow-hidden rounded-2xl border border-outline-variant bg-surface"
+      className="premium-skeleton overflow-hidden rounded-2xl bg-surface shadow-[var(--shadow-soft-line)]"
       aria-hidden="true"
     >
       <div className="h-44 bg-background" />

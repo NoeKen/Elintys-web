@@ -174,7 +174,7 @@ export default function GestionnaireFichePage() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="mb-4 font-serif text-2xl font-bold text-navy">Ma fiche lieu</h1>
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">
             Impossible de charger votre fiche lieu pour le moment.
           </p>
@@ -206,7 +206,7 @@ export default function GestionnaireFichePage() {
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="space-y-5 rounded-xl border border-border bg-white p-6 shadow-sm"
+        className="space-y-5 rounded-xl bg-white p-6 shadow-card"
         data-testid="venue-profile-form"
       >
         <div>

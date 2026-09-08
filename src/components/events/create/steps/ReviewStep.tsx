@@ -174,7 +174,7 @@ export function ReviewStep({
         {cards.map((card) => (
           <article
             key={`${card.title}-${card.step}`}
-            className="rounded-3xl border border-event-outline-subtle/60 bg-white/75 p-5 shadow-event-soft"
+            className="rounded-3xl bg-white/75 p-5 shadow-event-soft"
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="font-serif text-xl text-event-petrol">{card.title}</h3>

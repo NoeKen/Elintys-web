@@ -178,7 +178,7 @@ export function PublicEventExperience({ event }: { event: PublicEventDetail }) {
                 <h2 id="event-providers-title" className="mt-3 font-serif text-3xl text-navy-dark sm:text-4xl">{copy.providers}</h2>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {event.providers.map((provider) => (
-                    <article key={provider._id} className="rounded-3xl border border-outline-variant/60 bg-white/70 p-5 shadow-[var(--shadow-soft-line)]">
+                    <article key={provider._id} className="rounded-3xl bg-white/75 p-5 shadow-[var(--shadow-soft-line)]">
                       <span className="public-event-provider-mark" aria-hidden="true">{provider.businessName.slice(0, 1)}</span>
                       <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.12em] text-teal-dark">{provider.category}</p>
                       <h3 className="mt-2 font-serif text-2xl text-navy-dark">{provider.businessName}</h3>
@@ -203,7 +203,7 @@ export function PublicEventExperience({ event }: { event: PublicEventDetail }) {
 
           <aside className="lg:sticky lg:top-28" aria-label="Accès et admission">
             <EventPageClient event={event} />
-            <div className="mt-4 rounded-3xl border border-white/60 bg-white/55 p-5 text-sm leading-6 text-on-surface-variant backdrop-blur-xl">
+            <div className="mt-4 rounded-3xl bg-white/60 p-5 text-sm leading-6 text-on-surface-variant shadow-[var(--shadow-soft-line)] backdrop-blur-xl">
               <p className="font-bold text-on-surface">{copy.admission}</p>
               <p className="mt-1">{admissionLabels.join(' · ')}</p>
             </div>
@@ -245,7 +245,7 @@ function RelatedCard({ event }: { event: PublicRelatedEvent }) {
   const cover = event.coverImage ? getOptimizedMediaUrl(event.coverImage, 'card') : undefined;
   const date = new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(event.startDate));
   return (
-    <Link href={`/evenements/${event.slug}`} className="group overflow-hidden rounded-3xl border border-outline-variant/60 bg-white/75 shadow-[var(--shadow-float)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-premium)]">
+    <Link href={`/evenements/${event.slug}`} className="group overflow-hidden rounded-3xl bg-white/80 shadow-[var(--shadow-float)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-premium)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-navy to-teal-dark">
         {cover ? <Image src={cover} alt="" fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" /> : <Sparkles className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 text-white/50" aria-hidden="true" />}
       </div>

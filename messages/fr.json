@@ -455,6 +455,10 @@
       "phone": "Téléphone — facultatif",
       "invite": "Inviter ce prestataire à rejoindre Elintys",
       "inviteHint": "L’invitation sera envoyée seulement si un courriel est fourni.",
+      "catalogLoading": "Chargement des prestataires…",
+      "catalogUnavailable": "Le catalogue de prestataires est temporairement indisponible.",
+      "retrying": "Nouvel essai…",
+      "retry": "Réessayer",
       "categories": {
         "photographer": "Photographe",
         "videographer": "Vidéaste",

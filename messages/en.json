@@ -455,6 +455,10 @@
       "phone": "Phone — optional",
       "invite": "Invite this vendor to join Elintys",
       "inviteHint": "The invitation will only be sent if an email is provided.",
+      "catalogLoading": "Loading vendors…",
+      "catalogUnavailable": "The vendor catalog is temporarily unavailable.",
+      "retrying": "Trying again…",
+      "retry": "Try again",
       "categories": {
         "photographer": "Photographer",
         "videographer": "Videographer",

@@ -438,7 +438,7 @@ export default function EventBilletteriePage() {
           ))}
         </div>
       ) : typesQuery.isError ? (
-        <section className="rounded-3xl border border-destructive/20 bg-white p-7 text-center shadow-event-soft">
+        <section className="rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
           <AlertCircle className="mx-auto text-destructive" aria-hidden="true" />
           <h2 className="mt-4 font-serif text-2xl text-event-petrol">
             Impossible de charger les types de billets

@@ -136,7 +136,7 @@ export function VenueStep({ form }: VenueStepProps) {
             <label
               key={value}
               className={cn(
-                'flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border px-4 text-center text-sm font-semibold focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                'flex min-h-14 cursor-pointer items-center justify-center rounded-2xl px-4 text-center text-sm font-semibold focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                 venueChoice === value
                   ? 'border-event-gold bg-white shadow-event-selected'
                   : 'border-transparent bg-event-surface',

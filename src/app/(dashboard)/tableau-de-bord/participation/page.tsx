@@ -58,7 +58,7 @@ function LoadingRows({ label }: { label: string }) {
 
 function ErrorState({ message, retry }: { message: string; retry: () => void }) {
   return (
-    <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+    <div className="rounded-2xl bg-destructive/8 p-4" role="alert">
       <p className="text-sm text-destructive">{message}</p>
       <button
         type="button"
@@ -73,7 +73,7 @@ function ErrorState({ message, retry }: { message: string; retry: () => void }) 
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-outline bg-white/55 p-6 text-center">
+    <div className="rounded-2xl bg-white/65 p-6 text-center shadow-card">
       <p className="font-bold text-navy">{title}</p>
       <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-on-surface-variant">{description}</p>
       <Link
@@ -108,7 +108,7 @@ export default function ParticipationPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-10" data-testid="participation-page">
-      <header className="overflow-hidden rounded-[2rem] border border-outline-variant bg-[linear-gradient(135deg,rgba(15,92,94,0.12),rgba(255,248,239,0.94)_55%,rgba(198,105,78,0.12))] px-5 py-7 shadow-card sm:px-8 sm:py-9">
+      <header className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,rgba(15,92,94,0.12),rgba(255,248,239,0.94)_55%,rgba(198,105,78,0.12))] px-5 py-7 shadow-card sm:px-8 sm:py-9">
         <p className="section-eyebrow">{copy.navLabel}</p>
         <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
@@ -138,7 +138,7 @@ export default function ParticipationPage() {
         ))}
       </nav>
 
-      <section id="inscriptions" className="mt-6 scroll-mt-6 rounded-[1.75rem] border border-outline-variant bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="registrations-title">
+      <section id="inscriptions" className="mt-6 scroll-mt-6 rounded-[1.75rem] bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="registrations-title">
         <div className="mb-5 flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal/10 text-teal" aria-hidden="true">
             <CalendarDays className="h-5 w-5" />
@@ -155,7 +155,7 @@ export default function ParticipationPage() {
             const event = typeof registration.eventId === 'object' ? registration.eventId : undefined;
             const registrationDate = formatDate(registration.createdAt);
             return (
-              <article key={registration._id} className="rounded-2xl border border-outline-variant bg-surface-low/55 p-4" role="listitem">
+              <article key={registration._id} className="rounded-2xl bg-surface-low/55 p-4" role="listitem">
                 {event?.slug ? (
                   <Link href={`/evenements/${event.slug}`} className="font-bold text-navy transition-colors hover:text-teal">
                     {event.title}
@@ -172,7 +172,7 @@ export default function ParticipationPage() {
       </section>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section id="invitations" className="scroll-mt-6 rounded-[1.75rem] border border-outline-variant bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="invitations-title">
+        <section id="invitations" className="scroll-mt-6 rounded-[1.75rem] bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="invitations-title">
           <div className="mb-5 flex items-center gap-3">
             <Inbox className="h-6 w-6 text-terracotta" aria-hidden="true" />
             <h2 id="invitations-title" className="font-serif text-2xl text-navy-dark">{copy.sectionInvitations}</h2>
@@ -184,7 +184,7 @@ export default function ParticipationPage() {
           ) : null}
           <div className="space-y-3" role="list" aria-label={copy.invitationsListLabel}>
             {invitationItems.map((invitation) => (
-              <article key={invitation._id} className="rounded-2xl border border-outline-variant p-4" role="listitem">
+              <article key={invitation._id} className="rounded-2xl bg-surface-low/45 p-4" role="listitem">
                 <div className="flex items-start justify-between gap-3">
                   <p className="font-bold text-navy">{invitation.event?.title ?? invitation.name}</p>
                   <span className={cn(
@@ -204,7 +204,7 @@ export default function ParticipationPage() {
           </div>
         </section>
 
-        <section id="billets" className="scroll-mt-6 rounded-[1.75rem] border border-outline-variant bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="tickets-title">
+        <section id="billets" className="scroll-mt-6 rounded-[1.75rem] bg-white/80 p-5 shadow-card sm:p-7" aria-labelledby="tickets-title">
           <div className="mb-5 flex items-center gap-3">
             <Ticket className="h-6 w-6 text-gold" aria-hidden="true" />
             <h2 id="tickets-title" className="font-serif text-2xl text-navy-dark">{copy.sectionTickets}</h2>
@@ -219,7 +219,7 @@ export default function ParticipationPage() {
               const event = typeof ticket.event === 'object' ? ticket.event : undefined;
               const ticketType = typeof ticket.ticketType === 'object' ? ticket.ticketType : undefined;
               return (
-                <article key={ticket._id} className="rounded-2xl border border-outline-variant p-4" role="listitem">
+                <article key={ticket._id} className="rounded-2xl bg-surface-low/45 p-4" role="listitem">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-navy">{event?.title ?? journeyCopy.eventFallback}</p>

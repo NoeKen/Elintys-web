@@ -151,10 +151,10 @@ function ReadinessActionCard({
   return (
     <Link
       href={href}
-      className={`flex min-h-[44px] items-center justify-between rounded-3xl border p-5 shadow-event-soft ${
+      className={`flex min-h-[44px] items-center justify-between rounded-3xl p-5 shadow-event-soft ${
         isWarning
-          ? 'border-amber-200/60 bg-amber-50'
-          : 'border-red-200/60 bg-red-50'
+          ? 'bg-amber-50'
+          : 'bg-red-50'
       }`}
     >
       <span className="flex items-center gap-4">
@@ -240,7 +240,7 @@ export default function EventDashboardPage() {
 
   if (query.isError || !query.data)
     return (
-      <section className="m-6 rounded-3xl border border-destructive/20 bg-white p-7 text-center">
+      <section className="m-6 rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
         <AlertCircle className="mx-auto text-destructive" />
         <h1 className="mt-4 font-serif text-3xl text-event-petrol">Événement introuvable</h1>
         <button
@@ -450,7 +450,7 @@ export default function EventDashboardPage() {
           ) : null}
 
           {/* Current configuration */}
-          <section className="rounded-3xl border border-event-outline-subtle/50 bg-white p-6">
+          <section className="rounded-3xl bg-white p-6 shadow-event-soft">
             <h2 className="font-serif text-2xl text-event-petrol">{copy.workspace.currentConfiguration}</h2>
             <dl className="mt-5 space-y-4 text-sm">
               <ConfigurationRow

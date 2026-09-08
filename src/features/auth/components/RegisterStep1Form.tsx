@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -67,7 +67,7 @@ export function RegisterStep1Form({ onSuccess, emailTakenError, initialEmail = "
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof step1Schema>>({
@@ -75,8 +75,8 @@ export function RegisterStep1Form({ onSuccess, emailTakenError, initialEmail = "
     defaultValues: { acceptTerms: false, email: initialEmail },
   });
 
-  const password = watch("password") ?? "";
-  const confirmPassword = watch("confirmPassword") ?? "";
+  const password = useWatch({ control, name: "password" }) ?? "";
+  const confirmPassword = useWatch({ control, name: "confirmPassword" }) ?? "";
   const passwordsMatch = password.length > 0 && password === confirmPassword;
 
   useEffect(() => {

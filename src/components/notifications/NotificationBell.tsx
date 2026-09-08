@@ -32,32 +32,34 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: countData } = useQuery({
+  const countQuery = useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: () => notificationsService.countUnread(),
     refetchInterval: 30_000,
   });
 
-  const { data: notifications } = useQuery({
+  const notificationsQuery = useQuery({
     queryKey: notificationKeys.list(),
     queryFn: () => notificationsService.list(),
     enabled: open,
   });
 
-  const { mutate: markAll } = useMutation({
+  const markAllMutation = useMutation({
     mutationFn: () => notificationsService.markAllRead(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
   });
 
-  const unread = countData?.count ?? 0;
+  const unread = countQuery.data?.count ?? 0;
   const badgeLabel = unread > 9 ? '9+' : String(unread);
 
   return (
     <div className="relative">
       <button
         aria-label="Notifications"
+        aria-expanded={open}
+        aria-controls="notifications-panel"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
           'relative flex items-center justify-center rounded-md p-2 transition-colors',
@@ -93,30 +95,54 @@ export function NotificationBell() {
 
       {open && (
         <div
+          id="notifications-panel"
           className={cn(
-            'absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border border-border',
-            'bg-white shadow-lg',
+            'absolute bottom-full left-0 z-50 mb-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl',
+            'bg-white shadow-event-panel',
           )}
         >
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold text-navy">Notifications</span>
-            {unread > 0 && (
+            {unread > 0 && !countQuery.isError && (
               <button
-                onClick={() => markAll()}
-                className="text-xs font-medium text-teal hover:underline"
+                onClick={() => markAllMutation.mutate()}
+                disabled={markAllMutation.isPending}
+                className="min-h-11 text-xs font-medium text-teal hover:underline disabled:cursor-wait disabled:opacity-50"
               >
-                Tout marquer lu
+                {markAllMutation.isPending ? 'Mise à jour…' : 'Tout marquer lu'}
               </button>
             )}
           </div>
 
-          <ul className="max-h-72 overflow-y-auto">
-            {!notifications || notifications.length === 0 ? (
+          {markAllMutation.isError ? (
+            <p className="mx-4 mt-3 rounded-xl bg-destructive/8 px-3 py-2 text-xs text-destructive" role="alert">
+              Impossible de marquer les notifications comme lues. Réessayez.
+            </p>
+          ) : null}
+
+          <ul className="max-h-72 overflow-y-auto" aria-live="polite" aria-busy={notificationsQuery.isLoading || notificationsQuery.isFetching}>
+            {notificationsQuery.isLoading ? (
+              <li className="px-4 py-6 text-center text-sm text-muted">
+                Chargement des notifications…
+              </li>
+            ) : notificationsQuery.isError ? (
+              <li className="px-4 py-5 text-center text-sm text-muted" role="alert">
+                <p>Les notifications sont temporairement indisponibles.</p>
+                <button
+                  type="button"
+                  onClick={() => void notificationsQuery.refetch()}
+                  disabled={notificationsQuery.isFetching}
+                  className="mt-3 min-h-11 rounded-full bg-surface-low px-4 font-semibold text-teal disabled:cursor-wait disabled:opacity-50"
+                >
+                  {notificationsQuery.isFetching ? 'Nouvel essai…' : 'Réessayer'}
+                </button>
+              </li>
+            ) : !notificationsQuery.data || notificationsQuery.data.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-muted">
                 Aucune notification.
               </li>
             ) : (
-              notifications.map((notif: AppNotification) => (
+              notificationsQuery.data.map((notif: AppNotification) => (
                 <li
                   key={notif._id}
                   className={cn(

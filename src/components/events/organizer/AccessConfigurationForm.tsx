@@ -241,7 +241,7 @@ export function AccessConfigurationForm({
           {DISCOVERABILITIES.map((value) => (
             <label
               key={value}
-              className="flex cursor-pointer gap-3 rounded-2xl border border-event-outline-subtle/45 p-4 transition-colors has-[:checked]:border-event-teal has-[:checked]:bg-teal-pale"
+              className="flex cursor-pointer gap-3 rounded-2xl bg-event-surface p-4 transition-colors has-[:checked]:bg-teal-pale has-[:checked]:shadow-event-selected"
             >
               <input
                 type="radio"
@@ -269,7 +269,7 @@ export function AccessConfigurationForm({
           {POLICY_TYPES.map((value) => (
             <label
               key={value}
-              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-event-outline-subtle/45 px-4 py-3 transition-colors has-[:checked]:border-event-teal has-[:checked]:bg-teal-pale"
+              className="flex cursor-pointer items-center gap-3 rounded-2xl bg-event-surface px-4 py-3 transition-colors has-[:checked]:bg-teal-pale has-[:checked]:shadow-event-selected"
             >
               <input
                 type="radio"
@@ -361,10 +361,10 @@ export function AccessConfigurationForm({
                   <label
                     key={mode}
                     className={cn(
-                      'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition-colors',
+                      'flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 transition-colors',
                       checked
-                        ? 'border-event-teal bg-teal-pale'
-                        : 'border-event-outline-subtle/45',
+                        ? 'bg-teal-pale shadow-event-selected'
+                        : 'bg-event-surface',
                     )}
                   >
                     <input

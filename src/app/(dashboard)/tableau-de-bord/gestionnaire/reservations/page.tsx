@@ -70,7 +70,7 @@ function BookingCard({ booking }: { booking: VenueBooking }) {
 
   return (
     <div
-      className="rounded-xl border border-border bg-white p-5 shadow-sm"
+      className="rounded-xl bg-white p-5 shadow-card"
       data-testid="venue-booking-card"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -201,7 +201,7 @@ export default function GestionnaireReservationsPage() {
 
       {/* Aucune fiche lieu : étape manquante du parcours, pas une panne. */}
       {isError && isMissingProfileError(error) && (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+        <div className="rounded-xl bg-surface p-8 text-center shadow-card">
           <p className="text-sm text-navy">
             Créez d’abord votre fiche lieu pour recevoir des demandes de réservation.
           </p>
@@ -215,7 +215,7 @@ export default function GestionnaireReservationsPage() {
       )}
 
       {isError && !isMissingProfileError(error) && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">
             Impossible de charger les réservations pour le moment.
           </p>

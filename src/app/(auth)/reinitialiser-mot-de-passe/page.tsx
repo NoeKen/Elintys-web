@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -70,12 +70,12 @@ function ReinitialiserContent() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const password = watch("password") ?? "";
-  const confirmPassword = watch("confirmPassword") ?? "";
+  const password = useWatch({ control, name: "password" }) ?? "";
+  const confirmPassword = useWatch({ control, name: "confirmPassword" }) ?? "";
   const passwordsMatch = password.length > 0 && password === confirmPassword;
 
   const checks = [
@@ -300,17 +300,20 @@ function ReinitialiserContent() {
       <div className="mt-8 text-center space-y-2">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <span className="font-serif text-lg text-accent">Elintys</span>
-          {["À propos", "Confidentialité", "Conditions", "Support", "Blog"].map(
-            (link) => (
-              <a
-                key={link}
-                href="#"
+          {[
+            ["À propos", "/a-propos"],
+            ["Confidentialité", "/confidentialite"],
+            ["Conditions", "/conditions"],
+            ["Blog", "/blog"],
+          ].map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
                 className="text-xs text-on-surface-variant hover:text-on-surface transition-colors"
               >
-                {link}
-              </a>
-            ),
-          )}
+                {label}
+              </Link>
+            ))}
         </div>
         <p className="text-xs text-on-surface-variant">
           © 2024 Elintys. Tous droits réservés.

@@ -143,14 +143,20 @@ describe("ProvidersStep — catalogue de prestataires", () => {
     await waitFor(() => expect(mocks.list).toHaveBeenCalled());
   });
 
-  it("ne devrait pas planter si le service échoue (état d'erreur géré)", async () => {
+  it("distingue une panne catalogue d'un catalogue vide et permet un retry", async () => {
     mocks.list.mockRejectedValue(new Error("réseau indisponible"));
     const providerNeeds: ProviderNeedState[] = [{ category: "dj", mode: "elintys" }];
-    const { container } = renderStep({ providerNeeds });
+    const user = userEvent.setup({ delay: null });
+    renderStep({ providerNeeds });
 
-    await waitFor(() => expect(mocks.list).toHaveBeenCalled());
-    // L'étape reste rendue : l'échec catalogue ne casse pas le wizard.
-    expect(container.textContent).toBeTruthy();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Le catalogue de prestataires est temporairement indisponible",
+    );
+    expect(screen.queryByText("Aucun résultat")).not.toBeInTheDocument();
+
+    mocks.list.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 });
+    await user.click(screen.getByRole("button", { name: "Réessayer" }));
+    await waitFor(() => expect(mocks.list).toHaveBeenCalledTimes(2));
   });
 
   it("devrait gérer un catalogue vide sans erreur", async () => {

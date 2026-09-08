@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { slideInRight } from "@/lib/animations";
@@ -100,7 +100,9 @@ export function EventCreationWizard({
     defaultValues: getDefaultEventCreationValues(initialEvent),
     mode: "onTouched",
   });
-  const values = form.watch();
+  // The schema supplies a complete default object; React Hook Form types a
+  // whole-form subscription as partial even though these values are present.
+  const values = useWatch({ control: form.control }) as EventCreationFormValues;
   const canGoBack = step > 1;
   const readinessQuery = useQuery({
     queryKey: ["event-publish-readiness", event?._id],
@@ -329,7 +331,7 @@ export function EventCreationWizard({
 
       <div className="mx-auto grid max-w-[1500px] xl:grid-cols-[minmax(0,1fr)_390px]">
         <main className="min-w-0 px-5 py-8 sm:px-8 sm:py-12 lg:px-12 lg:py-16">
-          <div className="mx-auto max-w-[1000px] rounded-[24px] border border-white/80 bg-white/86 p-5 shadow-event-panel backdrop-blur-xl sm:p-8 lg:p-12">
+          <div className="mx-auto max-w-[1000px] rounded-[24px] bg-white/86 p-5 shadow-event-panel backdrop-blur-xl sm:p-8 lg:p-12">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={step}

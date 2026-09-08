@@ -26,7 +26,7 @@ function FavoriteRow({ favorite }: { favorite: Favorite }) {
   // un identifiant technique ou de masquer silencieusement la ligne.
   if (!target) {
     return (
-      <li className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-low p-4">
+      <li className="flex items-center justify-between gap-3 rounded-xl bg-surface-low p-4">
         <p className="text-sm text-muted">Cet élément n’est plus disponible.</p>
         <FavoriteButton
           targetId={favorite.targetId}
@@ -62,7 +62,7 @@ function FavoriteRow({ favorite }: { favorite: Favorite }) {
   );
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-4">
+    <li className="flex items-center justify-between gap-3 rounded-xl bg-white p-4 shadow-card">
       {/* Lien seulement si le serveur en a fourni un : un événement sans slug
           n'a pas de page publique, et un lien mort vaut moins que pas de lien. */}
       {target.href ? (
@@ -102,7 +102,7 @@ export default function DashboardFavorisPage() {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         <h1 className="mb-8 font-serif text-3xl text-navy">Mes favoris</h1>
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">
             Impossible de charger vos favoris pour le moment.
           </p>
@@ -129,7 +129,7 @@ export default function DashboardFavorisPage() {
 
       {favorites.length === 0 && (
         <div
-          className="rounded-xl border border-border bg-white p-8 text-center"
+          className="rounded-xl bg-white p-8 text-center shadow-card"
           data-testid="empty-state"
         >
           <Heart className="mx-auto mb-3 h-10 w-10 text-muted" aria-hidden="true" />
