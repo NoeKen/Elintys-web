@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/shared/lib/utils';
-import { useAuthToken } from '@/shared/hooks/useAuthToken';
 import {
   notificationsService,
   type AppNotification,
 } from '@/features/notifications/services/notifications.service';
+import { notificationKeys } from '@/features/notifications/query-keys';
 
 const TYPE_LABELS: Record<string, string> = {
   VENDOR_RESPONDED: 'Réponse prestataire',
@@ -30,27 +30,24 @@ function formatDate(iso: string): string {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const token = useAuthToken();
   const queryClient = useQueryClient();
 
   const { data: countData } = useQuery({
-    queryKey: ['notif-count'],
-    queryFn: () => notificationsService.countUnread(token),
-    enabled: !!token,
+    queryKey: notificationKeys.unreadCount(),
+    queryFn: () => notificationsService.countUnread(),
     refetchInterval: 30_000,
   });
 
   const { data: notifications } = useQuery({
-    queryKey: ['notifs', open],
-    queryFn: () => notificationsService.list(token),
-    enabled: open && !!token,
+    queryKey: notificationKeys.list(),
+    queryFn: () => notificationsService.list(),
+    enabled: open,
   });
 
   const { mutate: markAll } = useMutation({
-    mutationFn: () => notificationsService.markAllRead(token),
+    mutationFn: () => notificationsService.markAllRead(),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['notif-count'] });
-      void queryClient.invalidateQueries({ queryKey: ['notifs'] });
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
   });
 

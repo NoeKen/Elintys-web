@@ -1,4 +1,4 @@
-import { API_URL } from '@/shared/config/api-url';
+import api from '@/shared/lib/api';
 
 export interface AppNotification {
   _id: string;
@@ -18,54 +18,24 @@ export interface UnreadCountResponse {
   count: number;
 }
 
-async function authFetch<T>(
-  url: string,
-  token: string,
-  options?: RequestInit,
-): Promise<T> {
-  const authHeader: Record<string, string> = {};
-  if (token && token !== 'cookie-session') authHeader.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${url}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeader,
-      ...options?.headers,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  }
-
-  if (res.status === 204) {
-    return undefined as unknown as T;
-  }
-
-  return res.json() as Promise<T>;
-}
-
 export const notificationsService = {
-  async list(token: string, unreadOnly = false, page = 1): Promise<AppNotification[]> {
-    const params = new URLSearchParams({ page: String(page) });
-    if (unreadOnly) params.set('unreadOnly', 'true');
-    return authFetch<AppNotification[]>(`/notifications/me?${params.toString()}`, token);
-  },
-
-  async countUnread(token: string): Promise<UnreadCountResponse> {
-    return authFetch<UnreadCountResponse>('/notifications/me/unread-count', token);
-  },
-
-  async markRead(token: string, id: string): Promise<void> {
-    return authFetch<void>(`/notifications/${id}/read`, token, {
-      method: 'PATCH',
+  async list(unreadOnly = false, page = 1): Promise<AppNotification[]> {
+    const response = await api.get<AppNotification[]>('/notifications/me', {
+      params: { page, unreadOnly: unreadOnly || undefined },
     });
+    return response.data;
   },
 
-  async markAllRead(token: string): Promise<void> {
-    return authFetch<void>('/notifications/read-all', token, {
-      method: 'PATCH',
-    });
+  async countUnread(): Promise<UnreadCountResponse> {
+    const response = await api.get<UnreadCountResponse>('/notifications/me/unread-count');
+    return response.data;
+  },
+
+  async markRead(id: string): Promise<void> {
+    await api.patch<void>(`/notifications/${id}/read`);
+  },
+
+  async markAllRead(): Promise<void> {
+    await api.patch<void>('/notifications/read-all');
   },
 };

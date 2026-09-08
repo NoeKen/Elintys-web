@@ -1,27 +1,22 @@
-export type GuestStatus = "pending" | "confirmed" | "declined" | "no_show";
+export type GuestStatus = "invited" | "confirmed" | "declined" | "present";
 
 export interface Guest {
-  id: string;
-  eventId: string;
-  firstName: string;
-  lastName: string;
+  _id: string;
+  name: string;
   email?: string;
-  phone?: string;
   status: GuestStatus;
-  tableNumber?: number;
-  plusOne: boolean;
-  notes?: string;
+  note?: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateGuestInput {
-  eventId: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email?: string;
-  phone?: string;
-  plusOne?: boolean;
-  tableNumber?: number;
-  notes?: string;
+  note?: string;
+}
+
+export interface GuestListResponse {
+  data: Guest[];
+  total: number;
+  page: number;
 }

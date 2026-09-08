@@ -8,7 +8,7 @@ import { eventsService } from '@/features/events/services/events.service';
 import { guestsService } from '@/features/guests/services/guests.service';
 import { vendorRequestsService } from '@/features/vendors/services/vendor-requests.service';
 import { organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
-import { useAuthToken } from '@/shared/hooks/useAuthToken';
+import { guestKeys } from '@/features/guests/query-keys';
 import { getUserFacingError } from '@/shared/lib/user-facing-error';
 import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
 import api from '@/shared/lib/api';
@@ -178,7 +178,6 @@ function ReadinessActionCard({
 
 export default function EventDashboardPage() {
   const { id } = useParams<{ id: string }>();
-  const token = useAuthToken();
   const queryClient = useQueryClient();
 
   // All queries fire in parallel — no waterfall
@@ -202,9 +201,8 @@ export default function EventDashboardPage() {
   });
 
   const guestsQuery = useQuery({
-    queryKey: ['guests', id],
-    queryFn: () => guestsService.list(token, id),
-    enabled: Boolean(token),
+    queryKey: guestKeys.page(id, 1),
+    queryFn: () => guestsService.list(id),
     staleTime: 30_000,
   });
 

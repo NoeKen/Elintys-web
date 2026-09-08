@@ -1,3 +1,8 @@
 export { guestsService } from "./services/guests.service";
-export { useGuests } from "./hooks/useGuests";
-export type { Guest, GuestStatus, CreateGuestInput } from "./types";
+export { guestKeys } from "./query-keys";
+export type {
+  Guest,
+  GuestStatus,
+  CreateGuestInput,
+  GuestListResponse,
+} from "./types";
