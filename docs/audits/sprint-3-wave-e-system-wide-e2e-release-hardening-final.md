@@ -218,6 +218,7 @@ La review a trouvé puis corrigé la dépendance inter-test Notifications et sup
 | npm audit API/Web | 0 vulnérabilité / 0 vulnérabilité |
 | secret scan | aucun secret détecté dans le diff |
 | git diff --check | vert dans les deux dépôts |
+| services de test | arrêtés ; ports 3000 et 3001 libres |
 
 ## 33. Coverage
 
@@ -345,7 +346,12 @@ Les commits atomiques et leurs SHA sont ajoutés après le dernier rerun complet
 
 ## 40. PR readiness
 
-Le dernier rerun Playwright sur l'arbre final est vert : 248 passés, 2 skips historiques, 0 échec. Deux PR sont autorisées vers `dev` ; aucune ne sera fusionnée automatiquement. La mergeabilité, les checks CI et la preview Vercel sont vérifiés après ouverture.
+Le dernier rerun Playwright sur l'arbre final est vert : 248 passés, 2 skips historiques, 0 échec.
+
+- API : PR [#57](https://github.com/NoeKen/Elintys-api/pull/57), ouverte vers `dev`, non-draft, mergeable/CLEAN ; aucun check requis n'était attaché au premier contrôle.
+- Web : PR [#106](https://github.com/NoeKen/Elintys-web/pull/106), ouverte vers `dev`, non-draft et mergeable ; Vercel Preview Comments était vert et le déploiement preview encore en cours au premier contrôle.
+
+Aucune PR n'a été fusionnée. Le statut le plus récent des checks est donné dans le handoff final, car un commit documentaire de preuve déclenche lui-même une nouvelle preview.
 
 ## Final baseline decision
 
