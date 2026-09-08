@@ -76,10 +76,10 @@ export function InformationStep({ form }: InformationStepProps) {
                 <label
                   key={type}
                   className={cn(
-                    'group relative flex min-h-28 cursor-pointer flex-col justify-between rounded-2xl border p-4 transition-all duration-200 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                    'group relative flex min-h-28 cursor-pointer flex-col justify-between rounded-2xl p-4 transition-all duration-200 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                     selected
-                      ? 'border-event-gold bg-white shadow-event-selected'
-                      : 'border-transparent bg-event-surface hover:-translate-y-0.5 hover:bg-white hover:shadow-event-soft motion-reduce:transform-none',
+                      ? 'bg-white shadow-event-selected'
+                      : 'bg-event-surface hover:-translate-y-0.5 hover:bg-white hover:shadow-event-soft motion-reduce:transform-none',
                   )}
                 >
                   <input

@@ -59,22 +59,22 @@ export default async function LieuDetailPage({ params }: Props) {
           <h1 className="premium-heading mb-4">{venue.name}</h1>
 
           <div className="mb-7 grid gap-3 text-sm text-on-surface-variant sm:grid-cols-2">
-            <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+            <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
               {fullAddress}
             </p>
 
-            <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+            <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
               Capacité&nbsp;: {venue.capacity} personnes
             </p>
 
             {venue.pricePerDay !== undefined && (
-              <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
                 Prix&nbsp;: {(venue.pricePerDay / 100).toFixed(2)}&nbsp;$ / jour
               </p>
             )}
 
             {venue.reviewCount > 0 && (
-              <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
                 {venue.rating.toFixed(1)} / 5 ({venue.reviewCount} avis)
               </p>
             )}

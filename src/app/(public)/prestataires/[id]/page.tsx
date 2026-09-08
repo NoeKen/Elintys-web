@@ -59,13 +59,13 @@ export default async function PrestataireDetailPage({ params }: Props) {
 
           <div className="mb-7 grid gap-3 text-sm text-on-surface-variant sm:grid-cols-2">
             {vendor.serviceArea && (
-              <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
                 Zone de service&nbsp;: {vendor.serviceArea}
               </p>
             )}
 
             {vendor.reviewCount > 0 && (
-              <p className="rounded-2xl border border-outline-variant/70 bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
+              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
                 {vendor.rating.toFixed(1)} / 5 ({vendor.reviewCount} avis)
               </p>
             )}

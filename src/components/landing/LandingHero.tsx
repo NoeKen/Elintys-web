@@ -132,7 +132,7 @@ export function LandingHero() {
             aria-hidden="true"
             className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-teal-pale/80 to-transparent"
           />
-          <div className="relative rounded-[18px] border border-white/70 bg-white/75 p-5 [box-shadow:var(--shadow-soft-line)]">
+          <div className="relative rounded-[18px] bg-white/75 p-5 [box-shadow:var(--shadow-soft-line)]">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="section-eyebrow">Tableau de bord</p>
@@ -149,7 +149,7 @@ export function LandingHero() {
               {HERO_MODULES.map((module) => {
                 const Icon = module.icon;
                 return (
-                  <div key={module.label} className="rounded-2xl border border-outline-variant/60 bg-white/70 p-3.5">
+                  <div key={module.label} className="rounded-2xl bg-white/70 p-3.5 shadow-[var(--shadow-soft-line)]">
                     <div className="flex items-center gap-3">
                       <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${module.tone}`}>
                         <Icon size={17} aria-hidden="true" />
@@ -177,7 +177,7 @@ export function LandingHero() {
               })}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-outline-variant/60 bg-gradient-to-br from-white/80 to-teal-pale/45 p-4">
+            <div className="mt-5 rounded-2xl bg-gradient-to-br from-white/80 to-teal-pale/45 p-4 shadow-[var(--shadow-soft-line)]">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal text-white">
                   <Check size={15} aria-hidden="true" />

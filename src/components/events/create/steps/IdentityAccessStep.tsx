@@ -152,10 +152,10 @@ export function IdentityAccessStep({
             <label
               key={value}
               className={cn(
-                'flex min-h-64 cursor-pointer flex-col rounded-3xl border p-5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                'flex min-h-64 cursor-pointer flex-col rounded-3xl p-5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                 discoverability === value
-                  ? 'border-event-petrol bg-event-petrol text-white shadow-event-selected'
-                  : 'border-transparent bg-event-surface text-event-ink',
+                  ? 'bg-event-petrol text-white shadow-event-selected'
+                  : 'bg-event-surface text-event-ink',
               )}
             >
               <input
@@ -193,7 +193,7 @@ export function IdentityAccessStep({
         </div>
       </fieldset>
 
-      <fieldset className="mt-8 rounded-3xl border border-event-outline-subtle/70 bg-white/70 p-5 shadow-event-soft sm:p-7">
+      <fieldset className="mt-8 rounded-3xl bg-white/70 p-5 shadow-event-soft sm:p-7">
         <legend className="px-1 font-serif text-2xl text-event-petrol">
           {copy.identity.accessQuestion}
         </legend>
@@ -203,10 +203,10 @@ export function IdentityAccessStep({
             <label
               key={value}
               className={cn(
-                'flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 text-sm font-semibold transition',
+                'flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl px-4 text-sm font-semibold transition',
                 accessPolicyType === value
-                  ? 'border-event-gold bg-event-petrol text-white shadow-event-selected'
-                  : 'border-event-outline-subtle bg-event-surface text-event-ink',
+                  ? 'bg-event-petrol text-white shadow-event-selected'
+                  : 'bg-event-surface text-event-ink',
               )}
             >
               <input type="radio" value={value} {...form.register('accessPolicyType')} className="sr-only" />

@@ -151,7 +151,7 @@ export default function PrestataireProfilPage() {
     return (
       <div className="mx-auto max-w-2xl space-y-6 p-6">
         <h1 className="font-serif text-2xl text-navy">Mon profil prestataire</h1>
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">
             Impossible de charger votre profil pour le moment.
           </p>
@@ -182,7 +182,7 @@ export default function PrestataireProfilPage() {
 
       <form
         onSubmit={handleSubmit((values) => save(values))}
-        className="space-y-5 rounded-xl border border-border bg-surface p-6"
+        className="space-y-5 rounded-xl bg-surface p-6 shadow-card"
         data-testid="vendor-profile-form"
       >
         <div className="space-y-1">

@@ -13,10 +13,10 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Card({ className, interactive = false, glass = false, ...props }: CardProps) {
   const base = cn(
-    'rounded-2xl border p-6',
+    'rounded-2xl p-6',
     glass
-      ? 'border-white/50 bg-white/72 backdrop-blur-[24px]'
-      : 'border-outline-variant/60 bg-white/78',
+      ? 'bg-white/72 backdrop-blur-[24px]'
+      : 'bg-white/78',
     'shadow-[var(--shadow-float)]',
     className
   );

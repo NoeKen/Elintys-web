@@ -234,7 +234,7 @@ function Section({
     <section
       className={cn(
         danger
-          ? 'rounded-3xl border-2 border-red-200 bg-red-50/40 p-6'
+          ? 'rounded-3xl bg-red-50/70 p-6 shadow-event-soft'
           : 'rounded-3xl bg-white p-6 shadow-event-soft',
         className,
       )}
@@ -331,7 +331,7 @@ export default function EventSettingsPage() {
 
   if (query.isError || !query.data) {
     return (
-      <section className="m-6 rounded-3xl border border-red-200/60 bg-white p-7 text-center">
+      <section className="m-6 rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
         <AlertTriangle className="mx-auto text-terracotta-dark" />
         <h1 className="mt-4 font-serif text-3xl text-event-petrol">
           Événement introuvable

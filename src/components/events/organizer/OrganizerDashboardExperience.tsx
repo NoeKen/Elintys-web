@@ -93,7 +93,7 @@ export function OrganizerDashboardExperience() {
                   ))}
                 </div>
               ) : (
-                <div className="flex min-h-52 items-center justify-center rounded-3xl border border-dashed border-event-outline-subtle bg-white/65 px-6 text-center text-sm leading-6 text-event-muted">
+                <div className="flex min-h-52 items-center justify-center rounded-3xl bg-white/65 px-6 text-center text-sm leading-6 text-event-muted shadow-event-soft">
                   {copy.dashboard.noUpcoming}
                 </div>
               )}
@@ -102,7 +102,7 @@ export function OrganizerDashboardExperience() {
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
             <DashboardShortcuts />
-            <section className="rounded-3xl border border-white/70 bg-white/75 p-6 shadow-event-soft" aria-labelledby="recent-activity-title">
+            <section className="rounded-3xl bg-white/75 p-6 shadow-event-soft" aria-labelledby="recent-activity-title">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-event-surface text-event-teal" aria-hidden="true"><History size={20} /></span>
                 <h2 id="recent-activity-title" className="font-serif text-3xl text-event-petrol">{copy.dashboard.recentActivity}</h2>
@@ -120,7 +120,7 @@ export function OrganizerDashboardExperience() {
 
 function DashboardHeader({ greeting }: { greeting: string }) {
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/75 p-6 shadow-event-panel backdrop-blur-xl sm:p-9">
+    <header className="relative overflow-hidden rounded-3xl bg-white/75 p-6 shadow-event-panel backdrop-blur-xl sm:p-9">
       <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-teal-pale/80 blur-3xl" aria-hidden="true" />
       <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
@@ -138,7 +138,7 @@ function DashboardHeader({ greeting }: { greeting: string }) {
 
 function MetricCard({ label, value, icon, warm = false, alert = false }: { label: string; value: number; icon: React.ReactNode; warm?: boolean; alert?: boolean }) {
   return (
-    <article className={`rounded-3xl border p-5 shadow-event-soft ${alert ? 'border-destructive/20 bg-terracotta-pale' : warm ? 'border-event-orange/20 bg-white/80' : 'border-white/70 bg-white/75'}`}>
+    <article className={`rounded-3xl p-5 shadow-event-soft ${alert ? 'bg-terracotta-pale' : warm ? 'bg-gold-pale/35' : 'bg-white/75'}`}>
       <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${alert ? 'bg-white text-destructive' : warm ? 'bg-terracotta-pale text-terracotta-dark' : 'bg-teal-pale text-event-teal'}`} aria-hidden="true">{icon}</div>
       <p className="mt-5 font-serif text-4xl leading-none text-event-petrol">{value.toLocaleString('fr-CA')}</p>
       <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-event-muted">{label}</p>
@@ -201,7 +201,7 @@ function DashboardShortcuts() {
 
 function NewOrganizerDashboard() {
   return (
-    <section className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 shadow-event-panel backdrop-blur-xl">
+    <section className="mt-6 overflow-hidden rounded-3xl bg-white/75 shadow-event-panel backdrop-blur-xl">
       <div className="grid min-h-[430px] lg:grid-cols-[1.1fr_0.9fr]">
         <div className="flex flex-col justify-center p-7 sm:p-12">
           <p className="section-eyebrow mb-5">{copy.dashboard.emptyEyebrow}</p>
@@ -227,7 +227,7 @@ function DashboardExperienceLoading() {
 
 function DashboardExperienceError({ requestId, onRetry }: { requestId?: string; onRetry: () => void }) {
   return (
-    <section className="mx-auto mt-12 max-w-3xl rounded-3xl border border-destructive/20 bg-white/85 p-8 text-center shadow-event-panel">
+    <section className="mx-auto mt-12 max-w-3xl rounded-3xl bg-terracotta-pale/70 p-8 text-center shadow-event-panel">
       <AlertCircle className="mx-auto text-destructive" size={38} aria-hidden="true" />
       <h1 className="mt-5 font-serif text-4xl text-event-petrol">{copy.dashboard.errorTitle}</h1>
       <p className="mx-auto mt-3 max-w-xl text-event-muted">{copy.dashboard.errorBody}</p>

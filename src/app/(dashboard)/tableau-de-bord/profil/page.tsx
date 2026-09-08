@@ -72,22 +72,22 @@ const toneClasses: Record<RoleTone, { badge: string; icon: string; ring: string 
   teal: {
     badge: 'bg-teal-pale text-teal-dark border-teal/20',
     icon: 'bg-teal-pale text-teal',
-    ring: 'shadow-[inset_0_0_0_1px_rgba(74,142,158,0.16)]',
+    ring: '',
   },
   gold: {
     badge: 'bg-gold-pale text-gold-dark border-gold/20',
     icon: 'bg-gold-pale text-gold-dark',
-    ring: 'shadow-[inset_0_0_0_1px_rgba(196,165,88,0.18)]',
+    ring: '',
   },
   terracotta: {
     badge: 'bg-terracotta-pale text-terracotta-dark border-terracotta/20',
     icon: 'bg-terracotta-pale text-terracotta',
-    ring: 'shadow-[inset_0_0_0_1px_rgba(212,132,74,0.16)]',
+    ring: '',
   },
   sage: {
     badge: 'bg-sage-pale text-sage-dark border-sage/20',
     icon: 'bg-sage-pale text-sage',
-    ring: 'shadow-[inset_0_0_0_1px_rgba(110,127,88,0.16)]',
+    ring: '',
   },
 };
 
@@ -291,7 +291,7 @@ export default function UserProfilePage() {
           {hasOnboardingData ? (
             <div className="space-y-4">
               {Object.entries(user.onboardingData).map(([role, data]) => (
-                <div key={role} className="rounded-2xl border border-outline-variant/70 bg-white/65 p-4">
+                <div key={role} className="rounded-2xl bg-white/65 p-4 shadow-card">
                   <h3 className="text-sm font-bold text-navy-dark">
                     {ROLE_DISPLAY[role as UserRole]?.label ?? role}
                   </h3>
@@ -333,7 +333,7 @@ export default function UserProfilePage() {
           {user.subscriptions.length > 0 ? (
             <div className="space-y-3">
               {user.subscriptions.map((subscription, index) => (
-                <div key={index} className="rounded-2xl border border-outline-variant/70 bg-white/65 p-4">
+                <div key={index} className="rounded-2xl bg-white/65 p-4 shadow-card">
                   <p className="text-sm font-bold text-navy-dark">Abonnement {index + 1}</p>
                   <dl className="mt-3 grid gap-2">
                     {Object.entries(subscription).map(([key, value]) => (
@@ -375,7 +375,7 @@ function MetricCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-outline-variant/70 bg-white/68 p-4 shadow-card">
+    <div className="rounded-2xl bg-white/68 p-4 shadow-card">
       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-teal-pale text-teal">
         <Icon size={17} aria-hidden="true" />
       </div>
@@ -387,7 +387,7 @@ function MetricCard({
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-outline-variant/70 bg-white/65 p-4">
+    <div className="rounded-2xl bg-white/65 p-4 shadow-card">
       <dt className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">{label}</dt>
       <dd className="mt-2 break-words text-sm font-semibold text-on-surface">{value}</dd>
     </div>
@@ -409,7 +409,7 @@ function RoleCard({
   const Icon = role.Icon;
 
   return (
-    <div className={cn('rounded-2xl border border-outline-variant/70 bg-white/65 p-4', tone.ring)}>
+    <div className={cn('rounded-2xl bg-white/65 p-4 shadow-card', tone.ring)}>
       <div className="flex items-start gap-3">
         <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', tone.icon)}>
           <Icon size={20} aria-hidden="true" />
@@ -452,7 +452,7 @@ function EmptyPanel({
   href?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-outline-variant bg-white/55 p-6 text-center">
+    <div className="rounded-2xl bg-white/55 p-6 text-center shadow-card">
       <h3 className="font-serif text-2xl text-navy-dark">{title}</h3>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-on-surface-variant">{description}</p>
       {href && (

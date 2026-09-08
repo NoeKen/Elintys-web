@@ -38,7 +38,7 @@ export default function EventLieuxPage() {
 
   if (eventQuery.isError || bookingsQuery.isError || !eventQuery.data) {
     return (
-      <section className="m-6 rounded-3xl border border-destructive/20 bg-white p-7 text-center">
+      <section className="m-6 rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
         <AlertCircle className="mx-auto text-destructive" aria-hidden="true" />
         <h1 className="mt-4 font-serif text-3xl text-event-petrol">Impossible de charger le lieu</h1>
         <button
@@ -109,7 +109,7 @@ export default function EventLieuxPage() {
               const start = new Date(booking.bookingStart).toLocaleDateString('fr-CA');
               const end = new Date(booking.bookingEnd).toLocaleDateString('fr-CA');
               return (
-                <li key={booking._id} className="flex flex-col gap-3 rounded-2xl border border-event-outline-subtle/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <li key={booking._id} className="flex flex-col gap-3 rounded-2xl bg-event-surface/65 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-bold text-event-petrol">{venueName}</p>
                     <p className="mt-1 text-sm text-event-muted">{start} → {end}</p>

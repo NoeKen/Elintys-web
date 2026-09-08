@@ -52,10 +52,10 @@ export function VenueCard({
   return (
     <article
       className={cn(
-        'overflow-hidden rounded-3xl border bg-white transition-shadow',
+        'overflow-hidden rounded-3xl bg-white transition-all',
         selected
-          ? 'border-event-gold shadow-event-selected'
-          : 'border-event-outline-subtle/60 shadow-event-soft',
+          ? 'bg-teal-pale/35 shadow-event-selected'
+          : 'shadow-event-soft',
       )}
     >
       {venue.photos[0] ? (

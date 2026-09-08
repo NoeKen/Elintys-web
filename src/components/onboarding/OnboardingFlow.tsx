@@ -684,7 +684,7 @@ function PreviewCard({
           .map(([key, value]) => (
             <div
               key={key}
-              className="rounded-2xl border border-outline-variant/70 bg-white/65 p-4"
+              className="rounded-2xl bg-white/65 p-4 shadow-card"
             >
               <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">
                 {key}

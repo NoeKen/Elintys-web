@@ -67,7 +67,7 @@ export function FaqAccordion({ id }: { id?: string }) {
           <motion.div
             key={item.q}
             variants={staggerItem}
-            className="overflow-hidden rounded-[10px] border bg-white/70 shadow-card transition-colors"
+            className="overflow-hidden rounded-[10px] bg-white/70 shadow-card transition-colors"
             style={{ borderColor: open === i ? 'rgba(74,142,158,0.32)' : 'rgba(30,61,79,0.10)' }}
           >
             <button

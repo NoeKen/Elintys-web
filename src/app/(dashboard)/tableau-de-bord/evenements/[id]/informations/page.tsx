@@ -188,7 +188,7 @@ export default function EventInformationsPage() {
   if (isError || !event) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
-        <section className="rounded-3xl border border-destructive/20 bg-white p-7 text-center shadow-event-soft">
+        <section className="rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
           <h1 className="font-serif text-3xl text-event-petrol">{copy.workspace.informationLoadError}</h1>
           <button
             type="button"

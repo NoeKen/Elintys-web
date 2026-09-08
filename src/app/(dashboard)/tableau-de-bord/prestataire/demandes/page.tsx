@@ -86,7 +86,7 @@ export default function PrestataireDemandesPage() {
     return (
       <div className="mx-auto max-w-3xl space-y-4 p-6">
         <h1 className="font-serif text-2xl text-navy">Demandes reçues</h1>
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+        <div className="rounded-xl bg-surface p-8 text-center shadow-card">
           <p className="text-sm text-navy">
             Créez d’abord votre profil prestataire pour recevoir des demandes.
           </p>
@@ -105,7 +105,7 @@ export default function PrestataireDemandesPage() {
     return (
       <div className="mx-auto max-w-3xl space-y-4 p-6">
         <h1 className="font-serif text-2xl text-navy">Demandes reçues</h1>
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">
             Impossible de charger vos demandes pour le moment.
           </p>
@@ -132,7 +132,7 @@ export default function PrestataireDemandesPage() {
 
       {items.length === 0 ? (
         <div
-          className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-muted"
+          className="rounded-xl bg-surface p-8 text-center text-sm text-muted shadow-card"
           data-testid="empty-state"
         >
           Aucune demande pour le moment.
@@ -142,7 +142,7 @@ export default function PrestataireDemandesPage() {
           {items.map((request) => (
             <li
               key={request._id}
-              className="space-y-3 rounded-xl border border-border bg-surface p-5"
+              className="space-y-3 rounded-xl bg-surface p-5 shadow-card"
               data-testid="vendor-request-card"
             >
               <div className="flex items-start justify-between gap-4">

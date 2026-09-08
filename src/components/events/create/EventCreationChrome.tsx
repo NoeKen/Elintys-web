@@ -256,7 +256,7 @@ export function EventCreationAside({
         <h3 className="text-sm font-semibold text-event-ink">
           {copy.previewTitle}
         </h3>
-        <div className="mt-5 overflow-hidden rounded-3xl border border-white/80 bg-white/75 shadow-event-soft backdrop-blur-xl">
+        <div className="mt-5 overflow-hidden rounded-3xl bg-white/75 shadow-event-soft backdrop-blur-xl">
           <div className="relative aspect-[16/9] bg-event-surface">
             {coverPreview ? (
               <Image

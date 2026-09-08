@@ -258,7 +258,7 @@ export default function EventMediasPage() {
 
   if (isError || !event) {
     return (
-      <section className="m-6 rounded-3xl border border-destructive/20 bg-white p-7 text-center">
+      <section className="m-6 rounded-3xl bg-terracotta-pale/70 p-7 text-center shadow-event-soft">
         <ImageIcon className="mx-auto text-event-muted" size={32} aria-hidden="true" />
         <h1 className="mt-4 font-serif text-2xl text-event-petrol">Événement introuvable</h1>
         <p className="mt-2 text-sm text-event-muted">

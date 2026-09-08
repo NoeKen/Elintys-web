@@ -42,7 +42,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div
-          className="max-w-md rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+          className="max-w-md rounded-xl bg-destructive/5 p-6 text-center shadow-card"
           role="alert"
           data-testid="session-unavailable"
         >

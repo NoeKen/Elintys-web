@@ -185,7 +185,7 @@ export function OrganizerEventsExperience() {
 
   return (
     <div className="mx-auto max-w-7xl px-1 py-5 sm:px-3 sm:py-8">
-      <header className="rounded-3xl border border-white/60 bg-white/75 p-6 shadow-event-panel backdrop-blur-xl sm:p-9">
+      <header data-testid="organizer-events-header" className="rounded-3xl bg-white/75 p-6 shadow-event-panel backdrop-blur-xl sm:p-9">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="section-eyebrow mb-4">{copy.events.eyebrow}</p>
@@ -196,7 +196,7 @@ export function OrganizerEventsExperience() {
         </div>
       </header>
 
-      <section className="mt-4 rounded-3xl border border-white/60 bg-white/75 p-4 shadow-event-soft backdrop-blur-xl" aria-label={copy.events.filters}>
+      <section data-testid="organizer-events-filters" className="mt-4 rounded-3xl bg-white/75 p-4 shadow-event-soft backdrop-blur-xl" aria-label={copy.events.filters}>
         <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label={copy.events.status}>
           {TABS.map((tab, index) => (
             <button id={`organizer-event-tab-${tab.value}`} key={tab.value} type="button" role="tab" aria-selected={view === tab.value} tabIndex={view === tab.value ? 0 : -1} onKeyDown={(event) => handleTabKeyDown(event, index)} onClick={() => selectView(tab.value)} className={cn('min-h-11 shrink-0 rounded-full px-4 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-gold', view === tab.value ? 'bg-event-petrol text-white shadow-event-button' : 'bg-event-surface text-event-muted hover:text-event-petrol')}>{tab.label}</button>
@@ -269,7 +269,7 @@ export function OrganizerEventsExperience() {
           ) : (
             <EventList events={events} handlers={handlers} />
           )}
-          <nav className="mt-6 flex flex-col items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/75 px-5 py-4 sm:flex-row" aria-label={copy.events.title}>
+          <nav className="mt-6 flex flex-col items-center justify-between gap-4 rounded-3xl bg-white/75 px-5 py-4 shadow-event-soft sm:flex-row" aria-label={copy.events.title}>
             <p className="text-sm text-event-muted">{organizerCopy(copy.events.showing, { from: (safePage - 1) * PAGE_SIZE + 1, to: Math.min(safePage * PAGE_SIZE, total), total })}</p>
             <div className="flex items-center gap-2">
               <button type="button" aria-label={copy.events.previousPage} disabled={safePage === 1 || query.isFetching} onClick={() => setPage((value) => Math.max(1, value - 1))} className="flex h-11 w-11 items-center justify-center rounded-full bg-event-surface disabled:opacity-35"><ArrowLeft size={16} aria-hidden="true" /></button>
@@ -303,7 +303,7 @@ function FilterSelect({ label, value, onChange, options }: { label: string; valu
 
 function EventList({ events, handlers }: { events: OrganizerEvent[]; handlers: EventActionHandlers }) {
   return (
-    <div className="mt-5 overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-event-soft">
+    <div className="mt-5 overflow-hidden rounded-3xl bg-white/80 shadow-event-soft">
       <div className="hidden grid-cols-[minmax(220px,1.7fr)_1fr_0.8fr_1fr_0.8fr_1fr_1fr_auto] gap-4 border-b border-event-outline-subtle/40 bg-event-surface px-6 py-4 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-event-muted xl:grid">
         <span>{copy.events.title}</span><span>{copy.events.date}</span><span>{copy.events.status}</span><span>{copy.events.discoverability}</span><span>{copy.events.access}</span><span>{copy.events.progress}</span><span>{copy.events.modified}</span><span className="sr-only">{copy.events.actions}</span>
       </div>
@@ -351,7 +351,7 @@ function EventsLoading({ view }: { view: ViewMode }) {
 
 function EventsError({ requestId, onRetry }: { requestId?: string; onRetry: () => void }) {
   return (
-    <section className="mt-5 rounded-3xl border border-destructive/20 bg-white/85 p-8 text-center">
+    <section className="mt-5 rounded-3xl bg-terracotta-pale/70 p-8 text-center shadow-event-soft">
       <AlertCircle className="mx-auto text-destructive" size={36} aria-hidden="true" />
       <h2 className="mt-4 font-serif text-3xl text-event-petrol">{copy.events.errorTitle}</h2>
       <p className="mt-2 text-event-muted">{copy.events.errorBody}</p>
@@ -363,7 +363,7 @@ function EventsError({ requestId, onRetry }: { requestId?: string; onRetry: () =
 
 function EventsEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
   return (
-    <section className="mt-5 rounded-3xl border border-dashed border-event-outline-subtle bg-white/70 px-6 py-16 text-center">
+    <section className="mt-5 rounded-3xl bg-white/70 px-6 py-16 text-center shadow-event-soft">
       <CalendarPlus className="mx-auto text-event-teal" size={42} strokeWidth={1.4} aria-hidden="true" />
       <h2 className="mt-5 font-serif text-3xl text-event-petrol">{filtered ? copy.events.emptyTitle : copy.events.firstEmptyTitle}</h2>
       <p className="mx-auto mt-2 max-w-lg text-event-muted">{filtered ? copy.events.emptyBody : copy.events.firstEmptyBody}</p>

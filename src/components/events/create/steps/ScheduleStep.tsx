@@ -144,7 +144,7 @@ export function ScheduleStep({ form }: ScheduleStepProps) {
           </label>
         </fieldset>
 
-        <div className="rounded-3xl border border-event-outline-subtle/60 bg-white/70 p-6 shadow-event-soft">
+        <div className="rounded-3xl bg-white/70 p-6 shadow-event-soft">
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-event-muted">
             {copy.schedule.timezone}
           </p>
@@ -169,10 +169,10 @@ export function ScheduleStep({ form }: ScheduleStepProps) {
             <label
               key={value}
               className={cn(
-                'flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl border px-4 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                'flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl px-4 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                 format === value
-                  ? 'border-event-gold bg-white shadow-event-selected'
-                  : 'border-transparent bg-event-surface',
+                  ? 'bg-white shadow-event-selected'
+                  : 'bg-event-surface',
               )}
             >
               <input
@@ -199,10 +199,10 @@ export function ScheduleStep({ form }: ScheduleStepProps) {
               <label
                 key={value}
                 className={cn(
-                  'relative flex min-h-44 cursor-pointer flex-col rounded-3xl border p-5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                  'relative flex min-h-44 cursor-pointer flex-col rounded-3xl p-5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                   venueMode === value
-                    ? 'border-event-gold bg-white shadow-event-selected'
-                    : 'border-transparent bg-event-surface',
+                    ? 'bg-white shadow-event-selected'
+                    : 'bg-event-surface',
                 )}
               >
                 <input

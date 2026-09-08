@@ -270,8 +270,7 @@ body::before {
   .glass-panel,
   .glass-card {
     background: var(--surface-glass);
-    border: 1px solid var(--border-glass);
-    box-shadow: var(--shadow-soft-line), var(--shadow-float);
+    box-shadow: var(--shadow-float);
     backdrop-filter: blur(var(--blur-glass));
     -webkit-backdrop-filter: blur(var(--blur-glass));
   }
@@ -283,7 +282,6 @@ body::before {
   .premium-card {
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78));
-    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-float);
   }
@@ -1116,7 +1114,6 @@ body::before {
     text-align: left;
     border-radius: var(--radius-xl);
     background: rgba(255, 255, 255, 0.66);
-    border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-soft-line);
     backdrop-filter: blur(var(--blur-soft));
     -webkit-backdrop-filter: blur(var(--blur-soft));
@@ -1161,7 +1158,6 @@ body::before {
     overflow: hidden;
     display: block;
     text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.48);
     box-shadow: var(--shadow-float);
     isolation: isolate;
     transition:
@@ -1299,10 +1295,9 @@ body::before {
     top: calc(var(--navbar-height) + 24px);
     align-self: start;
     background: var(--surface-glass-strong);
-    border: 1px solid var(--border-glass);
     border-radius: var(--radius-2xl);
     padding: 24px;
-    box-shadow: var(--shadow-soft-line), var(--shadow-float);
+    box-shadow: var(--shadow-float);
     backdrop-filter: blur(var(--blur-glass));
     -webkit-backdrop-filter: blur(var(--blur-glass));
   }
@@ -1416,18 +1411,15 @@ body::before {
     border-radius: var(--radius-2xl);
     overflow: hidden;
     background: rgba(255, 255, 255, 0.84);
-    border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-soft-line), var(--shadow-float);
+    box-shadow: var(--shadow-float);
     backdrop-filter: blur(var(--blur-soft));
     -webkit-backdrop-filter: blur(var(--blur-soft));
     transition:
       box-shadow var(--motion-slow) var(--ease-premium),
-      transform var(--motion-slow) var(--ease-premium),
-      border-color var(--motion-slow) var(--ease-premium);
+      transform var(--motion-slow) var(--ease-premium);
   }
   .vendor-card:hover,
   .venue-card:hover {
-    border-color: rgba(74, 142, 158, 0.24);
     box-shadow: var(--shadow-premium);
     transform: translateY(-4px);
   }
@@ -1575,7 +1567,6 @@ body::before {
     overflow: hidden;
     border-radius: var(--radius-3xl);
     background: rgba(255, 255, 255, 0.78);
-    border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-premium);
     backdrop-filter: blur(var(--blur-glass));
     -webkit-backdrop-filter: blur(var(--blur-glass));
@@ -1616,7 +1607,6 @@ body::before {
     align-items: center;
     gap: 18px;
     border-radius: var(--radius-xl);
-    border: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.72);
     padding: 16px;
     box-shadow: var(--shadow-soft-line);
@@ -1659,7 +1649,6 @@ body::before {
 
   .card-elintys {
     background: rgba(255, 255, 255, 0.84);
-    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-2xl);
     padding: 24px;
     box-shadow: var(--shadow-soft-line), var(--shadow-float);
@@ -1899,7 +1888,6 @@ body::before {
   .public-event-fact,
   .public-event-section,
   .public-event-action-card {
-    border: 1px solid rgba(30, 61, 79, 0.10);
     background: rgba(255, 255, 255, 0.74);
     box-shadow: var(--shadow-soft-line), 0 18px 48px rgba(15, 34, 48, 0.07);
     backdrop-filter: blur(18px);
@@ -2004,7 +1992,6 @@ body::before {
     display: flex;
     align-items: center;
     gap: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.64);
     border-radius: 28px;
     background: linear-gradient(135deg, rgba(232, 244, 247, 0.80), rgba(255, 255, 255, 0.76));
     padding: 22px;

@@ -59,7 +59,7 @@ export default function BilletteriePage() {
       )}
 
       {isError && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4" role="alert">
+        <div className="rounded-xl bg-destructive/8 p-4" role="alert">
           <p className="text-sm text-destructive">{copy.ticketsError}</p>
           <button type="button" onClick={() => void refetch()} className="mt-2 min-h-11 text-sm font-medium text-teal underline">
             {copy.retry}
@@ -68,7 +68,7 @@ export default function BilletteriePage() {
       )}
 
       {!isLoading && !isError && tickets.length === 0 && (
-        <div className="rounded-xl border border-border bg-white p-8 text-center" data-testid="empty-state">
+        <div className="rounded-xl bg-white p-8 text-center shadow-card" data-testid="empty-state">
           <Ticket className="mx-auto mb-3 h-10 w-10 text-muted" aria-hidden="true" />
           <p className="font-medium text-navy">{copy.ticketsEmptyTitle}</p>
           <p className="mt-1 text-sm text-muted">{copy.ticketsEmptyDescription}</p>
@@ -83,7 +83,7 @@ export default function BilletteriePage() {
           const event = typeof ticket.event === 'object' ? ticket.event : undefined;
           const ticketType = typeof ticket.ticketType === 'object' ? ticket.ticketType : undefined;
           return (
-            <article key={ticket._id} className="rounded-xl border border-border bg-white p-4" role="listitem" data-testid="ticket-card">
+            <article key={ticket._id} className="rounded-xl bg-white p-4 shadow-card" role="listitem" data-testid="ticket-card">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   {event?.slug ? (

@@ -153,7 +153,7 @@ export function ProfileExperience() {
     return (
       <div className="h-[calc(100svh-3.5rem)] overflow-y-auto px-4 py-6 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <div className="h-[420px] animate-pulse rounded-[28px] border border-white/50 bg-white/50" />
+          <div className="h-[420px] animate-pulse rounded-[28px] bg-white/50 shadow-card" />
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ export function ProfileExperience() {
   if (!user) {
     return (
       <div className="h-[calc(100svh-3.5rem)] overflow-y-auto px-4 py-10 sm:px-6">
-        <section className="mx-auto max-w-xl rounded-[28px] border border-white/50 bg-white/70 p-8 text-center shadow-float backdrop-blur-2xl">
+        <section className="mx-auto max-w-xl rounded-[28px] bg-white/70 p-8 text-center shadow-float backdrop-blur-2xl">
           <CircleAlert className="mx-auto text-terracotta" size={30} aria-hidden="true" />
           <h1 className="mt-5 font-serif text-3xl text-navy-dark">Session introuvable</h1>
           <p className="mt-3 text-sm leading-6 text-on-surface-variant">
@@ -188,7 +188,7 @@ export function ProfileExperience() {
   return (
     <div className="h-[calc(100svh-3.5rem)] overflow-y-auto scroll-smooth bg-[radial-gradient(circle_at_0%_0%,rgba(136,196,208,0.22),transparent_34%),radial-gradient(circle_at_100%_0%,rgba(212,132,74,0.12),transparent_28%),linear-gradient(180deg,rgba(250,249,250,0.92),rgba(248,249,251,0.98))] px-4 py-6 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl space-y-8 pb-12">
-        <section className="relative overflow-hidden rounded-[28px] border border-white/50 bg-white/70 p-5 shadow-float backdrop-blur-2xl sm:p-8 lg:p-10">
+        <section className="relative overflow-hidden rounded-[28px] bg-white/70 p-5 shadow-float backdrop-blur-2xl sm:p-8 lg:p-10">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-teal-pale/80 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-terracotta-pale/70 blur-3xl" />
 
@@ -249,7 +249,7 @@ export function ProfileExperience() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-white/60 bg-white/60 p-5 shadow-card backdrop-blur-xl">
+            <div className="rounded-[24px] bg-white/60 p-5 shadow-card backdrop-blur-xl">
               <div className="flex items-end justify-between gap-5">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-on-surface-variant">
@@ -293,7 +293,7 @@ export function ProfileExperience() {
               {user.subscriptions.length > 0 ? (
                 <div className="space-y-3">
                   {user.subscriptions.map((subscription, index) => (
-                    <div key={index} className="rounded-2xl border border-outline-variant/60 bg-white/55 p-4">
+                    <div key={index} className="rounded-2xl bg-white/55 p-4 shadow-card">
                       <p className="text-sm font-bold text-primary">Abonnement {index + 1}</p>
                       <div className="mt-3 space-y-2">
                         {Object.entries(subscription).map(([key, value]) => (
@@ -354,7 +354,7 @@ export function ProfileExperience() {
                     const Icon = roleMeta?.Icon ?? Sparkles;
 
                     return (
-                      <div key={role} className="rounded-[22px] border border-outline-variant/60 bg-white/60 p-4">
+                      <div key={role} className="rounded-[22px] bg-white/60 p-4 shadow-card">
                         <div className="mb-4 flex items-center gap-3">
                           <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl", toneStyles[roleMeta?.tone ?? "petrol"].icon)}>
                             <Icon size={18} aria-hidden="true" />
@@ -412,7 +412,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[28px] border border-white/50 bg-white/70 p-5 shadow-float backdrop-blur-2xl sm:p-6">
+    <section className="rounded-[28px] bg-white/70 p-5 shadow-float backdrop-blur-2xl sm:p-6">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-dark">{eyebrow}</p>
@@ -464,7 +464,7 @@ function RoleTimelineItem({
         {!last && <div className={cn("absolute top-12 h-[calc(100%+1rem)] w-px bg-gradient-to-b", tone.line)} />}
       </div>
       <div className="pb-4">
-        <div className="rounded-[22px] border border-outline-variant/60 bg-white/55 p-4">
+        <div className="rounded-[22px] bg-white/55 p-4 shadow-card">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -512,7 +512,7 @@ function EmptyState({
   cta?: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-dashed border-outline-variant bg-white/45 p-6 text-center">
+    <div className="rounded-[22px] bg-white/45 p-6 text-center shadow-card">
       <Sparkles className="mx-auto text-teal" size={22} aria-hidden="true" />
       <h3 className="mt-4 font-serif text-2xl text-navy-dark">{title}</h3>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-on-surface-variant">{description}</p>
