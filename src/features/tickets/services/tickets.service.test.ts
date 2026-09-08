@@ -19,6 +19,8 @@ const apiTicket = {
   price: 0,
   quantity: 25,
   sold: 3,
+  reserved: 2,
+  isFree: true,
 };
 
 describe('ticketsService', () => {
@@ -36,6 +38,8 @@ describe('ticketsService', () => {
         price: 0,
         quantity: 25,
         soldCount: 3,
+        reservedCount: 2,
+        isFree: true,
       },
     ]);
     expect(api.get).toHaveBeenCalledWith('/ticket-types/events/event-1/manage');
@@ -59,6 +63,23 @@ describe('ticketsService', () => {
     await expect(
       ticketsService.updateType('ticket-type-1', { name: 'Billet modifié' }),
     ).resolves.toMatchObject({ name: 'Billet modifié', eventId: 'event-1' });
+  });
+
+  it('normalise sans ambiguïté les anciens documents sans compteur reserved', async () => {
+    const legacyTicket = {
+      _id: apiTicket._id,
+      event: apiTicket.event,
+      name: apiTicket.name,
+      description: apiTicket.description,
+      price: apiTicket.price,
+      quantity: apiTicket.quantity,
+      sold: apiTicket.sold,
+    };
+    vi.mocked(api.get).mockResolvedValue({ data: [legacyTicket], status: 200 });
+
+    await expect(ticketsService.getTypes('event-1')).resolves.toEqual([
+      expect.objectContaining({ reservedCount: 0, isFree: false }),
+    ]);
   });
 
   it('achète un billet gratuit avec idempotence et grant uniquement en headers', async () => {

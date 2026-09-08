@@ -10,6 +10,8 @@ interface ApiTicketType {
   price: number;
   quantity: number;
   sold: number;
+  reserved?: number;
+  isFree?: boolean;
 }
 
 function normalizeTicketType(type: ApiTicketType): TicketType {
@@ -21,6 +23,8 @@ function normalizeTicketType(type: ApiTicketType): TicketType {
     price: type.price,
     quantity: type.quantity,
     soldCount: type.sold,
+    reservedCount: type.reserved ?? 0,
+    isFree: type.isFree ?? false,
   };
 }
 
@@ -79,11 +83,6 @@ export const ticketsService = {
 
   async deleteType(typeId: string): Promise<void> {
     await api.delete<void>(`/ticket-types/${typeId}`);
-  },
-
-  async validate(code: string): Promise<Ticket> {
-    const res = await api.post<Ticket>("/tickets/validate", { code });
-    return res.data;
   },
 
   async purchaseFree(
