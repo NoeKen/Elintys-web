@@ -12,15 +12,14 @@ import { organizerCopy, organizerEventCopy as copy } from '@/features/events/i18
 import { getUserFacingError } from '@/shared/lib/user-facing-error';
 import { FormErrorAlert } from '@/shared/ui/FormErrorAlert';
 import { guestsService } from '@/features/guests/services/guests.service';
-import { useAuthToken } from '@/shared/hooks/useAuthToken';
+import { guestKeys } from '@/features/guests/query-keys';
 
 export default function EventAccessManagementPage() {
   const { id } = useParams<{ id: string }>();
-  const token = useAuthToken();
   const queryClient = useQueryClient();
   const eventQuery = useQuery({ queryKey: ['event', id], queryFn: () => eventsService.get(id), staleTime: 30_000 });
   const requestsQuery = useQuery({ queryKey: ['event-access-requests', id], queryFn: () => eventsService.listAccessRequests(id), staleTime: 10_000 });
-  const guestsQuery = useQuery({ queryKey: ['guests', id, 'access-summary'], queryFn: () => guestsService.list(token, id), enabled: Boolean(token), staleTime: 15_000 });
+  const guestsQuery = useQuery({ queryKey: guestKeys.page(id, 1), queryFn: () => guestsService.list(id), staleTime: 15_000 });
   const [isEditing, setIsEditing] = useState(false);
   const saveConfiguration = useMutation({
     mutationFn: (payload: UpdateEventAccessConfigurationInput) => eventsService.updateAccessConfiguration(id, payload),

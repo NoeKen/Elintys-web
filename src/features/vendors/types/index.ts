@@ -26,16 +26,6 @@ export interface Vendor {
   updatedAt: string;
 }
 
-export interface CreateVendorInput {
-  businessName: string;
-  category: VendorCategory;
-  description?: string;
-  priceRange?: { min?: number; max?: number };
-  serviceArea?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-}
-
 export interface VendorCatalogResponse {
   data: Vendor[];
   total: number;

@@ -22,6 +22,8 @@ export interface TicketType {
   price: number;
   quantity: number;
   soldCount: number;
+  reservedCount: number;
+  isFree: boolean;
   saleStartDate?: string;
   saleEndDate?: string;
 }

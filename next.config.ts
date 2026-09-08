@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+import { legacyDashboardRedirects } from "./src/shared/navigation/legacy-dashboard-redirects";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return legacyDashboardRedirects.map((redirect) => ({ ...redirect }));
+  },
   /**
    * Dossier de build isolable.
    *
