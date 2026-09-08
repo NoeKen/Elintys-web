@@ -75,7 +75,7 @@ export function ProvidersStep({
   selectedVendors,
   onSelectedVendorsChange
 }: ProvidersStepProps) {
-  const { data: vendorData } = useQuery({
+  const vendorQuery = useQuery({
     queryKey: ['vendor-catalog', 1, 20],
     queryFn: () => vendorsService.list(1, 20),
     staleTime: 60_000
@@ -121,7 +121,7 @@ export function ProvidersStep({
               <label
                 key={category}
                 className={cn(
-                  'group relative aspect-[16/8] cursor-pointer overflow-hidden rounded-3xl border focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
+                  'group relative aspect-[16/8] cursor-pointer overflow-hidden rounded-3xl focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-event-gold',
                   selected ? 'border-event-gold' : 'border-transparent',
                 )}
               >
@@ -205,7 +205,7 @@ export function ProvidersStep({
               phone: '',
               invite: false
             };
-            const compatibleVendors = (vendorData?.data ?? []).filter(
+            const compatibleVendors = (vendorQuery.data?.data ?? []).filter(
               (vendor) =>
                 need.category === 'other' ||
                 vendor.category.includes(
@@ -221,7 +221,7 @@ export function ProvidersStep({
             return (
               <div
                 key={need.category}
-                className="rounded-3xl border border-event-outline-subtle/60 bg-white/70 p-5 shadow-event-soft"
+                className="rounded-3xl bg-white/75 p-5 shadow-event-soft"
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-semibold text-event-ink">
@@ -241,7 +241,7 @@ export function ProvidersStep({
                     <label
                       key={mode}
                       className={cn(
-                        'flex min-h-11 cursor-pointer items-center justify-center rounded-xl border px-3 text-center text-xs font-semibold focus-within:outline-2 focus-within:outline-event-gold',
+                        'flex min-h-11 cursor-pointer items-center justify-center rounded-xl px-3 text-center text-xs font-semibold focus-within:outline-2 focus-within:outline-event-gold',
                         need.mode === mode
                           ? 'border-event-gold bg-event-surface text-event-petrol'
                           : 'border-event-outline-subtle/60 text-event-muted',
@@ -265,7 +265,23 @@ export function ProvidersStep({
 
                 {need.mode === 'elintys' && (
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                    {compatibleVendors.length === 0 ? (
+                    {vendorQuery.isLoading ? (
+                      <p className="text-sm text-event-muted" role="status">
+                        {copy.providers.catalogLoading}
+                      </p>
+                    ) : vendorQuery.isError ? (
+                      <div className="rounded-2xl bg-terracotta-pale p-4 text-sm text-destructive sm:col-span-2" role="alert">
+                        <p>{copy.providers.catalogUnavailable}</p>
+                        <button
+                          type="button"
+                          onClick={() => void vendorQuery.refetch()}
+                          disabled={vendorQuery.isFetching}
+                          className="mt-3 min-h-11 rounded-full bg-white/80 px-4 font-semibold text-event-petrol disabled:cursor-wait disabled:opacity-50"
+                        >
+                          {vendorQuery.isFetching ? copy.providers.retrying : copy.providers.retry}
+                        </button>
+                      </div>
+                    ) : compatibleVendors.length === 0 ? (
                       <p className="text-sm text-event-muted">
                         {copy.venue.noResults}
                       </p>
@@ -281,10 +297,10 @@ export function ProvidersStep({
                             })
                           }
                           className={cn(
-                            'rounded-2xl border p-4 text-left focus-visible:outline-2 focus-visible:outline-event-gold',
+                            'rounded-2xl p-4 text-left shadow-[var(--shadow-soft-line)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-gold',
                             selectedVendors[need.category] === vendor._id
-                              ? 'border-event-gold bg-event-surface'
-                              : 'border-event-outline-subtle/60',
+                              ? 'bg-teal-pale text-event-petrol shadow-event-soft'
+                              : 'bg-white/85 hover:bg-event-surface',
                           )}
                         >
                           <span className="font-semibold text-event-ink">

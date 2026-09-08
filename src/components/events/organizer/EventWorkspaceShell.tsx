@@ -10,6 +10,7 @@ import { eventsService } from '@/features/events/services/events.service';
 import { organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
 import { cn } from '@/shared/lib/utils';
 import type { MediaImageSource } from '@/shared/types/media.types';
+import { ApiClientError } from '@/shared/lib/api';
 
 interface WorkspaceShellProps { children: React.ReactNode; }
 
@@ -47,11 +48,19 @@ function getCoverUrl(coverImage: MediaImageSource | undefined): string | null {
   return coverImage.url ?? null;
 }
 
+export function getWorkspaceErrorMessage(error: unknown): string {
+  if (error instanceof ApiClientError) {
+    if (error.status === 403) return copy.workspace.forbidden;
+    if (error.status === 404) return copy.workspace.notFound;
+  }
+  return copy.workspace.loadError;
+}
+
 function CoverThumbnail({ coverImage, title }: { coverImage: MediaImageSource | undefined; title: string }) {
   const url = getCoverUrl(coverImage);
   if (url) {
     return (
-      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-white/40">
+      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg shadow-[var(--shadow-soft-line)]">
         <Image src={url} alt={title} fill className="object-cover" sizes="32px" />
       </div>
     );
@@ -82,8 +91,38 @@ export function EventWorkspaceShell({ children }: WorkspaceShellProps) {
   const statusBadgeClass = event ? (STATUS_BADGE_CLASSES[event.status] ?? 'bg-event-surface text-event-muted') : '';
   const isPublishDisabled = !readiness.data?.publishable || event?.status === 'published' || publishMutation.isPending;
 
+  if (query.isLoading) {
+    return (
+      <div
+        className="mx-auto flex min-h-64 max-w-[1500px] items-center justify-center rounded-3xl bg-white/70 px-6 text-sm font-semibold text-event-muted shadow-event-panel backdrop-blur-xl"
+        role="status"
+        aria-live="polite"
+      >
+        {copy.workspace.loadingStatus}…
+      </div>
+    );
+  }
+
+  if (query.isError) {
+    return (
+      <div className="mx-auto max-w-[1500px] rounded-3xl bg-white/70 p-4 shadow-event-panel backdrop-blur-xl sm:p-6">
+        <div className="rounded-2xl bg-terracotta-pale px-4 py-5 text-sm text-destructive" role="alert">
+          <p>{getWorkspaceErrorMessage(query.error)}</p>
+          <button
+            type="button"
+            onClick={() => void query.refetch()}
+            disabled={query.isFetching}
+            className="mt-3 min-h-11 rounded-full bg-white/80 px-4 font-bold text-event-petrol disabled:cursor-wait disabled:opacity-50"
+          >
+            {query.isFetching ? `${copy.workspace.retry}…` : copy.workspace.retry}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-[1500px] overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-event-panel backdrop-blur-xl">
+    <div className="mx-auto max-w-[1500px] overflow-hidden rounded-3xl bg-white/70 shadow-event-panel backdrop-blur-xl">
       <header className="flex flex-col gap-4 border-b border-event-outline-subtle/45 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           <Link
@@ -101,24 +140,33 @@ export function EventWorkspaceShell({ children }: WorkspaceShellProps) {
             </span>
           </div>
         </div>
-        <div className="flex gap-2">
-          {event?.slug && event.status === 'published' ? (
-            <Link
-              href={`/evenements/${event.slug}`}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-4 text-sm font-bold text-event-petrol"
+        <div className="flex flex-col items-start gap-2 lg:items-end">
+          <div className="flex flex-wrap gap-2">
+            {event?.slug && event.status === 'published' ? (
+              <Link
+                href={`/evenements/${event.slug}`}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-4 text-sm font-bold text-event-petrol"
+              >
+                <Eye size={16} />
+                {copy.workspace.preview}
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              disabled={isPublishDisabled}
+              onClick={() => { if (!isPublishDisabled) publishMutation.mutate(); }}
+              className="premium-button min-h-[44px] px-5 disabled:cursor-not-allowed disabled:opacity-45"
+              title={readiness.isError ? copy.workspace.readinessUnavailable : undefined}
             >
-              <Eye size={16} />
-              {copy.workspace.preview}
-            </Link>
+              {event?.status === 'published' ? copy.workspace.publishedAction : publishMutation.isPending ? copy.workspace.publishing : copy.workspace.publish}
+            </button>
+          </div>
+          {readiness.isError ? (
+            <p className="text-sm text-terracotta-dark" role="status">{copy.workspace.readinessUnavailable}</p>
           ) : null}
-          <button
-            type="button"
-            disabled={isPublishDisabled}
-            onClick={() => { if (!isPublishDisabled) publishMutation.mutate(); }}
-            className="premium-button min-h-[44px] px-5 disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            {event?.status === 'published' ? 'Événement publié' : publishMutation.isPending ? 'Publication…' : copy.workspace.publish}
-          </button>
+          {publishMutation.isError ? (
+            <p className="text-sm text-destructive" role="alert">{copy.workspace.publishError}</p>
+          ) : null}
         </div>
       </header>
       <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[250px_minmax(0,1fr)]">

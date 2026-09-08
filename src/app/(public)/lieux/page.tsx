@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { SearchBar } from '@/components/public/SearchBar';
 import { LieuxContent } from '@/components/public/LieuxContent';
 import type { PublicVenue } from '@/components/public/VenueCard';
 import { buildCatalogQuery } from '@/features/catalog/catalog-filters';
@@ -41,7 +40,6 @@ export default async function LieuxPage({
             Salles de conférence, espaces de réception, studios — tous vérifiés pour vos événements
             à Montréal.
           </p>
-          <SearchBar defaultQuery={type} />
         </div>
       </section>
 

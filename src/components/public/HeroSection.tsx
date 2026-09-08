@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { CategoryChip } from './CategoryChip';
-import { SearchBar } from './SearchBar';
 
 const CHIPS = [
   { label: 'Conférence', slug: 'conference' },
@@ -52,7 +51,7 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
         </p>
 
         <div className="hero-cta-row reveal" style={REVEAL(0.24)}>
-          <Link href="/evenements/recherche" className="premium-button">
+          <Link href="#events-catalog-title" className="premium-button">
             Explorer les événements
           </Link>
           <Link href="/comment-ca-marche" className="premium-button-secondary">
@@ -60,11 +59,7 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
           </Link>
         </div>
 
-        <div className="reveal w-full max-w-[760px]" style={REVEAL(0.32)}>
-          <SearchBar />
-        </div>
-
-        <div className="hero-chips reveal" style={REVEAL(0.4)}>
+        <div className="hero-chips reveal" style={REVEAL(0.32)}>
           {CHIPS.map((chip) => (
             <CategoryChip
               key={chip.slug}
@@ -74,7 +69,7 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
           ))}
         </div>
 
-        <div className="hero-proof-row reveal" style={REVEAL(0.48)}>
+        <div className="hero-proof-row reveal" style={REVEAL(0.4)}>
           {proofPoints.map((point) => (
             <div key={point.value} className="hero-proof-card">
               <strong>{point.value}</strong>
