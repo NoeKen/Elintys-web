@@ -117,6 +117,15 @@ test.describe.serial('Sprint 3 Vague 3 — workspace événement organisateur', 
   });
 
   test('Paramètres sépare accès, archive et suppression destructive', async ({ page }) => {
+    const dialogA11yWarnings: string[] = [];
+    page.on('console', (message) => {
+      if (
+        ['error', 'warning'].includes(message.type()) &&
+        /DialogContent|Description.*aria-describedby/.test(message.text())
+      ) {
+        dialogA11yWarnings.push(message.text());
+      }
+    });
     await page.goto(`/tableau-de-bord/evenements/${eventId}/parametres`);
     await expect(page.getByRole('heading', { name: /Configuration de l.accès/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Archiver/ })).toBeVisible();
@@ -128,6 +137,7 @@ test.describe.serial('Sprint 3 Vague 3 — workspace événement organisateur', 
     await expect(dialog.getByRole('button', { name: 'Supprimer définitivement' })).toBeEnabled();
     await dialog.getByRole('button', { name: 'Annuler' }).click();
     await expect(dialog).toBeHidden();
+    expect(dialogA11yWarnings).toEqual([]);
   });
 
   test('navigation mobile, scroll clavier et Axe serious/critical', async ({ page }) => {

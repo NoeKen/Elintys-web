@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useId, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -92,8 +92,6 @@ const ADMISSION_LABELS: Record<AdmissionMode, string> = {
 interface ConfirmDialogProps {
   open: boolean;
   onClose: () => void;
-  titleId: string;
-  descId: string;
   title: React.ReactNode;
   description: React.ReactNode;
   confirmLabel: string;
@@ -108,8 +106,6 @@ interface ConfirmDialogProps {
 function ConfirmDialog({
   open,
   onClose,
-  titleId,
-  descId,
   title,
   description,
   confirmLabel,
@@ -144,8 +140,6 @@ function ConfirmDialog({
             </Dialog.Overlay>
 
             <Dialog.Content
-              aria-labelledby={titleId}
-              aria-describedby={descId}
               onOpenAutoFocus={(e) => {
                 e.preventDefault();
                 cancelRef.current?.focus();
@@ -165,17 +159,11 @@ function ConfirmDialog({
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
                 transition={{ duration: 0.2 }}
               >
-                <Dialog.Title
-                  id={titleId}
-                  className="font-serif text-xl text-event-petrol"
-                >
+                <Dialog.Title className="font-serif text-xl text-event-petrol">
                   {title}
                 </Dialog.Title>
 
-                <Dialog.Description
-                  id={descId}
-                  className="mt-3 text-sm leading-6 text-event-muted"
-                >
+                <Dialog.Description className="mt-3 text-sm leading-6 text-event-muted">
                   {description}
                 </Dialog.Description>
 
@@ -279,9 +267,6 @@ export default function EventSettingsPage() {
 
   const [openDialog, setOpenDialog] = useState<DialogKind>(null);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
-
-  const titleId = useId();
-  const descId = useId();
 
   const query = useQuery({
     queryKey: ['event', id],
@@ -553,8 +538,6 @@ export default function EventSettingsPage() {
       <ConfirmDialog
         open={openDialog === 'archive'}
         onClose={closeDialog}
-        titleId={`${titleId}-archive-title`}
-        descId={`${descId}-archive-desc`}
         title={`Archiver « ${event.title} » ?`}
         description={`L'événement ne sera plus visible publiquement mais sera conservé. Vous pourrez le restaurer à tout moment.`}
         confirmLabel="Archiver"
@@ -566,8 +549,6 @@ export default function EventSettingsPage() {
       <ConfirmDialog
         open={openDialog === 'restore'}
         onClose={closeDialog}
-        titleId={`${titleId}-restore-title`}
-        descId={`${descId}-restore-desc`}
         title={`Restaurer « ${event.title} » ?`}
         description="L'événement redeviendra visible selon ses paramètres de découvrabilité actuels."
         confirmLabel="Restaurer"
@@ -579,8 +560,6 @@ export default function EventSettingsPage() {
       <ConfirmDialog
         open={openDialog === 'delete'}
         onClose={closeDialog}
-        titleId={`${titleId}-delete-title`}
-        descId={`${descId}-delete-desc`}
         title={`Supprimer définitivement « ${event.title} » ?`}
         description="Cette action supprime définitivement l'événement. Les données associées peuvent rester conservées selon les règles de rétention du service."
         confirmLabel="Supprimer définitivement"
