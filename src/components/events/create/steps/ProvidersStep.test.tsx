@@ -60,8 +60,16 @@ describe("ProvidersStep — besoins", () => {
   });
 
   it("devrait proposer les catégories de prestataires", () => {
-    renderStep();
+    const { container } = renderStep();
     expect(screen.getAllByRole("checkbox").length).toBeGreaterThan(0);
+    const featuredImages = container.querySelectorAll('img[src*="provider-"]');
+    expect(featuredImages.length).toBeGreaterThan(0);
+    for (const image of featuredImages) {
+      expect(image).toHaveAttribute(
+        'sizes',
+        '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+      );
+    }
   });
 
   it("devrait remonter un changement de besoins au parent", async () => {

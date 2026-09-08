@@ -137,10 +137,15 @@ describe('Routes de retour de paiement', () => {
   });
 
   it('expose une région live pour annoncer le changement d’état', async () => {
-    render(await PaymentSuccessPage(params({ order_id: ORDER_ID })));
+    const page = await PaymentSuccessPage(params({ order_id: ORDER_ID }));
+    await act(async () => {
+      render(page);
+      await Promise.resolve();
+    });
 
     const live = screen.getByLabelText('État de votre commande');
     expect(live).toHaveAttribute('aria-live', 'polite');
+    await waitFor(() => expect(syncTicketOrder).toHaveBeenCalledWith(ORDER_ID));
   });
 
   it('redémarre un cycle de polling borné après une reprise manuelle', async () => {
