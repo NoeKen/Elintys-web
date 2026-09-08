@@ -39,7 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    setIsLoading(true);
     void authService
       .restoreSession()
       .then((restored) => {
@@ -75,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [attempt]);
 
   const retrySession = useCallback(() => {
+    setIsLoading(true);
     setIsSessionUnavailable(false);
     // Réessai à la DEMANDE, jamais en boucle : un réessai automatique répété
     // sur une API en difficulté l'aggrave et peut déclencher le rate-limit.

@@ -185,7 +185,6 @@ function MobileAuthActions({
 }
 
 export function PublicNavbar({ showWaitlistCta = false, fixed = false }: PublicNavbarProps) {
-  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, isLoading } = useAuth();
   const { scrollY } = useScroll();
@@ -211,10 +210,6 @@ export function PublicNavbar({ showWaitlistCta = false, fixed = false }: PublicN
     : user
       ? { status: 'authenticated', user }
       : { status: 'anonymous' };
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;

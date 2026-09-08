@@ -16,7 +16,7 @@ function VerificationEmailContent() {
   const token = searchParams.get("token");
   const nextPath = sanitizeRedirectPath(searchParams.get("next"));
 
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(Boolean(token));
   const [verificationError, setVerificationError] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [countdown, setCountdown] = useState(60);
@@ -40,7 +40,6 @@ function VerificationEmailContent() {
   useEffect(() => {
     if (!token) return;
 
-    setIsVerifying(true);
     authService
       .verifyEmailCheck(token)
       .then(() => {

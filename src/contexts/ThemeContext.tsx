@@ -14,12 +14,13 @@ export const ThemeContext = createContext<ThemeContextValue | null>(null);
 const THEME_KEY = "elintys_theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-
-  useEffect(() => {
-    const stored = localStorage.getItem(THEME_KEY) as Theme | null;
-    if (stored) setThemeState(stored);
-  }, []);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "system";
+    const stored = localStorage.getItem(THEME_KEY);
+    return stored === "light" || stored === "dark" || stored === "system"
+      ? stored
+      : "system";
+  });
 
   useEffect(() => {
     const root = document.documentElement;

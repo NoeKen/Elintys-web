@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Input } from "@/shared/ui/Input";
@@ -31,7 +31,7 @@ export function CtaSection({ id }: { id?: string }) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<WaitlistInput>({
     resolver: zodResolver(waitlistSchema),
@@ -50,7 +50,7 @@ export function CtaSection({ id }: { id?: string }) {
     onSuccess: (data) => setResult(data.alreadyExists ? "exists" : "success"),
   });
 
-  const role = watch("role");
+  const role = useWatch({ control, name: "role" });
 
   if (result) {
     return (
