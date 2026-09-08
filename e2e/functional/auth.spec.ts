@@ -7,7 +7,7 @@ test.describe('Authentification', () => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
 
-    for (const route of ['/tableau-de-bord', '/organisateur', '/parametres']) {
+    for (const route of ['/tableau-de-bord', '/parametres']) {
       const initialResponse = await page.goto(route, { waitUntil: 'domcontentloaded' });
       expect(initialResponse, `${route} doit être rendu par Next.js avant la garde cliente`).not.toBeNull();
       expect(initialResponse?.status(), `${route} ne doit pas être redirigé par un proxy Next.js`).toBe(200);
@@ -19,6 +19,12 @@ test.describe('Authentification', () => {
       expect(page.url(), 'le chemin de retour doit être conservé').toContain('redirect=');
     }
     await context.close();
+  });
+
+  test('devrait canonicaliser une ancienne route avant la garde cliente', async ({ request }) => {
+    const response = await request.get('/organisateur', { maxRedirects: 0 });
+    expect([307, 308]).toContain(response.status());
+    expect(response.headers().location).toBe('/tableau-de-bord');
   });
 
   test('ne devrait PAS rediriger les routes publiques', async ({ browser }) => {
