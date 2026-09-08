@@ -234,12 +234,15 @@ Web :
 - `78d2b44` — `refactor(web): retire stale vendor client methods` ;
 - `b4a70be` — `fix(web): preserve canonical ticket type fields` ;
 - `3a67c0e` — `chore(web): remove proven dead integration code` ;
-- `22a6ad2` — `refactor(web): canonicalize legacy dashboard routes`.
+- `22a6ad2` — `refactor(web): canonicalize legacy dashboard routes` ;
+- `8ab56f1` — `docs(audit): record Sprint 3 Wave C validation`.
 
 API : aucun fichier modifié ; la branche correspond exactement à `origin/dev`. Créer un commit ou une PR vide pour l'API fabriquerait artificiellement un changement.
 
 ## 28. PR readiness
 
-P0/P1/P2 bloquants = 0. C-01 à C-10 sont traités ou explicitement N/A avec preuve. Les gates API/Web, auth, navigation, sécurité, audit dépendances, scan secrets et whitespace sont vertes. Le dépôt Web est prêt à être poussé et à ouvrir une PR vers `dev`. Aucune PR API n'est nécessaire faute de diff.
+P0/P1/P2 bloquants = 0. C-01 à C-10 sont traités ou explicitement N/A avec preuve. Les gates API/Web, auth, navigation, sécurité, audit dépendances, scan secrets et whitespace sont vertes. Le dépôt Web est poussé et sa PR vers `dev` est ouverte. Aucune PR API n'est nécessaire faute de diff.
+
+PR Web ouverte : [#104 — Sprint 3 — Wave C — Integration & Architecture Cleanup](https://github.com/NoeKen/Elintys-web/pull/104), branche mergeable vers `dev`. Le check Vercel Preview Comments est vert ; le déploiement Preview est encore en cours au moment de cette preuve. La branche API demandée est poussée mais identique à `dev`.
 
 **SPRINT 3 / VAGUE CORRECTIVE C — VALIDÉE — IMPLEMENTED, INDEPENDENTLY REVIEWED — PR OUVERTE VERS DEV**
