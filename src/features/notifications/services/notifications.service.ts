@@ -5,6 +5,7 @@ export interface AppNotification {
   type:
     | 'VENDOR_RESPONDED'
     | 'VENDOR_REQUEST_RECEIVED'
+    | 'VENUE_BOOKING_RECEIVED'
     | 'TICKET_SOLD'
     | 'VENUE_CONFIRMED'
     | 'INVITATION_ACCEPTED'

@@ -69,7 +69,7 @@ export function Topbar({ onMenuClick, menuButtonRef, menuOpen = false }: TopbarP
         aria-label="Ouvrir le menu"
         aria-expanded={menuOpen}
         aria-controls="mobile-dashboard-menu"
-        className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-teal-pale hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal md:hidden"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-teal-pale hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal md:hidden"
       >
         <IconMenu size={18} />
       </button>

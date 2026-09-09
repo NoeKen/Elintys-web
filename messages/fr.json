@@ -288,6 +288,29 @@
     "retry": "Réessayer",
     "backToEvents": "Voir les événements"
   },
+  "notifications": {
+    "title": "Notifications",
+    "unavailable": "Notifications indisponibles",
+    "loading": "Chargement des notifications…",
+    "empty": "Aucune notification.",
+    "listError": "Les notifications sont temporairement indisponibles.",
+    "retry": "Réessayer",
+    "retrying": "Nouvel essai…",
+    "markAll": "Tout marquer lu",
+    "markingAll": "Mise à jour…",
+    "markAllError": "Impossible de marquer les notifications comme lues. Réessayez.",
+    "markOneError": "Impossible de marquer cette notification comme lue.",
+    "unread": "non lue",
+    "types": {
+      "VENDOR_RESPONDED": "Réponse prestataire",
+      "VENDOR_REQUEST_RECEIVED": "Nouvelle demande prestataire",
+      "VENUE_BOOKING_RECEIVED": "Nouvelle demande de réservation",
+      "TICKET_SOLD": "Billet vendu",
+      "VENUE_CONFIRMED": "Réponse du lieu",
+      "INVITATION_ACCEPTED": "Invitation acceptée",
+      "EVENT_REMINDER": "Rappel événement"
+    }
+  },
   "eventCreation": {
     "metaTitle": "Créer un événement — Elintys",
     "brand": "Elintys",
