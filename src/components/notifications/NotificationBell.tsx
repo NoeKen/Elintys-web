@@ -1,22 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/shared/lib/utils';
 import {
   notificationsService,
   type AppNotification,
 } from '@/features/notifications/services/notifications.service';
 import { notificationKeys } from '@/features/notifications/query-keys';
+import messages from '../../../messages/fr.json';
 
-const TYPE_LABELS: Record<string, string> = {
-  VENDOR_RESPONDED: 'Réponse prestataire',
-  VENDOR_REQUEST_RECEIVED: 'Nouvelle demande',
-  TICKET_SOLD: 'Billet vendu',
-  VENUE_CONFIRMED: 'Lieu confirmé',
-  INVITATION_ACCEPTED: 'Invitation acceptée',
-  EVENT_REMINDER: 'Rappel événement',
-};
+const copy = messages.notifications;
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
+
+function getString(payload: Record<string, unknown>, key: string): string | null {
+  const value = payload[key];
+  return typeof value === 'string' ? value : null;
+}
+
+/** Resolve destinations from server-owned notification types and validated IDs only. */
+function getNotificationDestination(notification: AppNotification): string | null {
+  const eventId = getString(notification.payload, 'eventId');
+
+  switch (notification.type) {
+    case 'VENDOR_REQUEST_RECEIVED':
+      return '/tableau-de-bord/prestataire/demandes';
+    case 'VENUE_BOOKING_RECEIVED':
+      return '/tableau-de-bord/gestionnaire/reservations';
+    case 'VENDOR_RESPONDED':
+      return eventId && OBJECT_ID_PATTERN.test(eventId)
+        ? `/tableau-de-bord/evenements/${eventId}/prestataires`
+        : null;
+    case 'VENUE_CONFIRMED':
+      return eventId && OBJECT_ID_PATTERN.test(eventId)
+        ? `/tableau-de-bord/evenements/${eventId}/lieux`
+        : null;
+    case 'INVITATION_ACCEPTED':
+      return eventId && OBJECT_ID_PATTERN.test(eventId)
+        ? `/tableau-de-bord/evenements/${eventId}/invites`
+        : null;
+    case 'TICKET_SOLD':
+      return eventId && OBJECT_ID_PATTERN.test(eventId)
+        ? `/tableau-de-bord/evenements/${eventId}/billetterie`
+        : null;
+    default:
+      return null;
+  }
+}
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -31,6 +62,9 @@ function formatDate(iso: string): string {
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const countQuery = useQuery({
     queryKey: notificationKeys.unreadCount(),
@@ -47,9 +81,54 @@ export function NotificationBell() {
   const markAllMutation = useMutation({
     mutationFn: () => notificationsService.markAllRead(),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      queryClient.setQueryData(notificationKeys.unreadCount(), { count: 0 });
+      queryClient.setQueriesData<AppNotification[]>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+        (current) => current?.map((notification) => ({ ...notification, read: true })),
+      );
     },
   });
+
+  const markReadMutation = useMutation({
+    mutationFn: (id: string) => notificationsService.markRead(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueriesData<AppNotification[]>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+        (current) =>
+        current?.map((notification) =>
+          notification._id === id ? { ...notification, read: true } : notification,
+        ),
+      );
+      queryClient.setQueryData<{ count: number }>(notificationKeys.unreadCount(), (current) =>
+        current ? { count: Math.max(0, current.count - 1) } : current,
+      );
+    },
+  });
+
+  useEffect(() => {
+    if (!open) return;
+
+    panelRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!panelRef.current?.contains(target) && !triggerRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [open]);
 
   const unread = countQuery.data?.count ?? 0;
   const badgeLabel = unread > 9 ? '9+' : String(unread);
@@ -57,12 +136,13 @@ export function NotificationBell() {
   return (
     <div className="relative">
       <button
-        aria-label="Notifications"
+        ref={triggerRef}
+        aria-label={countQuery.isError ? copy.unavailable : copy.title}
         aria-expanded={open}
         aria-controls="notifications-panel"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'relative flex items-center justify-center rounded-md p-2 transition-colors',
+          'relative flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors',
           'text-on-surface-variant hover:bg-surface-low hover:text-on-surface',
         )}
       >
@@ -95,65 +175,88 @@ export function NotificationBell() {
 
       {open && (
         <div
+          ref={panelRef}
           id="notifications-panel"
+          role="dialog"
+          aria-label={copy.title}
+          tabIndex={-1}
           className={cn(
-            'absolute bottom-full left-0 z-50 mb-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl',
-            'bg-white shadow-event-panel',
+            'fixed left-1/2 top-20 z-50 w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-2xl sm:left-auto sm:right-3 sm:translate-x-0',
+            'bg-white shadow-event-panel outline-none',
           )}
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <span className="text-sm font-semibold text-navy">Notifications</span>
+          <div className="flex items-center justify-between border-b border-border/35 px-4 py-3">
+            <span className="text-sm font-semibold text-navy">{copy.title}</span>
             {unread > 0 && !countQuery.isError && (
               <button
                 onClick={() => markAllMutation.mutate()}
                 disabled={markAllMutation.isPending}
                 className="min-h-11 text-xs font-medium text-teal hover:underline disabled:cursor-wait disabled:opacity-50"
               >
-                {markAllMutation.isPending ? 'Mise à jour…' : 'Tout marquer lu'}
+                {markAllMutation.isPending ? copy.markingAll : copy.markAll}
               </button>
             )}
           </div>
 
           {markAllMutation.isError ? (
             <p className="mx-4 mt-3 rounded-xl bg-destructive/8 px-3 py-2 text-xs text-destructive" role="alert">
-              Impossible de marquer les notifications comme lues. Réessayez.
+              {copy.markAllError}
+            </p>
+          ) : null}
+
+          {markReadMutation.isError ? (
+            <p className="mx-4 mt-3 rounded-xl bg-destructive/8 px-3 py-2 text-xs text-destructive" role="alert">
+              {copy.markOneError}
             </p>
           ) : null}
 
           <ul className="max-h-72 overflow-y-auto" aria-live="polite" aria-busy={notificationsQuery.isLoading || notificationsQuery.isFetching}>
             {notificationsQuery.isLoading ? (
               <li className="px-4 py-6 text-center text-sm text-muted">
-                Chargement des notifications…
+                {copy.loading}
               </li>
             ) : notificationsQuery.isError ? (
               <li className="px-4 py-5 text-center text-sm text-muted" role="alert">
-                <p>Les notifications sont temporairement indisponibles.</p>
+                <p>{copy.listError}</p>
                 <button
                   type="button"
                   onClick={() => void notificationsQuery.refetch()}
                   disabled={notificationsQuery.isFetching}
                   className="mt-3 min-h-11 rounded-full bg-surface-low px-4 font-semibold text-teal disabled:cursor-wait disabled:opacity-50"
                 >
-                  {notificationsQuery.isFetching ? 'Nouvel essai…' : 'Réessayer'}
+                  {notificationsQuery.isFetching ? copy.retrying : copy.retry}
                 </button>
               </li>
             ) : !notificationsQuery.data || notificationsQuery.data.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-muted">
-                Aucune notification.
+                {copy.empty}
               </li>
             ) : (
               notificationsQuery.data.map((notif: AppNotification) => (
-                <li
-                  key={notif._id}
-                  className={cn(
-                    'border-b border-border px-4 py-3 last:border-b-0',
-                    !notif.read && 'bg-teal-pale',
-                  )}
-                >
-                  <p className="text-xs font-medium text-navy">
-                    {TYPE_LABELS[notif.type] ?? notif.type}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted">{formatDate(notif.createdAt)}</p>
+                <li key={notif._id} className="border-b border-border/35 last:border-b-0">
+                  <button
+                    type="button"
+                    aria-label={`${copy.types[notif.type] ?? notif.type} — ${formatDate(notif.createdAt)}${!notif.read ? ` — ${copy.unread}` : ''}`}
+                    disabled={markReadMutation.isPending && markReadMutation.variables === notif._id}
+                    onClick={() => {
+                      if (!notif.read) markReadMutation.mutate(notif._id);
+                      const destination = getNotificationDestination(notif);
+                      if (destination) {
+                        setOpen(false);
+                        router.push(destination);
+                      }
+                    }}
+                    className={cn(
+                      'min-h-14 w-full px-4 py-3 text-left transition-colors hover:bg-surface-low disabled:cursor-wait disabled:opacity-70',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal',
+                      !notif.read && 'bg-teal-pale',
+                    )}
+                  >
+                    <span className="block text-xs font-medium text-navy">
+                      {copy.types[notif.type] ?? notif.type}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted">{formatDate(notif.createdAt)}</span>
+                  </button>
                 </li>
               ))
             )}

@@ -65,6 +65,11 @@ export default defineConfig({
       url: 'http://localhost:3001/api/v1/health',
       reuseExistingServer: true,
       timeout: 180_000,
+      env: {
+        ...process.env,
+        EMAIL_DELIVERY_ENABLED: 'false',
+        JWT_EXPIRES_IN: '60m',
+      },
     },
     {
       command: 'npm run dev',

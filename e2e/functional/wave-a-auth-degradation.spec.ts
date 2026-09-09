@@ -132,10 +132,13 @@ test.describe('Vague A — dégradation de la restauration de session', () => {
 
       await page.goto('/tableau-de-bord/favoris');
       await expect(page.getByTestId('session-unavailable')).toBeVisible();
+      const callsAfterInitialRender = calls;
+      expect(callsAfterInitialRender).toBeGreaterThan(0);
       await page.waitForTimeout(2500);
 
-      // Rejouer en boucle aggraverait la panne et déclencherait le rate-limit.
-      expect(calls).toBeLessThanOrEqual(1);
+      // Next peut rendre l'effet initial plus d'une fois en développement.
+      // L'invariant utile est l'absence de NOUVEL appel après stabilisation.
+      expect(calls).toBe(callsAfterInitialRender);
     } finally {
       await context.close();
     }

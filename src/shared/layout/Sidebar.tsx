@@ -9,7 +9,6 @@ import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Tooltip } from '@/shared/ui/Tooltip';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { IconSidebarCollapse, IconSidebarExpand } from '@/lib/icons';
 import { buildNavSections, type SidebarIconName } from '@/shared/layout/sidebar-nav';
 import { NavIcon } from '@/shared/layout/nav-icons';
@@ -163,11 +162,6 @@ export function Sidebar() {
 
       {/* User footer */}
       <div className="px-2 pt-4">
-        {!collapsed && (
-          <div className="flex items-center justify-end px-3 py-1">
-            <NotificationBell />
-          </div>
-        )}
         <div
           className={cn(
             'flex items-center gap-3 rounded-2xl border border-outline-variant/50 bg-white/55 px-3 py-2',
