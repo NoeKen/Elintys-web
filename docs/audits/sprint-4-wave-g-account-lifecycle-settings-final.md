@@ -235,6 +235,11 @@ La révocation immédiate de tous les access tokens nécessiterait une architect
 
 ## 36. Final verdict
 
-Wave G est prête pour push et ouverture de PR vers `dev`. Les PR ne doivent pas être fusionnées dans le cadre de ce mandat.
+Branches poussées et PR ouvertes vers `dev` :
+
+- API : https://github.com/NoeKen/Elintys-api/pull/59
+- Web : https://github.com/NoeKen/Elintys-web/pull/108
+
+Les PR ne doivent pas être fusionnées dans le cadre de ce mandat.
 
 SPRINT 4 / WAVE G — VALIDÉE — ACCOUNT LIFECYCLE & SETTINGS PRODUCT INTEGRATION COMPLETE — PR OUVERTE VERS DEV
