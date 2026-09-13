@@ -150,7 +150,7 @@ test.describe('Vague A — navigation mobile par rôle', () => {
     }
   });
 
-  test('la barre mobile n’expose aucun écran placeholder', async ({ browser }) => {
+  test('la barre mobile n’expose aucun écran placeholder et donne accès aux paramètres', async ({ browser }) => {
     const { page, close } = await mobilePage(browser, organizer);
     try {
       await page.goto('/tableau-de-bord');
@@ -159,7 +159,7 @@ test.describe('Vague A — navigation mobile par rôle', () => {
       const hrefs = await reachableHrefs(page);
 
       expect(hrefs).not.toContain('/tableau-de-bord/messages');
-      expect(hrefs).not.toContain('/parametres');
+      expect(hrefs).toContain('/parametres');
     } finally {
       await close();
     }

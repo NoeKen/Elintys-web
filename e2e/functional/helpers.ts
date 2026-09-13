@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import { request } from '@playwright/test';
+import { createHash } from 'node:crypto';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 export const E2E_DIR = path.resolve('.e2e');
@@ -52,6 +53,39 @@ export function multiRoleCredentials(): Credentials {
   const password = process.env.E2E_TEST_PASSWORD;
   if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
   return { email, password };
+}
+
+export function accountCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_ACCOUNT ?? 'qa-account@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+export function verificationCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_VERIFICATION ?? 'qa-verification@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+export function recoveryCredentials(): Credentials {
+  const email = process.env.E2E_TEST_EMAIL_RECOVERY ?? 'qa-recovery@demo.elintys.com';
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!password) throw new Error('E2E_TEST_PASSWORD est requis.');
+  return { email, password };
+}
+
+export function waveGVerificationToken(): string {
+  return createHash('sha256')
+    .update(`wave-g-verification:${verificationCredentials().password}`)
+    .digest('hex');
+}
+
+export function waveGResetToken(): string {
+  return createHash('sha256')
+    .update(`wave-g-reset:${recoveryCredentials().password}`)
+    .digest('hex');
 }
 
 export function secondaryCredentials(): Credentials {
@@ -240,6 +274,14 @@ export async function apiContextFor(credentials: Credentials): Promise<ApiClient
     extraHTTPHeaders: { Origin: 'http://localhost:3000' },
   });
   return wrap(context);
+}
+
+/** Force une nouvelle connexion après une opération qui révoque le refresh token. */
+export async function freshApiContextFor(credentials: Credentials): Promise<ApiClient> {
+  sessionCache.delete(credentials.email);
+  const statePath = statePathFor(credentials.email);
+  if (fs.existsSync(statePath)) fs.unlinkSync(statePath);
+  return apiContextFor(credentials);
 }
 
 /** Crée un événement brouillon via l'API et retourne son identifiant. */

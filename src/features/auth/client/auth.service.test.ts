@@ -113,3 +113,71 @@ describe("authService.restoreSession — distinction absence / indisponibilité"
     await expect(authService.refreshSession()).resolves.toBeNull();
   });
 });
+
+describe("authService — account settings", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const apiUser = {
+    _id: "user-1",
+    email: "ana@elintys.com",
+    fullName: "Ana Tremblay",
+    roles: ["participant", "prestataire"],
+    emailNotifications: {
+      vendorRequestReceived: false,
+      vendorResponse: true,
+      venueBookingReceived: true,
+      venueResponse: false,
+    },
+  };
+
+  it("met à jour le profil et normalise la session retournée", async () => {
+    patch.mockResolvedValue({ data: { user: apiUser }, status: 200 });
+
+    const session = await authService.updateProfile({ firstName: "Ana", lastName: "Tremblay" });
+
+    expect(patch).toHaveBeenCalledWith("/auth/me/profile", {
+      firstName: "Ana",
+      lastName: "Tremblay",
+    });
+    expect(session.user).toMatchObject({ firstName: "Ana", lastName: "Tremblay" });
+  });
+
+  it("change le mot de passe sans exposer de session factice", async () => {
+    post.mockResolvedValue({ data: { message: "ok" }, status: 200 });
+
+    await authService.changePassword("AncienSecret1!", "NouveauSecret2!");
+
+    expect(post).toHaveBeenCalledWith("/auth/me/change-password", {
+      currentPassword: "AncienSecret1!",
+      newPassword: "NouveauSecret2!",
+    });
+  });
+
+  it("met à jour les préférences et retourne la source serveur", async () => {
+    patch.mockResolvedValue({ data: { user: apiUser }, status: 200 });
+
+    const session = await authService.updateNotificationPreferences({ venueResponse: false });
+
+    expect(patch).toHaveBeenCalledWith("/auth/me/notification-preferences", {
+      venueResponse: false,
+    });
+    expect(session.user.emailNotifications?.vendorRequestReceived).toBe(false);
+  });
+
+  it("ajoute un rôle via le contrat sécurisé", async () => {
+    post.mockResolvedValue({ data: { user: apiUser }, status: 200 });
+
+    const session = await authService.addRole("prestataire");
+
+    expect(post).toHaveBeenCalledWith("/auth/me/roles", { role: "prestataire" });
+    expect(session.user.roles).toContain("prestataire");
+  });
+
+  it("renvoie la vérification sans transmettre l’adresse du client", async () => {
+    post.mockResolvedValue({ data: { message: "ok" }, status: 200 });
+
+    await authService.resendMyVerification();
+
+    expect(post).toHaveBeenCalledWith("/auth/me/resend-verification");
+  });
+});
