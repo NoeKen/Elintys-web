@@ -20,6 +20,14 @@ export interface User {
   onboardingCompleted: boolean;
   onboardingByRole: Record<string, boolean>;
   onboardingData: Record<string, Record<string, string | string[] | number>>;
+  emailNotifications?: EmailNotificationPreferences;
+}
+
+export interface EmailNotificationPreferences {
+  vendorRequestReceived: boolean;
+  vendorResponse: boolean;
+  venueBookingReceived: boolean;
+  venueResponse: boolean;
 }
 
 export interface AuthSession {
