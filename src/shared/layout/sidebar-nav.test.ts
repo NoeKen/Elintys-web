@@ -159,7 +159,7 @@ describe("buildMobileNav", () => {
 
     expect(hrefs).not.toContain("/tableau-de-bord/messages");
     expect(hrefs).not.toContain("/tableau-de-bord/prestataires");
-    expect(hrefs).not.toContain("/parametres");
+    expect(hrefs).toContain("/parametres");
   });
 
   it("dérive de la MÊME source que la barre latérale", () => {
@@ -175,10 +175,11 @@ describe("buildMobileNav", () => {
 
   it("ne rend aucun emplacement pour un compte sans rôle exploitable", () => {
     const { primary } = buildMobileNav([]);
-    // Section commune uniquement : favoris et découvrir restent accessibles.
+    // Section commune uniquement : favoris, découvrir et paramètres restent accessibles.
     expect(primary.map((item) => item.href)).toEqual([
       "/tableau-de-bord/favoris",
       "/evenements",
+      "/parametres",
     ]);
   });
 });

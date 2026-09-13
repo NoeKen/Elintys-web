@@ -10,6 +10,16 @@ import { ROUTES } from "@/shared/constants/routes";
 import { getPostAuthPath, sanitizeRedirectPath } from "@/lib/auth/redirects";
 import { cn } from "@/shared/lib/utils";
 
+function verificationSuccessDestination(
+  session: Awaited<ReturnType<typeof authService.refreshSession>>,
+  nextPath: string | null,
+): string {
+  if (session) return nextPath ?? getPostAuthPath(session.user);
+  const login = new URLSearchParams({ verified: '1' });
+  if (nextPath) login.set('redirect', nextPath);
+  return `${ROUTES.AUTH.LOGIN}?${login.toString()}`;
+}
+
 function VerificationEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
@@ -19,22 +29,13 @@ function VerificationEmailContent() {
   const [isVerifying, setIsVerifying] = useState(Boolean(token));
   const [verificationError, setVerificationError] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
-  const [countdown, setCountdown] = useState(60);
+  const [resendError, setResendError] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+  useEffect(() => () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
   }, []);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ function VerificationEmailContent() {
         return authService.refreshSession();
       })
       .then((session) => {
-        window.location.href = nextPath ?? (session ? getPostAuthPath(session.user) : ROUTES.DASHBOARD.HOME);
+        window.location.href = verificationSuccessDestination(session, nextPath);
       })
       .catch(() => {
         setVerificationError(true);
@@ -78,7 +79,7 @@ function VerificationEmailContent() {
     try {
       await authService.verifyEmailCheck(token);
       const session = await authService.refreshSession();
-      window.location.href = nextPath ?? (session ? getPostAuthPath(session.user) : ROUTES.DASHBOARD.HOME);
+      window.location.href = verificationSuccessDestination(session, nextPath);
     } catch {
       setVerificationError(true);
       setIsVerifying(false);
@@ -86,11 +87,23 @@ function VerificationEmailContent() {
   };
 
   const handleResend = async () => {
-    if (countdown > 0) return;
-    await authService.resendVerification(email);
-    setResendSuccess(true);
-    startCountdown();
-    setTimeout(() => setResendSuccess(false), 6000);
+    if (countdown > 0 || isResending) return;
+    if (!email) {
+      setResendError(true);
+      return;
+    }
+    setIsResending(true);
+    setResendError(false);
+    try {
+      await authService.resendVerification(email);
+      setResendSuccess(true);
+      startCountdown();
+      setTimeout(() => setResendSuccess(false), 6000);
+    } catch {
+      setResendError(true);
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -138,6 +151,7 @@ function VerificationEmailContent() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="flex items-center gap-2 bg-destructive/8 border border-destructive/20 rounded-lg px-4 py-3 mb-6 text-left"
+                role="alert"
               >
                 <p className="text-sm text-destructive">
                   Ce lien de vérification est invalide ou expiré.
@@ -152,9 +166,24 @@ function VerificationEmailContent() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="flex items-center gap-2 bg-accent-light rounded-lg px-4 py-3 mb-6 text-left"
+                role="status"
               >
                 <CheckCircle2 size={16} className="text-accent shrink-0" />
                 <p className="text-sm text-accent">Lien de vérification renvoyé avec succès.</p>
+              </motion.div>
+            )}
+
+            {resendError && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="mb-6 rounded-lg bg-destructive/8 px-4 py-3 text-left"
+                role="alert"
+              >
+                <p className="text-sm text-destructive">
+                  Impossible de renvoyer le lien pour le moment. Réessayez.
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -179,13 +208,14 @@ function VerificationEmailContent() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={countdown > 0}
+              disabled={countdown > 0 || isResending}
+              aria-busy={isResending}
               className={cn(
                 "text-accent font-medium transition-opacity",
-                countdown > 0 ? "opacity-40 cursor-not-allowed" : "hover:underline"
+                countdown > 0 || isResending ? "opacity-40 cursor-not-allowed" : "hover:underline"
               )}
             >
-              Renvoyer le lien
+              {isResending ? "Envoi en cours…" : "Renvoyer le lien"}
             </button>
             {countdown > 0 && (
               <span className="text-on-surface-variant ml-1">{countdown}s</span>

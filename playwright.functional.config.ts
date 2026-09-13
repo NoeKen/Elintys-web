@@ -60,10 +60,12 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'npm run start:dev',
+      command: 'npm run qa:provision && npm run start:dev',
       cwd: '../Elintys-api',
       url: 'http://localhost:3001/api/v1/health',
-      reuseExistingServer: true,
+      // Le provisionneur QA doit s'exécuter à chaque batterie : réutiliser une
+      // API existante rendrait les tokens one-shot Wave G non déterministes.
+      reuseExistingServer: false,
       timeout: 180_000,
       env: {
         ...process.env,
@@ -74,7 +76,7 @@ export default defineConfig({
     {
       command: 'npm run dev',
       url: 'http://localhost:3000',
-      reuseExistingServer: true,
+      reuseExistingServer: false,
       timeout: 180_000,
     },
   ],

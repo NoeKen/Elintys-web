@@ -17,7 +17,6 @@ import {
   Star,
   Ticket,
   UserRound,
-  WalletCards,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -77,7 +76,6 @@ const ROLE_META: Record<UserRole, RoleMeta> = {
 };
 
 const ROLE_ORDER: UserRole[] = ["organisateur", "prestataire", "gestionnaire_salle", "participant"];
-const SUBSCRIBABLE_ROLES: UserRole[] = ["organisateur", "prestataire", "gestionnaire_salle"];
 
 const toneStyles: Record<Tone, { chip: string; icon: string; line: string; dot: string }> = {
   petrol: {
@@ -182,7 +180,6 @@ export function ProfileExperience() {
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (score / 100) * circumference;
   const activeRoles = ROLE_ORDER.filter((role) => user.roles.includes(role)).map((role) => ROLE_META[role]);
-  const availableRoles = SUBSCRIBABLE_ROLES.filter((role) => !user.roles.includes(role)).map((role) => ROLE_META[role]);
   const onboardingEntries = Object.entries(user.onboardingData ?? {});
 
   return (
@@ -289,37 +286,15 @@ export function ProfileExperience() {
               </div>
             </Panel>
 
-            <Panel title="Abonnements" eyebrow="Acces" icon={WalletCards}>
-              {user.subscriptions.length > 0 ? (
-                <div className="space-y-3">
-                  {user.subscriptions.map((subscription, index) => (
-                    <div key={index} className="rounded-2xl bg-white/55 p-4 shadow-card">
-                      <p className="text-sm font-bold text-primary">Abonnement {index + 1}</p>
-                      <div className="mt-3 space-y-2">
-                        {Object.entries(subscription).map(([key, value]) => (
-                          <DetailRow
-                            key={key}
-                            compact
-                            label={key}
-                            value={
-                              typeof value === "string" || typeof value === "number" || typeof value === "boolean"
-                                ? String(value)
-                                : "Donnee structuree"
-                            }
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  title="Aucun abonnement actif"
-                  description="Les souscriptions a un nouveau role apparaitront ici."
-                  href="/tarification"
-                  cta="Voir les offres"
-                />
-              )}
+            <Panel title="Compte Elintys" eyebrow="Accès" icon={ShieldCheck}>
+              <p className="text-sm leading-6 text-on-surface-variant">
+                Les rôles métier sont ajoutés depuis vos paramètres. La gestion d’abonnement
+                sera proposée lorsqu’une offre commerciale réelle sera disponible.
+              </p>
+              <Link href="/parametres#roles" className="premium-button-secondary mt-5 min-h-11">
+                Gérer mes rôles
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
             </Panel>
           </div>
 
@@ -330,19 +305,15 @@ export function ProfileExperience() {
                   <RoleTimelineItem
                     key={role.role}
                     role={role}
-                    last={index === activeRoles.length - 1 && availableRoles.length === 0}
+                    last={index === activeRoles.length - 1}
                     active
                     done={onboardingDone(user, role.role)}
                   />
                 ))}
-                {availableRoles.map((role, index) => (
-                  <RoleTimelineItem
-                    key={role.role}
-                    role={role}
-                    last={index === availableRoles.length - 1}
-                    actionHref={`/tarification?role=${role.role}`}
-                  />
-                ))}
+                <Link href="/parametres#roles" className="premium-button-secondary min-h-11">
+                  Ajouter un rôle
+                  <ArrowRight size={15} aria-hidden="true" />
+                </Link>
               </div>
             </Panel>
 
@@ -444,13 +415,11 @@ function RoleTimelineItem({
   active,
   done,
   last,
-  actionHref,
 }: {
   role: RoleMeta;
   active?: boolean;
   done?: boolean;
   last?: boolean;
-  actionHref?: string;
 }) {
   const Icon = role.Icon;
   const tone = toneStyles[role.tone];
@@ -485,12 +454,6 @@ function RoleTimelineItem({
               <Link href={role.href} className="premium-button-secondary min-h-10 shrink-0 px-4 py-2">
                 Continuer
                 <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            )}
-            {!active && actionHref && (
-              <Link href={actionHref} className="premium-button-secondary min-h-10 shrink-0 px-4 py-2">
-                Souscrire
-                <ChevronRight size={15} aria-hidden="true" />
               </Link>
             )}
           </div>

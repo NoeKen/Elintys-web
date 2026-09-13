@@ -24,6 +24,8 @@ interface AuthContextValue {
   /** Relance une restauration après un échec transitoire. */
   retrySession: () => void;
   login: (session: AuthSession) => void;
+  /** Oublie localement une session que le serveur a déjà révoquée. */
+  clearSession: () => void;
   logout: () => Promise<void>;
 }
 
@@ -87,15 +89,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsSessionUnavailable(false);
   }, []);
 
+  const clearSession = useCallback(() => {
+    loggedInManuallyRef.current = false;
+    setSession(null);
+    setIsSessionUnavailable(false);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
     } finally {
-      loggedInManuallyRef.current = false;
-      setSession(null);
-      setIsSessionUnavailable(false);
+      clearSession();
     }
-  }, []);
+  }, [clearSession]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -106,9 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isSessionUnavailable,
       retrySession,
       login,
+      clearSession,
       logout,
     }),
-    [session, isLoading, isSessionUnavailable, retrySession, login, logout]
+    [session, isLoading, isSessionUnavailable, retrySession, login, clearSession, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

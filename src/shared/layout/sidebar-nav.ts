@@ -178,7 +178,6 @@ export function buildNavSections(
         label: "Paramètres",
         href: "/parametres",
         icon: "settings",
-        placeholder: true,
       },
     ],
   });

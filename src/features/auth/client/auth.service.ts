@@ -1,5 +1,10 @@
 import api, { ApiClientError } from "@/shared/lib/api";
-import type { AuthSession, User, UserRole } from "@/shared/types";
+import type {
+  AuthSession,
+  EmailNotificationPreferences,
+  User,
+  UserRole,
+} from "@/shared/types";
 
 const USER_ROLES: UserRole[] = [
   "organisateur",
@@ -23,7 +28,15 @@ interface ApiUser {
   onboardingCompleted?: boolean;
   onboardingByRole?: Record<string, boolean>;
   onboardingData?: Record<string, Record<string, string | string[] | number>>;
+  emailNotifications?: Partial<EmailNotificationPreferences>;
 }
+
+const DEFAULT_EMAIL_NOTIFICATIONS: EmailNotificationPreferences = {
+  vendorRequestReceived: true,
+  vendorResponse: true,
+  venueBookingReceived: true,
+  venueResponse: true,
+};
 
 interface AuthApiResponse {
   user: ApiUser;
@@ -53,6 +66,10 @@ function normalizeUser(apiUser: ApiUser): User {
     onboardingCompleted: apiUser.onboardingCompleted ?? false,
     onboardingByRole: apiUser.onboardingByRole ?? {},
     onboardingData: apiUser.onboardingData ?? {},
+    emailNotifications: {
+      ...DEFAULT_EMAIL_NOTIFICATIONS,
+      ...(apiUser.emailNotifications ?? {}),
+    },
   };
 }
 
@@ -183,6 +200,34 @@ export const authService = {
 
   async resendVerification(email: string): Promise<void> {
     await api.post("/auth/resend-verification", { email });
+  },
+
+  async resendMyVerification(): Promise<void> {
+    await api.post("/auth/me/resend-verification");
+  },
+
+  async updateProfile(data: { firstName: string; lastName: string }): Promise<AuthSession> {
+    const response = await api.patch<AuthApiResponse>("/auth/me/profile", data);
+    return buildSession(response.data.user);
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await api.post("/auth/me/change-password", { currentPassword, newPassword });
+  },
+
+  async updateNotificationPreferences(
+    preferences: Partial<EmailNotificationPreferences>,
+  ): Promise<AuthSession> {
+    const response = await api.patch<AuthApiResponse>(
+      "/auth/me/notification-preferences",
+      preferences,
+    );
+    return buildSession(response.data.user);
+  },
+
+  async addRole(role: Exclude<UserRole, "participant">): Promise<AuthSession> {
+    const response = await api.post<AuthApiResponse>("/auth/me/roles", { role });
+    return buildSession(response.data.user);
   },
 
   async saveOnboarding(
