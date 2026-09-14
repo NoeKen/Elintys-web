@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { CategoryChip } from './CategoryChip';
+import { SearchBar } from './SearchBar';
 
 const CHIPS = [
   { label: 'Conférence', slug: 'conference' },
@@ -50,7 +51,11 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
           pour composer une expérience cohérente, du billet au dernier détail.
         </p>
 
-        <div className="hero-cta-row reveal" style={REVEAL(0.24)}>
+        <div className="reveal mx-auto mt-7 w-full max-w-4xl" style={REVEAL(0.22)}>
+          <SearchBar />
+        </div>
+
+        <div className="hero-cta-row reveal" style={REVEAL(0.28)}>
           <Link href="#events-catalog-title" className="premium-button">
             Explorer les événements
           </Link>
@@ -59,7 +64,7 @@ export function HeroSection({ eventCount }: HeroSectionProps) {
           </Link>
         </div>
 
-        <div className="hero-chips reveal" style={REVEAL(0.32)}>
+        <div className="hero-chips reveal" style={REVEAL(0.34)}>
           {CHIPS.map((chip) => (
             <CategoryChip
               key={chip.slug}
