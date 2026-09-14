@@ -14,6 +14,7 @@ const VIEWPORTS = [
 ] as const;
 
 const EMPTY_STATE = { cookies: [], origins: [] };
+const ANONYMOUS_AUTH_CONSOLE_ERROR = 'Failed to load resource: the server responded with a status of 401 (Unauthorized)';
 const CARD_SELECTOR = [
   '[data-testid="event-card"]',
   '.vendor-card',
@@ -56,17 +57,17 @@ async function expectNoVisibleCardBorders(page: Page, label: string) {
 }
 
 test.describe('Wave D — vérité produit et cohérence visuelle', () => {
-  test('la recherche future est annoncée honnêtement sans CTA factice', async ({ browser }) => {
+  test('la recherche publique livrée reste honnête et sans CTA factice', async ({ browser }) => {
     const context = await browser.newContext({ storageState: EMPTY_STATE });
     const page = await context.newPage();
     try {
       await page.goto('/evenements/recherche');
       await waitForHydration(page);
-      await expect(page.getByText('Fonctionnalité à venir')).toBeVisible();
-      await expect(page.getByText(/recherche avancée n’est pas encore disponible/i)).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Parcourir le catalogue' })).toHaveAttribute('href', '/evenements');
+      await expect(page.getByRole('heading', { name: /Tout l’événementiel/i })).toBeVisible();
+      await expect(page.getByRole('search')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Rechercher' })).toBeEnabled();
       await expect(page.locator('a[href="#"]')).toHaveCount(0);
-      await expectNoBlockingAxe(page, 'recherche future');
+      await expectNoBlockingAxe(page, 'recherche publique');
     } finally {
       await context.close();
     }
@@ -140,11 +141,15 @@ test.describe('Wave D — vérité produit et cohérence visuelle', () => {
   test('les surfaces représentatives restent sans erreur console ni réponse serveur inattendue', async ({ page }) => {
     const consoleErrors: string[] = [];
     const networkFailures: string[] = [];
+    const unauthorizedResponses: string[] = [];
     page.on('console', (message) => {
-      if (message.type() === 'error') consoleErrors.push(message.text());
+      if (message.type() === 'error' && message.text() !== ANONYMOUS_AUTH_CONSOLE_ERROR) {
+        consoleErrors.push(message.text());
+      }
     });
     page.on('response', (response) => {
       if (response.status() >= 500) networkFailures.push(`${response.status()} ${response.url()}`);
+      if (response.status() === 401) unauthorizedResponses.push(response.url());
     });
 
     for (const route of ['/evenements', '/prestataires', '/lieux', '/tableau-de-bord/evenements']) {
@@ -154,6 +159,10 @@ test.describe('Wave D — vérité produit et cohérence visuelle', () => {
 
     expect(consoleErrors).toEqual([]);
     expect(networkFailures).toEqual([]);
+    expect(
+      unauthorizedResponses.filter((url) => !/\/auth\/(me|refresh)$/.test(url)),
+      '401 inattendus hors restauration de session',
+    ).toEqual([]);
   });
 
   test('preuves visuelles minimales desktop et mobile', async ({ browser }) => {

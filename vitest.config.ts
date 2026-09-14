@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "server-only": fileURLToPath(new URL("./vitest.server-only.ts", import.meta.url)),
     },
   },
   test: {
@@ -29,9 +30,6 @@ export default defineConfig({
         "src/**/*.stories.{ts,tsx}",
         "src/app/**/layout.tsx",
         "src/app/**/page.tsx",
-        // `server-only` n'est pas analysable par le parseur de coverage-v8
-        // (PARSE_ERROR silencieux) : exclusion explicite et documentée.
-        "src/server/catalog/catalog-api.ts",
       ],
       thresholds: {
         // Plancher global : garde-fou anti-régression sur la couverture actuelle.
