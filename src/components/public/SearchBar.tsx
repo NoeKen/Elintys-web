@@ -1,112 +1,92 @@
 'use client';
 
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search, X } from 'lucide-react';
+import type { DiscoveryType } from '@/features/discovery/discovery-query';
+import messages from '../../../messages/fr.json';
+
+const copy = messages.publicSearch;
 
 interface SearchBarProps {
   defaultQuery?: string;
-  defaultCity?: string;
+  defaultType?: DiscoveryType;
   className?: string;
+  showClear?: boolean;
 }
 
-const CITIES = ['Montréal', 'Québec', 'Laval', 'Rive-Sud', 'Longueuil'];
+export function SearchBar(props: SearchBarProps) {
+  const { defaultQuery = '', defaultType = 'all' } = props;
+  return (
+    <SearchBarForm
+      key={`${defaultType}:${defaultQuery}`}
+      {...props}
+      defaultQuery={defaultQuery}
+      defaultType={defaultType}
+    />
+  );
+}
 
-export function SearchBar({ defaultQuery = '', defaultCity = 'Montréal', className = '' }: SearchBarProps) {
+function SearchBarForm({
+  defaultQuery = '',
+  defaultType = 'all',
+  className = '',
+  showClear = false,
+}: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState(defaultQuery);
-  const [city, setCity] = useState(defaultCity);
-  const [date, setDate] = useState('');
+  const [type, setType] = useState<DiscoveryType>(defaultType);
 
-  const handleSearch = () => {
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const params = new URLSearchParams();
     if (query.trim()) params.set('q', query.trim());
-    if (city) params.set('city', city);
-    if (date) params.set('date', date);
+    if (type !== 'all') params.set('type', type);
+    params.set('page', '1');
     router.push(`/evenements/recherche?${params.toString()}`);
   };
 
   return (
-    <div className={`searchbar-container ${className}`}>
+    <form role="search" aria-label={copy.metaTitle} className={`searchbar-container ${className}`} onSubmit={handleSearch}>
       <div className="searchbar-field">
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          style={{ color: 'var(--on-surface-variant)', flexShrink: 0 }}
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
+        <Search className="h-4 w-4 shrink-0 text-on-surface-variant" aria-hidden="true" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="Rechercher un événement..."
-          aria-label="Rechercher un événement"
+          placeholder={copy.inputPlaceholder}
+          aria-label={copy.inputLabel}
+          minLength={2}
+          maxLength={120}
         />
       </div>
 
       <div className="searchbar-divider" />
 
       <div className="searchbar-field searchbar-field--sm">
-        <svg
-          width="14"
-          height="14"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          style={{ color: 'var(--on-surface-variant)', flexShrink: 0 }}
-          aria-hidden="true"
-        >
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-          <circle cx="12" cy="10" r="3" />
-        </svg>
         <select
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          aria-label="Ville"
+          value={type}
+          onChange={(event) => setType(event.target.value as DiscoveryType)}
+          aria-label={copy.typeLabel}
         >
-          {CITIES.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
+          <option value="all">{copy.typeAll}</option>
+          <option value="event">{copy.typeEvents}</option>
+          <option value="vendor">{copy.typeVendors}</option>
+          <option value="venue">{copy.typeVenues}</option>
         </select>
       </div>
-
-      <div className="searchbar-divider" />
-
-      <div className="searchbar-field searchbar-field--sm">
-        <svg
-          width="14"
-          height="14"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          style={{ color: 'var(--on-surface-variant)', flexShrink: 0 }}
-          aria-hidden="true"
+      {showClear && (defaultQuery || defaultType !== 'all') && (
+        <button
+          type="button"
+          className="searchbar-clear"
+          onClick={() => router.push('/evenements/recherche')}
         >
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          aria-label="Date"
-          style={{ minWidth: 0 }}
-        />
-      </div>
-
-      <button className="searchbar-btn" onClick={handleSearch}>
-        Rechercher
+          <X className="h-4 w-4" aria-hidden="true" />
+          {copy.clearFilters}
+        </button>
+      )}
+      <button type="submit" className="searchbar-btn">
+        {copy.submit}
       </button>
-    </div>
+    </form>
   );
 }
