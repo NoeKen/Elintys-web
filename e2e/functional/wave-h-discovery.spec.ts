@@ -182,5 +182,19 @@ test.describe('Wave H — Discovery publique', () => {
       new RegExp(`q=${throttleProbe}`),
     );
     await expect(page.getByTestId('search-empty-state')).toHaveCount(0);
+
+    // Ce test sature volontairement le bucket public partagé par IP. Attendre
+    // son rétablissement observable évite de contaminer les specs suivantes,
+    // tout en conservant exactement la limite et la fenêtre de production.
+    await expect.poll(
+      async () => (
+        await api.get(`/discovery/search?q=${throttleProbe}-recovered&limit=1`)
+      ).status(),
+      {
+        message: 'le bucket Search doit redevenir disponible après sa fenêtre',
+        timeout: 75_000,
+        intervals: [1_000],
+      },
+    ).toBe(200);
   });
 });

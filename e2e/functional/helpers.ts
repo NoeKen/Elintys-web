@@ -300,10 +300,24 @@ export async function createDraft(
   return { id, title };
 }
 
-/** Supprime les événements E2E créés par ce compte (nettoyage QA). */
+/**
+ * Nettoie les événements QA sans contourner le cycle de vie produit.
+ *
+ * Les brouillons sont supprimés. Un événement déjà publié/terminal ne peut
+ * plus être supprimé : il est alors archivé afin de disparaître des surfaces
+ * actives tout en conservant l'historique attendu par le domaine.
+ */
 export async function cleanupEvents(api: ApiClient, ids: string[]): Promise<void> {
   await Promise.all(
-    ids.map((id) => api.delete(`/events/${id}`).catch(() => undefined)),
+    ids.map(async (id) => {
+      try {
+        const deletion = await api.delete(`/events/${id}`);
+        if (deletion.status() === 204 || deletion.status() === 404) return;
+        await api.patch(`/events/${id}/archive`);
+      } catch {
+        // Best effort uniquement : le cleanup ne masque jamais le résultat du test.
+      }
+    }),
   );
 }
 

@@ -133,6 +133,32 @@ describe('OrganizerEventsExperience', () => {
     expect(await screen.findByRole('button', { name: 'Publier' })).toBeDisabled();
   });
 
+  it('ne propose jamais la suppression définitive hors brouillon', async () => {
+    vi.mocked(eventsService.getMyEvents).mockResolvedValue(
+      page([{ ...event, status: 'published' }]),
+    );
+    const user = userEvent.setup();
+    renderExperience();
+
+    await user.click(await screen.findByRole('button', { name: /Plus d.actions.*Gala Boréal/i }));
+    expect(screen.queryByText('Supprimer')).not.toBeInTheDocument();
+  });
+
+  it('permet de filtrer les événements en cours', async () => {
+    const user = userEvent.setup();
+    renderExperience();
+    await screen.findByText('Gala Boréal');
+
+    await user.click(screen.getByRole('button', { name: /^Filtres/ }));
+    await user.selectOptions(screen.getByLabelText('Statut réel'), 'ongoing');
+
+    await waitFor(() =>
+      expect(eventsService.getMyEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: 'ongoing' }),
+      ),
+    );
+  });
+
   it('rend l’erreur et relance la requête', async () => {
     vi.mocked(eventsService.getMyEvents)
       .mockRejectedValueOnce(new Error('network'))

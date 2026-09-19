@@ -116,7 +116,7 @@ test.describe.serial('Sprint 3 Vague 3 — workspace événement organisateur', 
     await expect(page.getByAltText(`Image de couverture de ${eventTitle}`)).toBeVisible();
   });
 
-  test('Paramètres sépare accès, archive et suppression destructive', async ({ page }) => {
+  test('Paramètres sépare accès, archivage et annulation sans suppression d’un événement publié', async ({ page }) => {
     const dialogA11yWarnings: string[] = [];
     page.on('console', (message) => {
       if (
@@ -129,14 +129,14 @@ test.describe.serial('Sprint 3 Vague 3 — workspace événement organisateur', 
     await page.goto(`/tableau-de-bord/evenements/${eventId}/parametres`);
     await expect(page.getByRole('heading', { name: /Configuration de l.accès/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Archiver/ })).toBeVisible();
-    await page.getByRole('button', { name: /^Supprimer définitivement/ }).click();
+    await expect(page.getByRole('button', { name: /^Supprimer définitivement/ })).toHaveCount(0);
+    await page.getByRole('button', { name: /Annuler l['’]événement/ }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole('button', { name: 'Supprimer définitivement' })).toBeDisabled();
-    await dialog.getByRole('checkbox').check();
-    await expect(dialog.getByRole('button', { name: 'Supprimer définitivement' })).toBeEnabled();
-    await dialog.getByRole('button', { name: 'Annuler' }).click();
+    await expect(dialog).toContainText('Aucun remboursement');
+    await dialog.getByRole('button', { name: 'Conserver l’événement' }).click();
     await expect(dialog).toBeHidden();
+    await expect(page.getByRole('button', { name: /Annuler l['’]événement/ })).toBeFocused();
     expect(dialogA11yWarnings).toEqual([]);
   });
 

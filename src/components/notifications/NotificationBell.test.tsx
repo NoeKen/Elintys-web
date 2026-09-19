@@ -133,6 +133,26 @@ describe('NotificationBell — intégration produit Wave F', () => {
     );
   });
 
+  it("ouvre le workspace de l'événement annulé sans faire confiance à une URL serveur", async () => {
+    const eventId = '507f1f77bcf86cd799439011';
+    mocks.list.mockResolvedValue([{
+      _id: '507f1f77bcf86cd799439012',
+      type: 'EVENT_CANCELLED',
+      payload: { eventId, href: 'https://evil.example' },
+      read: false,
+      createdAt: '2026-09-14T12:00:00.000Z',
+    }]);
+    const user = userEvent.setup();
+    renderBell();
+
+    await user.click(screen.getByRole('button', { name: /Notifications/ }));
+    await user.click(await screen.findByRole('button', { name: /Événement annulé/ }));
+
+    expect(mocks.push).toHaveBeenCalledWith(
+      `/tableau-de-bord/evenements/${eventId}`,
+    );
+  });
+
   it('ferme le panneau avec Escape et rend le focus à la cloche', async () => {
     const user = userEvent.setup();
     renderBell();
