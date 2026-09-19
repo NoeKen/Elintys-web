@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Archive,
   ArrowUpFromLine,
+  Ban,
   Eye,
   ShieldCheck,
   Ticket,
@@ -18,12 +19,13 @@ import {
 import { eventsService } from '@/features/events/services/events.service';
 import type { Event, EventStatus, AdmissionMode } from '@/features/events/types';
 import { cn } from '@/shared/lib/utils';
+import { ApiClientError } from '@/shared/lib/api';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type DialogKind = 'archive' | 'restore' | 'delete' | null;
+type DialogKind = 'archive' | 'restore' | 'cancel' | 'delete' | null;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -99,6 +101,7 @@ interface ConfirmDialogProps {
   confirmDisabled?: boolean;
   isPending?: boolean;
   onConfirm: () => void;
+  onRestoreFocus?: () => void;
   destructive?: boolean;
   children?: React.ReactNode;
 }
@@ -113,6 +116,7 @@ function ConfirmDialog({
   confirmDisabled = false,
   isPending = false,
   onConfirm,
+  onRestoreFocus,
   destructive = false,
   children,
 }: ConfirmDialogProps) {
@@ -140,6 +144,20 @@ function ConfirmDialog({
             </Dialog.Overlay>
 
             <Dialog.Content
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.stopPropagation();
+                  onClose();
+                }
+              }}
+              onEscapeKeyDown={(event) => {
+                event.preventDefault();
+                onClose();
+              }}
+              onCloseAutoFocus={(event) => {
+                event.preventDefault();
+                onRestoreFocus?.();
+              }}
               onOpenAutoFocus={(e) => {
                 e.preventDefault();
                 cancelRef.current?.focus();
@@ -189,7 +207,7 @@ function ConfirmDialog({
                       'focus-visible:outline-2 focus-visible:outline-offset-2',
                       'disabled:cursor-not-allowed disabled:opacity-40',
                       destructive
-                        ? 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600'
+                        ? 'bg-red-800 text-white hover:bg-red-900 focus-visible:outline-red-800'
                         : 'bg-event-petrol text-white hover:bg-event-petrol/90 focus-visible:outline-event-petrol',
                     )}
                   >
@@ -267,6 +285,13 @@ export default function EventSettingsPage() {
 
   const [openDialog, setOpenDialog] = useState<DialogKind>(null);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
+
+  const openConfirmation = (kind: Exclude<DialogKind, null>, trigger: HTMLButtonElement) => {
+    returnFocusRef.current = trigger;
+    setOpenDialog(kind);
+  };
+  const restoreFocus = () => returnFocusRef.current?.focus();
 
   const query = useQuery({
     queryKey: ['event', id],
@@ -297,6 +322,16 @@ export default function EventSettingsPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['my-events'] });
       router.push('/tableau-de-bord/evenements');
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => eventsService.cancel(id),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['event', id], updated);
+      void queryClient.invalidateQueries({ queryKey: ['my-events'] });
+      void queryClient.invalidateQueries({ queryKey: ['organizer-dashboard-summary'] });
+      setOpenDialog(null);
     },
   });
 
@@ -334,6 +369,14 @@ export default function EventSettingsPage() {
 
   const event: Event = query.data;
   const isArchived = Boolean(event.archivedAt);
+  const canCancel = ['published', 'ongoing'].includes(event.status);
+  const canDelete = event.status === 'draft';
+  const isTerminal = ['completed', 'cancelled'].includes(event.status);
+  const cancellationBlockedByPaidOrders =
+    cancelMutation.error instanceof ApiClientError &&
+    JSON.stringify(cancelMutation.error.payload).includes(
+      'EVENT_CANCELLATION_BLOCKED_BY_PAID_ORDERS',
+    );
   const base = `/tableau-de-bord/evenements/${id}`;
 
   const admissions =
@@ -424,7 +467,7 @@ export default function EventSettingsPage() {
               <div className="mt-5">
                 <button
                   type="button"
-                  onClick={() => setOpenDialog('restore')}
+                  onClick={(event) => openConfirmation('restore', event.currentTarget)}
                   className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-5 text-sm font-semibold text-event-petrol transition-colors hover:bg-event-surface/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-teal"
                 >
                   <ArrowUpFromLine size={16} aria-hidden="true" />
@@ -451,7 +494,7 @@ export default function EventSettingsPage() {
               <div className="mt-5">
                 <button
                   type="button"
-                  onClick={() => setOpenDialog('archive')}
+                  onClick={(event) => openConfirmation('archive', event.currentTarget)}
                   className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-5 text-sm font-semibold text-event-petrol transition-colors hover:bg-event-surface/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-teal"
                 >
                   <Archive size={16} aria-hidden="true" />
@@ -492,23 +535,34 @@ export default function EventSettingsPage() {
             />
           </dl>
 
-          <div className="mt-6">
+          {!isTerminal ? <div className="mt-6">
             <Link
               href={`${base}/acces-et-inscriptions`}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-5 text-sm font-semibold text-event-petrol transition-colors hover:bg-event-surface/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-event-teal"
             >
               Gérer la configuration d&apos;accès
             </Link>
-          </div>
+          </div> : null}
         </Section>
 
         {/* ── Section 4 : Zone de danger ──────────────────────────────── */}
         <Section danger>
           <h2 className="font-serif text-2xl text-red-700">Zone de danger</h2>
           <p className="mt-3 text-sm leading-6 text-red-700/80">
-            La suppression définitive est irréversible. Procédez avec la plus
-            grande prudence.
+            {canDelete
+              ? 'Seul un brouillon peut être supprimé définitivement.'
+              : canCancel
+                ? "L’annulation retire l’événement des surfaces publiques. Elle ne déclenche aucun remboursement automatique."
+                : 'Cet événement est dans un état terminal et reste disponible en consultation.'}
           </p>
+
+          {cancelMutation.isError ? (
+            <p role="alert" className="mt-4 rounded-2xl bg-red-100 px-4 py-3 text-sm font-medium text-red-700">
+              {cancellationBlockedByPaidOrders
+                ? 'La billetterie payante est configurée ou une commande en attente/payée existe. L’annulation est bloquée tant que ce risque financier n’est pas résolu.'
+                : 'L’annulation a échoué. Actualisez la page puis réessayez.'}
+            </p>
+          ) : null}
 
           {deleteMutation.isError ? (
             <p
@@ -519,16 +573,27 @@ export default function EventSettingsPage() {
             </p>
           ) : null}
 
-          <div className="mt-5">
+          {canCancel ? <div className="mt-5">
             <button
               type="button"
-              onClick={() => setOpenDialog('delete')}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+              onClick={(event) => openConfirmation('cancel', event.currentTarget)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-red-800 px-5 text-sm font-semibold text-white transition-colors hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
+            >
+              <Ban size={16} aria-hidden="true" />
+              Annuler l&apos;événement
+            </button>
+          </div> : null}
+
+          {canDelete ? <div className="mt-5">
+            <button
+              type="button"
+              onClick={(event) => openConfirmation('delete', event.currentTarget)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-red-800 px-5 text-sm font-semibold text-white transition-colors hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
             >
               <Trash2 size={16} aria-hidden="true" />
               Supprimer définitivement l&apos;événement
             </button>
-          </div>
+          </div> : null}
         </Section>
       </div>
 
@@ -538,6 +603,7 @@ export default function EventSettingsPage() {
       <ConfirmDialog
         open={openDialog === 'archive'}
         onClose={closeDialog}
+        onRestoreFocus={restoreFocus}
         title={`Archiver « ${event.title} » ?`}
         description={`L'événement ne sera plus visible publiquement mais sera conservé. Vous pourrez le restaurer à tout moment.`}
         confirmLabel="Archiver"
@@ -549,6 +615,7 @@ export default function EventSettingsPage() {
       <ConfirmDialog
         open={openDialog === 'restore'}
         onClose={closeDialog}
+        onRestoreFocus={restoreFocus}
         title={`Restaurer « ${event.title} » ?`}
         description="L'événement redeviendra visible selon ses paramètres de découvrabilité actuels."
         confirmLabel="Restaurer"
@@ -558,8 +625,22 @@ export default function EventSettingsPage() {
 
       {/* Delete */}
       <ConfirmDialog
+        open={openDialog === 'cancel'}
+        onClose={closeDialog}
+        onRestoreFocus={restoreFocus}
+        title={`Annuler « ${event.title} » ?`}
+        description="L’événement sera retiré du public et les personnes concernées seront informées. Aucun remboursement n’est lancé automatiquement. Une admission payante configurée ou des commandes en attente/payées bloquent cette opération."
+        confirmLabel="Annuler l’événement"
+        cancelLabel="Conserver l’événement"
+        isPending={cancelMutation.isPending}
+        onConfirm={() => cancelMutation.mutate()}
+        destructive
+      />
+
+      <ConfirmDialog
         open={openDialog === 'delete'}
         onClose={closeDialog}
+        onRestoreFocus={restoreFocus}
         title={`Supprimer définitivement « ${event.title} » ?`}
         description="Cette action supprime définitivement l'événement. Les données associées peuvent rester conservées selon les règles de rétention du service."
         confirmLabel="Supprimer définitivement"

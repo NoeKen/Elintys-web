@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Eye, Image as ImageIcon, Info, LayoutGrid, MapPin, Settings, ShieldCheck, Ticket, Users, UsersRound } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { eventsService } from '@/features/events/services/events.service';
+import type { Event as EventModel } from '@/features/events/types';
 import { organizerEventCopy as copy } from '@/features/events/i18n/organizer-event.copy';
 import { cn } from '@/shared/lib/utils';
 import type { MediaImageSource } from '@/shared/types/media.types';
@@ -56,6 +57,28 @@ export function getWorkspaceErrorMessage(error: unknown): string {
   return copy.workspace.loadError;
 }
 
+export function isTerminalWorkspaceReadOnly(
+  status: string | undefined,
+  pathname: string,
+  base: string,
+): boolean {
+  return (
+    (status === 'completed' || status === 'cancelled') &&
+    pathname !== base &&
+    !pathname.startsWith(`${base}/parametres`)
+  );
+}
+
+export function canPreviewWorkspaceEvent(
+  event: Pick<EventModel, 'slug' | 'status' | 'discoverability'> | undefined,
+): boolean {
+  return Boolean(
+    event?.slug &&
+      ['published', 'ongoing'].includes(event.status) &&
+      event.discoverability !== 'private',
+  );
+}
+
 function CoverThumbnail({ coverImage, title }: { coverImage: MediaImageSource | undefined; title: string }) {
   const url = getCoverUrl(coverImage);
   if (url) {
@@ -87,9 +110,10 @@ export function EventWorkspaceShell({ children }: WorkspaceShellProps) {
   });
   const base = `/tableau-de-bord/evenements/${id}`;
   const event = query.data;
+  const readOnlySection = isTerminalWorkspaceReadOnly(event?.status, pathname, base);
 
   const statusBadgeClass = event ? (STATUS_BADGE_CLASSES[event.status] ?? 'bg-event-surface text-event-muted') : '';
-  const isPublishDisabled = !readiness.data?.publishable || event?.status === 'published' || publishMutation.isPending;
+  const isPublishDisabled = !readiness.data?.publishable || event?.status !== 'draft' || publishMutation.isPending;
 
   if (query.isLoading) {
     return (
@@ -142,24 +166,24 @@ export function EventWorkspaceShell({ children }: WorkspaceShellProps) {
         </div>
         <div className="flex flex-col items-start gap-2 lg:items-end">
           <div className="flex flex-wrap gap-2">
-            {event?.slug && event.status === 'published' ? (
+            {canPreviewWorkspaceEvent(event) ? (
               <Link
-                href={`/evenements/${event.slug}`}
+                href={`/evenements/${event!.slug}`}
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-event-surface px-4 text-sm font-bold text-event-petrol"
               >
                 <Eye size={16} />
                 {copy.workspace.preview}
               </Link>
             ) : null}
-            <button
+            {event?.status === 'draft' ? <button
               type="button"
               disabled={isPublishDisabled}
               onClick={() => { if (!isPublishDisabled) publishMutation.mutate(); }}
               className="premium-button min-h-[44px] px-5 disabled:cursor-not-allowed disabled:opacity-45"
               title={readiness.isError ? copy.workspace.readinessUnavailable : undefined}
             >
-              {event?.status === 'published' ? copy.workspace.publishedAction : publishMutation.isPending ? copy.workspace.publishing : copy.workspace.publish}
-            </button>
+              {publishMutation.isPending ? copy.workspace.publishing : copy.workspace.publish}
+            </button> : null}
           </div>
           {readiness.isError ? (
             <p className="text-sm text-terracotta-dark" role="status">{copy.workspace.readinessUnavailable}</p>
@@ -194,7 +218,26 @@ export function EventWorkspaceShell({ children }: WorkspaceShellProps) {
             })}
           </nav>
         </aside>
-        <div className="min-w-0 bg-event-background/70">{children}</div>
+        <div className="min-w-0 bg-event-background/70">
+          {readOnlySection ? (
+            <div
+              role="status"
+              className="m-4 rounded-2xl bg-sage-pale px-5 py-4 text-sm text-sage-dark shadow-event-soft sm:m-6"
+            >
+              <p className="font-bold">{copy.workspace.terminalReadOnlyTitle}</p>
+              <p className="mt-1 leading-6">{copy.workspace.terminalReadOnlyBody}</p>
+            </div>
+          ) : null}
+          <div
+            inert={readOnlySection ? true : undefined}
+            className={cn(
+              readOnlySection &&
+                'opacity-75 [&_button]:cursor-not-allowed [&_button]:opacity-60 [&_input]:cursor-not-allowed [&_select]:cursor-not-allowed [&_textarea]:cursor-not-allowed',
+            )}
+          >
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

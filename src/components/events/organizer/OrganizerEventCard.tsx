@@ -158,7 +158,7 @@ export function OrganizerEventActions({
 }: OrganizerEventActionsProps) {
   const archived = Boolean(event.archivedAt);
   const manageHref = getManageHref(event);
-  const canPreview = event.status === 'published' && event.discoverability !== 'private' && Boolean(event.slug);
+  const canPreview = ['published', 'ongoing'].includes(event.status) && event.discoverability !== 'private' && Boolean(event.slug);
   const canPublish = event.status === 'draft' && event.readiness.publishable && !archived;
 
   return (
@@ -200,8 +200,12 @@ export function OrganizerEventActions({
             ) : (
               <DropdownMenu.Item onSelect={() => onArchive(event)} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-semibold text-event-petrol outline-none focus:bg-event-surface"><Archive size={16} aria-hidden="true" />{copy.events.archive}</DropdownMenu.Item>
             )}
-            <DropdownMenu.Separator className="my-1 h-px bg-event-outline-subtle/60" />
-            <DropdownMenu.Item onSelect={() => onDelete(event)} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-semibold text-destructive outline-none focus:bg-terracotta-pale"><Trash2 size={16} aria-hidden="true" />{copy.events.delete}</DropdownMenu.Item>
+            {event.status === 'draft' ? (
+              <>
+                <DropdownMenu.Separator className="my-1 h-px bg-event-outline-subtle/60" />
+                <DropdownMenu.Item onSelect={() => onDelete(event)} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-semibold text-destructive outline-none focus:bg-terracotta-pale"><Trash2 size={16} aria-hidden="true" />{copy.events.delete}</DropdownMenu.Item>
+              </>
+            ) : null}
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>

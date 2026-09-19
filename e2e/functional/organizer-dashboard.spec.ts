@@ -217,6 +217,7 @@ test.describe.serial('Sprint 3 Vague 1 — dashboard organisateur et Mes événe
 
     await page.getByRole('button', { name: 'Effacer les filtres' }).click();
     await page.getByRole('tab', { name: 'Archivés' }).click();
+    await page.getByPlaceholder('Rechercher un événement…').fill(incomplete.title);
     card = page.getByRole('heading', { name: incomplete.title }).locator('xpath=ancestor::article');
     await expect(card).toBeVisible();
     await card.getByRole('button', { name: 'Restaurer' }).click();

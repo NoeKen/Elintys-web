@@ -4,11 +4,23 @@ import { waitForHydration } from './helpers';
 
 test.describe('Phase 24B — scroll natif', () => {
   for (const route of ['/', '/evenements', '/prestataires', '/lieux', '/connexion', '/inscription']) {
-    test(`document natif ${route}`, async ({ page }) => {
-      await page.setViewportSize({ width: 390, height: 720 });
-      await page.goto(route);
-      await waitForHydration(page);
-      await assertPageIsScrollable(page);
+    test(`document natif ${route}`, async ({ browser }) => {
+      // Les routes auth-only redirigent un compte déjà connecté vers le
+      // dashboard (scroller interne). Vérifier leur document public exige donc
+      // un vrai contexte anonyme, comme le ferait un visiteur.
+      const context = await browser.newContext({
+        baseURL: 'http://localhost:3000',
+        viewport: { width: 390, height: 720 },
+        storageState: { cookies: [], origins: [] },
+      });
+      const page = await context.newPage();
+      try {
+        await page.goto(route);
+        await waitForHydration(page);
+        await assertPageIsScrollable(page);
+      } finally {
+        await context.close();
+      }
     });
   }
 

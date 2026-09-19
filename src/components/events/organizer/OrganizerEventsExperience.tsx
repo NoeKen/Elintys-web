@@ -43,7 +43,7 @@ import { ApiClientError } from '@/shared/lib/api';
 import { cn } from '@/shared/lib/utils';
 
 type ViewMode = 'grid' | 'list';
-type LifecycleStatus = '' | 'draft' | 'published' | 'completed' | 'cancelled';
+type LifecycleStatus = '' | 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
 type EventTypeFilter = '' | keyof typeof copy.types;
 
 interface EventActionHandlers {
@@ -234,7 +234,7 @@ export function OrganizerEventsExperience() {
         {filtersOpen ? (
           <div id="organizer-event-filters" className="mt-4 grid gap-3 border-t border-event-outline-subtle/50 pt-4 sm:grid-cols-2 xl:grid-cols-6">
             <FilterSelect label={copy.events.statusFilter} value={status} onChange={(value) => { setStatus(value as LifecycleStatus); setView('all'); resetPage(); }} options={[
-              ['', copy.events.filterAll], ['draft', copy.events.drafts], ['published', copy.events.published], ['completed', copy.events.completed], ['cancelled', copy.events.cancelled],
+              ['', copy.events.filterAll], ['draft', copy.events.drafts], ['published', copy.events.published], ['ongoing', copy.events.ongoing], ['completed', copy.events.completed], ['cancelled', copy.events.cancelled],
             ]} />
             <FilterSelect label={copy.events.typeFilter} value={eventType} onChange={(value) => { setEventType(value as EventTypeFilter); resetPage(); }} options={[['', copy.events.filterAll], ...Object.entries(copy.types)]} />
             <FilterSelect label={copy.events.discoverabilityFilter} value={discoverability} onChange={(value) => { setDiscoverability(value); resetPage(); }} options={[

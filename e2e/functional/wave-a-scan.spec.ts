@@ -60,6 +60,12 @@ async function eventWithTicket(label: string): Promise<{ eventId: string; qrCode
   expect(ticketType.status(), await ticketType.text()).toBe(201);
   const ticketTypeId = ((await ticketType.json()) as { _id: string })._id;
 
+  // Le scanner est une opération d'admission : la fixture doit reproduire un
+  // événement réellement exploitable, pas s'appuyer sur l'ancien comportement
+  // qui permettait de scanner un brouillon.
+  const published = await organizer.patch(`/events/${eventId}/publish`);
+  expect(published.status(), await published.text()).toBe(200);
+
   const purchase = await organizer.post('/tickets/purchase', {
     data: { ticketTypeId, quantity: 1 },
     headers: { 'Idempotency-Key': `${label}-${Date.now()}` },
