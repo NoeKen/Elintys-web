@@ -278,4 +278,7 @@ Wave K devra définir : refund/void PayPal réel, statuts et idempotence financi
 
 Tous les gates locaux sont verts : API 1 306 unitaires, 153 E2E et 17 concurrences ; Web 445 unitaires et 300 E2E réussis avec 2 skips historiques ; builds, lint, typecheck, audits npm, scan secrets ciblé et `git diff --check` verts. P0/P1/P2 ouverts : 0. Les PR Wave I sont ouvertes vers `dev` et ne sont pas fusionnées dans cette mission.
 
+- API commits : `c1e3fd5`, `850a388` — PR [#61](https://github.com/NoeKen/Elintys-api/pull/61).
+- Web commits : `70891fb`, `0dcfae9`, `f765c3f` — PR [#110](https://github.com/NoeKen/Elintys-web/pull/110).
+
 **SPRINT 4 / WAVE I — VALIDÉE — EVENT OPERATIONS PRODUCT LIFECYCLE COMPLETE — PR OUVERTE VERS DEV**
