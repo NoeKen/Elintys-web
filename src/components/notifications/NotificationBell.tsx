@@ -44,6 +44,10 @@ function getNotificationDestination(notification: AppNotification): string | nul
       return eventId && OBJECT_ID_PATTERN.test(eventId)
         ? `/tableau-de-bord/evenements/${eventId}/billetterie`
         : null;
+    case 'EVENT_CANCELLED':
+      return eventId && OBJECT_ID_PATTERN.test(eventId)
+        ? `/tableau-de-bord/evenements/${eventId}`
+        : null;
     default:
       return null;
   }

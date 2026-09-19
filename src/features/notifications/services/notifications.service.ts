@@ -9,7 +9,8 @@ export interface AppNotification {
     | 'TICKET_SOLD'
     | 'VENUE_CONFIRMED'
     | 'INVITATION_ACCEPTED'
-    | 'EVENT_REMINDER';
+    | 'EVENT_REMINDER'
+    | 'EVENT_CANCELLED';
   payload: Record<string, unknown>;
   read: boolean;
   createdAt: string;

@@ -440,7 +440,8 @@
       "TICKET_SOLD": "Billet vendu",
       "VENUE_CONFIRMED": "Réponse du lieu",
       "INVITATION_ACCEPTED": "Invitation acceptée",
-      "EVENT_REMINDER": "Rappel événement"
+      "EVENT_REMINDER": "Rappel événement",
+      "EVENT_CANCELLED": "Événement annulé"
     }
   },
   "eventCreation": {

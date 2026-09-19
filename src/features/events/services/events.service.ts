@@ -224,6 +224,11 @@ export const eventsService = {
     return res.data;
   },
 
+  async cancel(id: string): Promise<Event> {
+    const res = await api.patch<Event>(`/events/${id}/cancel`, {});
+    return res.data;
+  },
+
   async archive(id: string): Promise<Event> {
     const res = await api.patch<Event>(`/events/${id}/archive`, {});
     return res.data;
