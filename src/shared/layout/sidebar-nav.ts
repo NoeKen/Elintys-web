@@ -82,6 +82,11 @@ export function buildNavSections(
           badge: counts?.unreadMessages,
           placeholder: true,
         },
+        {
+          label: "Avis reçus",
+          href: "/tableau-de-bord/avis",
+          icon: "star-half",
+        },
       ],
     });
   }
@@ -122,8 +127,18 @@ export function buildNavSections(
       label: "Gestionnaire de lieu",
       items: [
         {
-          label: "Ma fiche lieu",
-          href: "/tableau-de-bord/gestionnaire/fiche",
+          label: "Mon profil",
+          href: "/tableau-de-bord/gestionnaire/profil",
+          icon: "map-pin",
+        },
+        {
+          label: "Mes lieux",
+          href: "/tableau-de-bord/gestionnaire/lieux",
+          icon: "map-pin",
+        },
+        {
+          label: "Ajouter un lieu",
+          href: "/tableau-de-bord/gestionnaire/lieux/nouveau",
           icon: "map-pin",
         },
         {
@@ -204,7 +219,7 @@ export const ROLE_PRIORITY: readonly UserRole[] = [
 const ROLE_HOME: Record<UserRole, string> = {
   organisateur: "/tableau-de-bord",
   prestataire: "/tableau-de-bord/prestataire/profil",
-  gestionnaire_salle: "/tableau-de-bord/gestionnaire/fiche",
+  gestionnaire_salle: "/tableau-de-bord/gestionnaire/lieux",
   participant: "/tableau-de-bord/participation",
 };
 

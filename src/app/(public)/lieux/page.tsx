@@ -37,7 +37,7 @@ export default async function LieuxPage({
           <span className="section-eyebrow">Lieux d&apos;exception</span>
           <h1>Trouver un espace</h1>
           <p>
-            Salles de conférence, espaces de réception, studios — tous vérifiés pour vos événements
+            Salles de conférence, espaces de réception, studios pour vos événements
             à Montréal.
           </p>
         </div>

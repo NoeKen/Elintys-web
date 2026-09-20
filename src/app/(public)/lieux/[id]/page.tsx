@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { API_URL } from '@/shared/config/api-url';
+import { VerifiedReviews } from '@/features/reviews/components/VerifiedReviews';
 
 interface VenueProfile {
   _id: string;
@@ -69,15 +70,10 @@ export default async function LieuDetailPage({ params }: Props) {
 
             {venue.pricePerDay !== undefined && (
               <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
-                Prix&nbsp;: {(venue.pricePerDay / 100).toFixed(2)}&nbsp;$ / jour
+                Prix&nbsp;: {venue.pricePerDay.toFixed(2)}&nbsp;$ / jour
               </p>
             )}
 
-            {venue.reviewCount > 0 && (
-              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
-                {venue.rating.toFixed(1)} / 5 ({venue.reviewCount} avis)
-              </p>
-            )}
           </div>
 
           {venue.description && (
@@ -104,6 +100,7 @@ export default async function LieuDetailPage({ params }: Props) {
               </a>
             </p>
           )}
+          <VerifiedReviews targetType="venue" targetId={venue._id} />
         </div>
       </article>
     </main>

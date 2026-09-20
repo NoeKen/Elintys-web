@@ -73,11 +73,11 @@ async function ensureVendorProfile(): Promise<string> {
 }
 
 async function ensureVenueProfile(): Promise<string> {
-  const existing = await venue.get('/venues/me');
-  if (existing.status() === 200) {
-    return ((await existing.json()) as { _id: string })._id;
-  }
-  expect(existing.status(), 'un compte sans fiche doit répondre 404 métier').toBe(404);
+  await venue.put('/venue-managers/me', { data: { professionalName: `${QA_TITLE_PREFIX} Gestionnaire` } });
+  const existing = await venue.get('/venues/mine?limit=1');
+  expect(existing.status()).toBe(200);
+  const listed = await existing.json() as { data: Array<{ _id: string }> };
+  if (listed.data.length) return listed.data[0]._id;
 
   const created = await venue.post('/venues', {
     data: {
@@ -190,10 +190,10 @@ test.describe('Vague A — parcours prestataire', () => {
 });
 
 test.describe('Vague A — parcours gestionnaire de lieu', () => {
-  test('fiche créée puis mise à jour via la route /me', async () => {
+  test('lieu créé puis mis à jour via son identifiant propriétaire', async () => {
     const venueId = await ensureVenueProfile();
 
-    const updated = await venue.put('/venues/me', { data: { capacity: 180 } });
+    const updated = await venue.put(`/venues/${venueId}`, { data: { capacity: 180 } });
     expect(updated.status(), await updated.text()).toBe(200);
     const body = (await updated.json()) as { _id: string; capacity: number };
     expect(body._id).toBe(venueId);

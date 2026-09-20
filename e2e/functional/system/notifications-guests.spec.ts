@@ -53,9 +53,11 @@ async function createVendorNotification(label: string): Promise<{ eventId: strin
 }
 
 async function ensureVenueProfile(): Promise<string> {
-  const existing = await venue.get('/venues/me');
-  if (existing.status() === 200) return ((await existing.json()) as { _id: string })._id;
-  expect(existing.status()).toBe(404);
+  await venue.put('/venue-managers/me', { data: { professionalName: `${QA_TITLE_PREFIX} Gestionnaire Wave F` } });
+  const existing = await venue.get('/venues/mine?limit=1');
+  expect(existing.status()).toBe(200);
+  const listed = await existing.json() as { data: Array<{ _id: string }> };
+  if (listed.data.length) return listed.data[0]._id;
   const created = await venue.post('/venues', {
     data: {
       name: `${QA_TITLE_PREFIX} Salle Wave F`,

@@ -123,12 +123,12 @@ test.describe('Vague A — navigation mobile par rôle', () => {
   test('le gestionnaire atteint sa fiche et ses réservations', async ({ browser }) => {
     const { page, close } = await mobilePage(browser, venue);
     try {
-      await page.goto('/tableau-de-bord/gestionnaire/fiche');
+      await page.goto('/tableau-de-bord/gestionnaire/lieux');
       await waitForHydration(page);
 
       const hrefs = await reachableHrefs(page);
 
-      expect(hrefs).toContain('/tableau-de-bord/gestionnaire/fiche');
+      expect(hrefs).toContain('/tableau-de-bord/gestionnaire/lieux');
       expect(hrefs).toContain('/tableau-de-bord/gestionnaire/reservations');
     } finally {
       await close();
@@ -285,11 +285,11 @@ test.describe('Vague A — atterrissage post-connexion par rôle', () => {
     }
   });
 
-  test('le gestionnaire est redirigé vers sa fiche', async ({ browser }) => {
+  test('le gestionnaire est redirigé vers ses lieux', async ({ browser }) => {
     const { page, close } = await mobilePage(browser, venue, { width: 1440, height: 900 });
     try {
       await page.goto('/tableau-de-bord');
-      await expect(page).toHaveURL(/\/tableau-de-bord\/gestionnaire\/fiche/);
+      await expect(page).toHaveURL(/\/tableau-de-bord\/gestionnaire\/lieux/);
     } finally {
       await close();
     }

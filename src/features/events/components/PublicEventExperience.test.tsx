@@ -9,6 +9,9 @@ vi.mock('./EventGallery', () => ({
 vi.mock('./EventPageClient', () => ({
   EventPageClient: () => <div data-testid="access-panel">Accès</div>,
 }));
+vi.mock('@/features/reviews/components/VerifiedReviews', () => ({
+  VerifiedReviews: () => <div data-testid="verified-reviews">Avis</div>,
+}));
 
 const baseEvent: PublicEventDetail = {
   _id: 'event-1',

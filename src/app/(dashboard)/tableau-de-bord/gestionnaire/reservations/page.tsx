@@ -13,6 +13,7 @@ import {
 import { isMissingProfileError } from "@/features/venues/services/venue-profile.service";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+import { InteractionReviewAction } from "@/features/reviews/components/InteractionReviewAction";
 
 const STATUS_LABELS: Record<VenueBooking["status"], string> = {
   pending: "En attente",
@@ -80,6 +81,7 @@ function BookingCard({ booking }: { booking: VenueBooking }) {
           </p>
           {/* `fullName` : le schéma User n'expose ni firstName ni lastName. */}
           <p className="text-sm text-muted">{organizerName(booking.organizer) ?? "—"}</p>
+          <p className="text-sm text-muted">Lieu : {booking.venue && typeof booking.venue === 'object' ? booking.venue.name ?? 'Lieu non disponible' : 'Lieu non disponible'}</p>
           <p className="text-sm text-muted">
             Du {start} au {end}
           </p>
@@ -168,6 +170,11 @@ function BookingCard({ booking }: { booking: VenueBooking }) {
           </div>
         </div>
       )}
+      {booking.status === "confirmed" && (
+        <div className="mt-4">
+          <InteractionReviewAction contextType="venue_booking" contextId={booking._id} />
+        </div>
+      )}
     </div>
   );
 }
@@ -206,7 +213,7 @@ export default function GestionnaireReservationsPage() {
             Créez d’abord votre fiche lieu pour recevoir des demandes de réservation.
           </p>
           <Link
-            href="/tableau-de-bord/gestionnaire/fiche"
+            href="/tableau-de-bord/gestionnaire/lieux"
             className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-teal underline"
           >
             Créer ma fiche

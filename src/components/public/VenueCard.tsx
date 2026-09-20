@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Star } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 
 export interface PublicVenue {
@@ -26,7 +26,6 @@ interface VenueCardProps {
 
 export function VenueCard({ venue }: VenueCardProps) {
   const photo = venue.photos?.[0];
-  const reviewCount = venue.reviewsCount ?? venue.reviewCount;
 
   return (
     <div className="catalog-card-shell">
@@ -66,17 +65,6 @@ export function VenueCard({ venue }: VenueCardProps) {
         )}
       </div>
       <div className="venue-card-body">
-        {venue.rating != null && venue.rating > 0 && (
-          <div className="rating-row">
-            <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
-            <span className="font-bold">{venue.rating.toFixed(1)}</span>
-            {reviewCount != null && reviewCount > 0 && (
-              <span className="text-xs text-on-surface-variant">
-                ({reviewCount} avis)
-              </span>
-            )}
-          </div>
-        )}
         <h3 className="venue-card-name">{venue.name}</h3>
         {venue.description && (
           <p className="venue-card-desc">{venue.description}</p>
