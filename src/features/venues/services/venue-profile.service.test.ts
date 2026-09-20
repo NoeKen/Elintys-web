@@ -15,20 +15,20 @@ const address = { street: '1 rue Test', city: 'Montréal' };
 describe('venueProfileService', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('lit la fiche du compte connecté', async () => {
+  it('liste tous les lieux privés du compte connecté', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { _id: 'l1' }, status: 200 });
 
-    await venueProfileService.getMyProfile();
+    await venueProfileService.listMine();
 
-    expect(api.get).toHaveBeenCalledWith('/venues/me');
+    expect(api.get).toHaveBeenCalledWith('/venues/mine', { params: { page: 1, limit: 20 } });
   });
 
-  it('met à jour via PUT /venues/me et non PUT /venues/:id', async () => {
+  it('met à jour uniquement le lieu sélectionné', async () => {
     vi.mocked(api.put).mockResolvedValue({ data: { _id: 'l1' }, status: 200 });
 
-    await venueProfileService.updateProfile({ name: 'Salle' });
+    await venueProfileService.updateProfile('l1', { name: 'Salle' });
 
-    expect(api.put).toHaveBeenCalledWith('/venues/me', { name: 'Salle' });
+    expect(api.put).toHaveBeenCalledWith('/venues/l1', { name: 'Salle' });
   });
 
   it('crée la fiche via POST /venues', async () => {

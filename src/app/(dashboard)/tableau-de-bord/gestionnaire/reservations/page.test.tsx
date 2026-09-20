@@ -100,7 +100,7 @@ describe('Page réservations gestionnaire', () => {
 
     expect(await screen.findByRole('link', { name: 'Créer ma fiche' })).toHaveAttribute(
       'href',
-      '/tableau-de-bord/gestionnaire/fiche',
+      '/tableau-de-bord/gestionnaire/lieux',
     );
   });
 

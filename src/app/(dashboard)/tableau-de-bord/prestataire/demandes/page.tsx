@@ -13,6 +13,7 @@ import { isMissingProfileError } from "@/features/vendors/services/vendor-profil
 import { cn } from "@/shared/lib/utils";
 import { getUserFacingError } from "@/shared/lib/user-facing-error";
 import { FormErrorAlert } from "@/shared/ui/FormErrorAlert";
+import { InteractionReviewAction } from "@/features/reviews/components/InteractionReviewAction";
 
 const STATUS_LABELS: Record<VendorRequest["status"], string> = {
   pending: "En attente",
@@ -235,6 +236,9 @@ export default function PrestataireDemandesPage() {
                     Répondre
                   </button>
                 ))}
+              {request.status === "accepted" && (
+                <InteractionReviewAction contextType="vendor_request" contextId={request._id} />
+              )}
             </li>
           ))}
         </ul>

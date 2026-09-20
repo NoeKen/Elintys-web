@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { API_URL } from '@/shared/config/api-url';
+import { VerifiedReviews } from '@/features/reviews/components/VerifiedReviews';
 
 interface VendorProfile {
   _id: string;
@@ -64,11 +65,6 @@ export default async function PrestataireDetailPage({ params }: Props) {
               </p>
             )}
 
-            {vendor.reviewCount > 0 && (
-              <p className="rounded-2xl bg-white/70 p-4 shadow-[var(--shadow-soft-line)]">
-                {vendor.rating.toFixed(1)} / 5 ({vendor.reviewCount} avis)
-              </p>
-            )}
           </div>
 
           {vendor.description && (
@@ -85,6 +81,7 @@ export default async function PrestataireDetailPage({ params }: Props) {
               </a>
             </p>
           )}
+          <VerifiedReviews targetType="vendor" targetId={vendor._id} />
         </div>
       </article>
     </main>

@@ -77,7 +77,7 @@ describe("getRoleHomePath", () => {
   it.each([
     [["organisateur"], "/tableau-de-bord"],
     [["prestataire"], "/tableau-de-bord/prestataire/profil"],
-    [["gestionnaire_salle"], "/tableau-de-bord/gestionnaire/fiche"],
+    [["gestionnaire_salle"], "/tableau-de-bord/gestionnaire/lieux"],
     [["participant"], "/tableau-de-bord/participation"],
   ] as const)("envoie %j vers %s", (roles, expected) => {
     // `/tableau-de-bord` rend l'expérience organisateur : y envoyer les autres
@@ -89,7 +89,7 @@ describe("getRoleHomePath", () => {
     // Même ordre que getFirstOnboardingPath : aucune seconde politique.
     expect(getRoleHomePath(["prestataire", "organisateur"])).toBe("/tableau-de-bord");
     expect(getRoleHomePath(["participant", "gestionnaire_salle"])).toBe(
-      "/tableau-de-bord/gestionnaire/fiche",
+      "/tableau-de-bord/gestionnaire/lieux",
     );
     expect(getRoleHomePath(["participant", "prestataire"])).toBe(
       "/tableau-de-bord/prestataire/profil",
@@ -122,7 +122,7 @@ describe("buildMobileNav", () => {
     const { primary, overflow } = buildMobileNav(["gestionnaire_salle"]);
     const hrefs = [...primary, ...overflow].map((item) => item.href);
 
-    expect(hrefs).toContain("/tableau-de-bord/gestionnaire/fiche");
+    expect(hrefs).toContain("/tableau-de-bord/gestionnaire/lieux");
     expect(hrefs).toContain("/tableau-de-bord/gestionnaire/reservations");
   });
 

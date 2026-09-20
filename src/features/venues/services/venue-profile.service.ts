@@ -7,7 +7,7 @@ export interface VenueAddress {
   postalCode?: string;
 }
 
-export interface VenueProfile {
+export interface Venue {
   _id: string;
   name: string;
   type?: string;
@@ -24,7 +24,9 @@ export interface VenueProfile {
   isActive: boolean;
 }
 
-/** Champs éditables depuis l'écran « Ma fiche lieu ». */
+export type VenueProfile = Venue;
+
+/** Fields owned by the physical venue, not its manager profile. */
 export interface VenueProfileInput {
   name: string;
   type?: string;
@@ -58,9 +60,13 @@ export const venueProfileService = {
     return response.data;
   },
 
-  async getMyProfile(): Promise<VenueProfile> {
-    const res = await api.get<VenueProfile>("/venues/me");
+  async listMine(page = 1, limit = 20): Promise<VenueCatalogResponse> {
+    const res = await api.get<VenueCatalogResponse>("/venues/mine", { params: { page, limit } });
     return res.data;
+  },
+
+  async getMine(id: string): Promise<Venue> {
+    return (await api.get<Venue>(`/venues/mine/${encodeURIComponent(id)}`)).data;
   },
 
   async createProfile(input: VenueProfileInput): Promise<VenueProfile> {
@@ -68,9 +74,9 @@ export const venueProfileService = {
     return res.data;
   },
 
-  /** `PUT /venues/me` — identité serveur, aucun id transmis par le client. */
-  async updateProfile(input: Partial<VenueProfileInput>): Promise<VenueProfile> {
-    const res = await api.put<VenueProfile>("/venues/me", input);
+  /** Ownership of the selected venue is verified by the API. */
+  async updateProfile(id: string, input: Partial<VenueProfileInput>): Promise<VenueProfile> {
+    const res = await api.put<VenueProfile>(`/venues/${encodeURIComponent(id)}`, input);
     return res.data;
   },
 };

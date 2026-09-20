@@ -12,8 +12,8 @@ describe("legacyDashboardRedirects", () => {
       { source: "/prestataire/profil", destination: "/tableau-de-bord/prestataire/profil", permanent: true },
       { source: "/prestataire/demandes", destination: "/tableau-de-bord/prestataire/demandes", permanent: true },
       { source: "/prestataire/avis", destination: "/tableau-de-bord/prestataire/avis", permanent: true },
-      { source: "/gestionnaire", destination: "/tableau-de-bord/gestionnaire/fiche", permanent: true },
-      { source: "/gestionnaire/lieux", destination: "/tableau-de-bord/gestionnaire/fiche", permanent: true },
+      { source: "/gestionnaire", destination: "/tableau-de-bord/gestionnaire/lieux", permanent: true },
+      { source: "/gestionnaire/lieux", destination: "/tableau-de-bord/gestionnaire/lieux", permanent: true },
       { source: "/gestionnaire/reservations", destination: "/tableau-de-bord/gestionnaire/reservations", permanent: true },
       { source: "/gestionnaire/calendrier", destination: "/tableau-de-bord/gestionnaire/calendrier", permanent: true },
     ]);

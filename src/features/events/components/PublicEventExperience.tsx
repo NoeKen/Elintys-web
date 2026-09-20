@@ -7,7 +7,6 @@ import {
   Clock3,
   MapPin,
   Sparkles,
-  Star,
   UsersRound,
 } from 'lucide-react';
 import { EventGallery } from './EventGallery';
@@ -16,6 +15,7 @@ import { eventCreationCopy as wizardCopy } from '@/features/events/i18n/event-cr
 import { publicEventCopy as copy } from '@/features/events/i18n/public-event.copy';
 import type { PublicEventDetail, PublicRelatedEvent } from '@/features/events/types';
 import { getOptimizedMediaUrl } from '@/shared/lib/media';
+import { VerifiedReviews } from '@/features/reviews/components/VerifiedReviews';
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   conference: 'Conférence',
@@ -154,11 +154,6 @@ export function PublicEventExperience({ event }: { event: PublicEventDetail }) {
                       {[event.venue.address.street, event.venue.address.city, event.venue.address.province, event.venue.address.postalCode].filter(Boolean).join(', ')}
                     </p>
                   </div>
-                  {event.venue.rating > 0 && (
-                    <span className="inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-gold-pale px-4 text-sm font-bold text-gold-dark">
-                      <Star size={16} fill="currentColor" aria-hidden="true" />{event.venue.rating.toFixed(1)}
-                    </span>
-                  )}
                 </div>
                 {event.venue.description && <p className="mt-6 text-base leading-8 text-on-surface-variant">{event.venue.description}</p>}
                 {event.venue.amenities.length > 0 && (
@@ -202,13 +197,20 @@ export function PublicEventExperience({ event }: { event: PublicEventDetail }) {
           </div>
 
           <aside className="lg:sticky lg:top-28" aria-label="Accès et admission">
-            <EventPageClient event={event} />
+            {event.status === 'completed' ? (
+              <div className="rounded-3xl bg-white/75 p-6 shadow-[var(--shadow-soft-line)]">
+                <p className="font-serif text-2xl text-navy-dark">Événement terminé</p>
+                <p className="mt-2 text-sm leading-6 text-on-surface-variant">Les admissions sont fermées. Les participants vérifiés peuvent maintenant partager leur expérience.</p>
+              </div>
+            ) : <EventPageClient event={event} />}
             <div className="mt-4 rounded-3xl bg-white/60 p-5 text-sm leading-6 text-on-surface-variant shadow-[var(--shadow-soft-line)] backdrop-blur-xl">
               <p className="font-bold text-on-surface">{copy.admission}</p>
               <p className="mt-1">{admissionLabels.join(' · ')}</p>
             </div>
           </aside>
         </div>
+
+        <VerifiedReviews targetType="event" targetId={event._id} />
 
         {event.relatedEvents.length > 0 && (
           <section className="mt-16 border-t border-outline-variant/60 pt-12 sm:mt-20 sm:pt-16" aria-labelledby="event-related-title">

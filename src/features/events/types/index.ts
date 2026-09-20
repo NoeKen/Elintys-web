@@ -236,6 +236,7 @@ export interface PublicEventDetail {
   _id: string;
   slug: string;
   title: string;
+  status?: 'published' | 'ongoing' | 'completed';
   shortDescription?: string;
   description?: string;
   eventType?: EventType;

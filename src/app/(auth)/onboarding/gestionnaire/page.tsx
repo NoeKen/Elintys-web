@@ -1,5 +1,5 @@
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { ManagerProfileScreen } from '@/features/venues/components/ManagerScreens';
 
 export default function OnboardingGestionnairePage() {
-  return <OnboardingFlow role="gestionnaire" />;
+  return <ManagerProfileScreen onboarding />;
 }

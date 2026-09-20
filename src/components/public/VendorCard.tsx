@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Sparkles, Star } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 
 export interface PublicVendor {
@@ -28,7 +28,6 @@ export function VendorCard({ vendor }: VendorCardProps) {
   const displayName = vendor.businessName ?? vendor.name ?? 'Prestataire';
   const displayDesc = vendor.shortBio ?? vendor.description?.substring(0, 90);
   const photo = vendor.photos?.[0];
-  const reviewCount = vendor.reviewsCount ?? vendor.reviewCount;
   const startingPrice = vendor.startingPrice ?? vendor.priceRange?.min;
 
   return (
@@ -69,17 +68,6 @@ export function VendorCard({ vendor }: VendorCardProps) {
         )}
       </div>
       <div className="vendor-card-body">
-        {vendor.rating != null && vendor.rating > 0 && (
-          <div className="rating-row">
-            <Star className="h-3.5 w-3.5 fill-amber text-amber" aria-hidden="true" />
-            <span className="font-bold">{vendor.rating.toFixed(1)}</span>
-            {reviewCount != null && reviewCount > 0 && (
-              <span className="text-xs text-on-surface-variant">
-                ({reviewCount} avis)
-              </span>
-            )}
-          </div>
-        )}
         <h3 className="vendor-card-name">{displayName}</h3>
         {displayDesc && (
           <p className="vendor-card-desc">
