@@ -1,7 +1,11 @@
 # Sprint 4 / Wave J — état de reprise pour Claude Code
 
-Date du gel : 20 septembre 2026  
-Statut : **IMPLÉMENTATION TERMINÉE, GATES LOCAUX VERTS ET COMMITS CRÉÉS — PUSH/PR À FINALISER**  
+Date du gel : 20 septembre 2026
+
+Dernière mise à jour : 20 septembre 2026 (reprise Claude Code)
+
+Statut : **IMPLÉMENTATION TERMINÉE, GATES LOCAUX VERTS, BRANCHES POUSSÉES, DEUX PR OUVERTES VERS `dev` — MERGE NON EFFECTUÉ**
+
 Motif du handoff : quota Codex hebdomadaire à 96 % utilisé (4 % restant), aucun crédit additionnel. Aucun raccourci de release n'a été pris.
 
 ## 1. État Git exact
@@ -13,7 +17,9 @@ Motif du handoff : quota Codex hebdomadaire à 96 % utilisé (4 % restant), aucu
 - Baseline Web : `101709a` (Wave I / PR #110)
 - Commits API : `fe7a71c`, `0be5963`.
 - Commits Web : `3f7545a`, `0904e6f`.
-- Aucun push ni PR Wave J au moment de cette mise à jour ; aucun merge.
+- Commit documentaire Web supplémentaire : `15566ac` (`docs(audit): document sprint 4 wave J validation`).
+- Les deux branches sont poussées sur `origin` (vérifié via `git ls-remote`) : API `0be5963`, Web `15566ac`.
+- PR ouvertes vers `dev`, **non mergées** : API https://github.com/NoeKen/Elintys-api/pull/62, Web https://github.com/NoeKen/Elintys-web/pull/111.
 
 ## 2. Fonctionnalités terminées
 
@@ -98,12 +104,14 @@ Motif du handoff : quota Codex hebdomadaire à 96 % utilisé (4 % restant), aucu
 
 ## 7. Ce qui reste à faire — ordre obligatoire
 
-1. Committer la documentation et les preuves QA Web.
-2. Push de la branche Wave J dans les deux dépôts.
-3. Ouvrir deux PR vers `dev`, titre `Sprint 4 — Wave J — Venue Model + Reviews & Reputation`.
-4. Vérifier mergeability, CI et preview Web. **Ne pas merger les PR Wave J.**
-5. Ajouter URLs/statuts CI au rapport, commit/push documentaire.
-6. Confirmer worktrees propres et branches alignées avec leurs remotes.
+1. ~~Committer la documentation et les preuves QA Web.~~ Fait — commit `15566ac`.
+2. ~~Push de la branche Wave J dans les deux dépôts.~~ Fait — API `0be5963`, Web `15566ac` sur `origin`.
+3. ~~Ouvrir deux PR vers `dev`.~~ Fait — API #62, Web #111, titre `Sprint 4 — Wave J — Venue Model + Reviews & Reputation`.
+4. ~~Vérifier mergeability, CI et preview Web.~~ Fait — les deux PR sont MERGEABLE / CLEAN. Aucun workflow GitHub Actions n'existe dans les deux dépôts, donc pas de CI à attendre ; la preview Vercel Web est verte : https://elintys-web-git-feat-s4-wave-j-ven-d5411c-noe-kenfacks-projects.vercel.app
+5. ~~Ajouter URLs/statuts CI au rapport, commit/push documentaire.~~ Fait — §49 du rapport final.
+6. ~~Confirmer worktrees propres et branches alignées avec leurs remotes.~~ Fait.
+
+Reste ouvert : **la revue et le merge des PR #62 et #111**, qui ne relèvent pas de Wave J.
 
 ## 8. Backlog préservé
 
@@ -115,4 +123,4 @@ Motif du handoff : quota Codex hebdomadaire à 96 % utilisé (4 % restant), aucu
 
 ## 9. Verdict de reprise
 
-Le code est stabilisé et localement qualifié. La Wave J ne doit être déclarée livrée qu'après commits, push, deux PR ouvertes et vérification de leurs checks. Le rapport final existant est un brouillon de release à actualiser ; il ne constitue pas encore une preuve de PR ouverte.
+Les six étapes de release sont terminées : commits, push, deux PR ouvertes vers `dev`, mergeabilité et checks disponibles vérifiés. Wave J est livrée en revue. Les PR #62 et #111 ne doivent pas être mergées dans le cadre de Wave J.

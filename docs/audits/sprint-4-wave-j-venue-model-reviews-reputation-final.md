@@ -202,10 +202,23 @@ Commits Web :
 - `3f7545a` — `feat(reputation): integrate multi-venue management and verified reviews`
 - `0904e6f` — `test(reputation): cover venue ownership and bilateral reviews`
 
-Les URLs et statuts des PR sont ajoutés après leur création. Elles ciblent `dev` et ne doivent pas être mergées par Wave J.
+Commit documentaire Web supplémentaire :
+
+- `15566ac` — `docs(audit): document sprint 4 wave J validation`
+
+PRs ouvertes le 20 septembre 2026, ciblant `dev`, **non mergées** :
+
+| Dépôt | PR | Base | Mergeable | Checks |
+|---|---|---|---|---|
+| Elintys-api | https://github.com/NoeKen/Elintys-api/pull/62 | `dev` | MERGEABLE / CLEAN | aucun workflow CI configuré dans le dépôt |
+| Elintys-web | https://github.com/NoeKen/Elintys-web/pull/111 | `dev` | MERGEABLE / CLEAN | Vercel SUCCESS, Vercel Preview Comments SUCCESS |
+
+Preview Web : https://elintys-web-git-feat-s4-wave-j-ven-d5411c-noe-kenfacks-projects.vercel.app
+
+Ni `Elintys-api/.github/workflows` ni `Elintys-web/.github/workflows` n'existent : il n'y a pas de CI GitHub Actions à attendre sur ces PR. La seule vérification automatisée disponible est la preview Vercel côté Web, verte.
 
 ## 50. Final verdict
 
 Release scorecard : Venue ownership **GREEN** ; Multi-venue **GREEN** ; Reviews eligibility **GREEN** ; Event reputation **GREEN** ; Vendor reputation **GREEN** ; Venue reputation **GREEN** ; Organizer private feedback **GREEN** ; Participant public reputation **N/A/INTERDIT** ; Responsive/A11y **GREEN** ; Security/privacy **GREEN** ; migrations **GREEN**.
 
-**SPRINT 4 / WAVE J — PARTIELLE — implémentation et gates locaux verts ; commits, push, PR et CI à finaliser**
+**SPRINT 4 / WAVE J — LIVRÉE EN REVUE — implémentation et gates locaux verts ; commits, push et deux PR ouvertes vers `dev`, mergeables et checks verts ; merge non effectué, en attente de revue**
