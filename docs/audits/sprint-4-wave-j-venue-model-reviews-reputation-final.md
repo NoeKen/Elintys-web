@@ -1,14 +1,20 @@
 # Sprint 4 / Wave J — Venue Model + Verified Reviews & Reputation
 
-Date de validation : 20 septembre 2026  
-Branche API/Web : `feat/s4-wave-j-venue-model-reviews-reputation`  
-Verdict technique local : **CANDIDATE VALIDÉE**. Livraison Git/PR en attente ; voir `sprint-4-wave-j-implementation-state.md`.
+Date de validation : 20 septembre 2026
+
+Date de livraison en revue : 20 septembre 2026
+
+Branche API/Web : `feat/s4-wave-j-venue-model-reviews-reputation`
+
+Verdict technique : **CANDIDATE VALIDÉE ET LIVRÉE EN REVUE**. Commits, push et deux PR ouvertes vers `dev` ; merge non effectué. Détail en §49 ; historique de reprise dans `sprint-4-wave-j-implementation-state.md`.
 
 ## 1. Executive summary
 
 Wave J sépare désormais le compte gestionnaire, son profil professionnel et ses lieux. Un même gestionnaire peut administrer plusieurs lieux sans ambiguïté d’ownership. Les avis publics sont exclusivement issus d’interactions serveur vérifiées : participation à un événement terminé, collaboration prestataire acceptée et exécutée, ou réservation de lieu confirmée et terminée. Les relations Organisateur↔Prestataire et Organisateur↔Lieu sont bilatérales ; la réputation Participant reste non publique.
 
 Les revues indépendantes ont trouvé et corrigé quatre défauts avant livraison : absence des surfaces d’avis inverses, détail public des événements terminés inaccessible, appel privé d’éligibilité pour les anonymes et parcours d’éligibilité N+1. Les anciens compteurs de réputation ont aussi été retirés des cartes de catalogue en attendant les futurs badges Search vérifiés.
+
+La Wave est livrée en revue : les deux branches sont poussées et les PR API #62 et Web #111 ciblent `dev`, toutes deux mergeables sans conflit. Elles ne doivent pas être mergées dans le cadre de Wave J.
 
 ## 2. Wave I merge evidence
 
@@ -202,9 +208,12 @@ Commits Web :
 - `3f7545a` — `feat(reputation): integrate multi-venue management and verified reviews`
 - `0904e6f` — `test(reputation): cover venue ownership and bilateral reviews`
 
-Commit documentaire Web supplémentaire :
+Commits documentaires Web supplémentaires :
 
 - `15566ac` — `docs(audit): document sprint 4 wave J validation`
+- `020be1c` — `docs(audit): record Wave J pull requests`
+
+Avance sur `origin/dev` au moment de l'ouverture des PR : API 2 commits (38 fichiers, +1291/-384), Web 3 commits (47 fichiers, +1348/-484), aucun retard dans les deux cas.
 
 PRs ouvertes le 20 septembre 2026, ciblant `dev`, **non mergées** :
 
@@ -216,6 +225,10 @@ PRs ouvertes le 20 septembre 2026, ciblant `dev`, **non mergées** :
 Preview Web : https://elintys-web-git-feat-s4-wave-j-ven-d5411c-noe-kenfacks-projects.vercel.app
 
 Ni `Elintys-api/.github/workflows` ni `Elintys-web/.github/workflows` n'existent : il n'y a pas de CI GitHub Actions à attendre sur ces PR. La seule vérification automatisée disponible est la preview Vercel côté Web, verte.
+
+Réserve de traçabilité : les statuts de checks du tableau ci-dessus ont été relevés sur le Web à `15566ac`. Les commits documentaires postérieurs (`020be1c` et suivants) déclenchent un nouveau build de preview dont le statut n'est pas relevé ici ; ils ne touchent que des fichiers Markdown sous `docs/audits/` et ne modifient aucun code applicatif.
+
+État des dépôts après livraison : worktrees propres, branches locales alignées avec `origin` dans les deux dépôts, aucun merge, aucun force push, aucune écriture directe sur `dev`.
 
 ## 50. Final verdict
 
