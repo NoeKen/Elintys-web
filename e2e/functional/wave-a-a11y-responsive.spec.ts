@@ -66,7 +66,7 @@ test.describe('Vague A — accessibilité des écrans corrigés', () => {
   test('écrans prestataire et gestionnaire', async ({ browser }) => {
     for (const [client, routes] of [
       [vendor, ['/tableau-de-bord/prestataire/profil', '/tableau-de-bord/prestataire/demandes']],
-      [venue, ['/tableau-de-bord/gestionnaire/fiche', '/tableau-de-bord/gestionnaire/reservations']],
+      [venue, ['/tableau-de-bord/gestionnaire/profil', '/tableau-de-bord/gestionnaire/lieux', '/tableau-de-bord/gestionnaire/reservations']],
       [owner, ['/tableau-de-bord/favoris']],
     ] as const) {
       const context = await browser.newContext({ storageState: await client.storageState() });
