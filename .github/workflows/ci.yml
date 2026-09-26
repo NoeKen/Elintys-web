@@ -240,6 +240,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
+      # La batterie fonctionnelle s'appuie sur le jeu de démonstration de dev
+      # (prestataires, lieux, événements publics) : on l'upserte dans le
+      # conteneur jetable — jamais dans Atlas.
+      - name: Données de démonstration (seed:dev sur le conteneur)
+        working-directory: Elintys-api
+        run: npm run seed:dev
       - name: Batterie fonctionnelle (API + MongoDB)
         run: npm run test:e2e:functional
       - name: Batterie smoke (API factice)
