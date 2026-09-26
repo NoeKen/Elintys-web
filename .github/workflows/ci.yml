@@ -153,19 +153,6 @@ jobs:
       (github.event_name == 'pull_request' && (github.base_ref == 'uat' || github.base_ref == 'main'))
     runs-on: ubuntu-latest
     timeout-minutes: 75
-    services:
-      # Base ÉPHÉMÈRE du runner — jamais Atlas. Le nom `elintys-dev` est exigé
-      # par le provisionneur QA actuel de l'API (garde anti-production) ; il
-      # désigne ici un conteneur jetable, détruit à la fin du job.
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
     defaults:
       run:
         working-directory: web
@@ -178,7 +165,10 @@ jobs:
       # Comptes créés par `qa:provision` de l'API (valeurs par défaut du provisionneur).
       E2E_TEST_EMAIL: qa-organisateur@demo.elintys.com
       E2E_TEST_EMAIL_SECONDARY: qa-tiers@demo.elintys.com
-      MONGODB_URI: mongodb://127.0.0.1:27017/elintys-dev
+      # Base ÉPHÉMÈRE du runner — jamais Atlas. Le nom `elintys-dev` est exigé
+      # par le provisionneur QA et le seed de dev (gardes anti-production) ; il
+      # désigne ici un conteneur jetable, détruit à la fin du job.
+      MONGODB_URI: mongodb://127.0.0.1:27017/elintys-dev?replicaSet=rs0
       FRONTEND_URL: http://localhost:3000
       EMAIL_DELIVERY_ENABLED: "false"
       RESEND_API_KEY: re_ci_disabled
@@ -219,6 +209,27 @@ jobs:
           cache-dependency-path: |
             web/package-lock.json
             Elintys-api/package-lock.json
+      # L'API utilise des transactions MongoDB (inscriptions, achats, scan,
+      # avis) : il faut un replica set, qu'un service container ne sait pas
+      # initialiser. Replica set à un nœud, local au runner.
+      - name: MongoDB éphémère (replica set à un nœud)
+        working-directory: .
+        run: |
+          docker run -d --name mongo -p 27017:27017 mongo:7 --replSet rs0 --bind_ip_all
+          for attempt in $(seq 1 30); do
+            docker exec mongo mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' >/dev/null 2>&1 && break
+            sleep 2
+          done
+          docker exec mongo mongosh --quiet --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "127.0.0.1:27017" }] })'
+          for attempt in $(seq 1 30); do
+            if docker exec mongo mongosh --quiet --eval 'db.hello().isWritablePrimary' | grep -q true; then
+              echo "replica set prêt"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "replica set non prêt" >&2
+          exit 1
       - name: Secrets éphémères (générés, masqués, jamais persistés)
         run: |
           for name in JWT_SECRET JWT_REFRESH_SECRET E2E_TEST_PASSWORD; do
