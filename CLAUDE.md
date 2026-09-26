@@ -38,6 +38,57 @@ Ce dépôt est le **frontend Next.js** de la plateforme.
 
 ---
 
+## Plateforme — état réel et workflow (septembre 2026)
+
+> Certaines mentions plus bas sont obsolètes : le code tourne sous
+> **Next.js 16** (`package.json`), il n'y a **ni `src/middleware.ts` ni
+> Zustand** (la session est restaurée côté client via `GET /auth/me`, les
+> cookies httpOnly host-only restent sur le domaine API), le paiement visé
+> est **PayPal** (pas Stripe Checkout) et l'API locale écoute sur le port
+> **3001**. En cas de doute, le code et les documents ci-dessous font foi.
+
+Documentation plateforme (API + web) : dépôt `NoeKen/Elintys-api`, dossier
+`docs/` — `architecture/architecture-current.md`,
+`operations/environments.md`, `operations/deployment.md`,
+`operations/ci-cd.md`, `operations/bug-workflow.md`, `uat/README.md`,
+`security/email-verification.md`. Frontend : `docs/deployment-environments.md`
+et `TESTING.md` de ce dépôt.
+
+### Commandes
+`npm run dev` · `npm run lint` · `npm run typecheck` · `npm test` ·
+`npm run build` · `npm run test:e2e:smoke` (après un build avec
+`NEXT_PUBLIC_API_URL=http://127.0.0.1:3999/api/v1`) ·
+`npm run test:e2e:functional` (API `../Elintys-api` + MongoDB).
+
+### Branches et PR
+`main` = production, `uat` = promotion, `dev` = intégration.
+`feature/*` | `fix/*` → PR `dev` → PR `dev → uat` → recette → PR `uat → main`.
+Jamais de commit direct sur `uat`/`main`, jamais de force-push ; un bug de
+recette repasse par `fix/*` → `dev`.
+
+### CI
+`.github/workflows/ci.yml` — checks requis `quality`, `unit`, `build`,
+`e2e-smoke`, `security` ; `e2e-full` sur PR vers `uat`/`main`, la nuit et à
+la demande. Ne pas renommer les jobs. Aucun secret de dépôt.
+
+### Environnement — `NEXT_PUBLIC_ELINTYS_ENV`
+`local` | `ci` | `dev` | `uat` | `prod` (`src/shared/config/environment.ts`) :
+badge UAT, `noindex` sur dev/uat, Analytics en prod uniquement ; une valeur
+inconnue fait échouer le build. Aucune variable `NEXT_PUBLIC_*` ne doit
+contenir de secret.
+
+### Courriel non vérifié
+Un 403 `EMAIL_NOT_VERIFIED` de l'API doit toujours ouvrir l'état de
+vérification (`src/features/auth/email-verification/`), jamais échouer
+silencieusement.
+
+### Interdits (en plus de la liste plus bas)
+Aucun secret en clair ; aucune action sur la production (Vercel Production,
+API prod) ; aucun test désactivé pour passer la CI ; pas de BFF/proxy de
+cookies ajouté sans décision explicite.
+
+---
+
 ## Stack technique — immuable
 
 ```
