@@ -22,7 +22,7 @@ Matrice des variables publiques (aucune n'est secrète) :
 | Variable | local | ci | dev | uat | prod |
 | --- | --- | --- | --- | --- | --- |
 | `NEXT_PUBLIC_ELINTYS_ENV` | `local` (défaut) | `ci` | `dev` | `uat` | `prod` |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3001/api/v1` | factice (`https://api.ci.invalid/api/v1` pour le build, API stub locale pour le smoke) | `https://elintys-api-dev-1pdh.onrender.com/api/v1` | `https://elintys-api-uat.onrender.com/api/v1` | `https://api.elintys.com/api/v1` |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001/api/v1` | factice (`https://api.ci.invalid/api/v1` pour le build, API stub locale pour le smoke) | `https://elintys-api-dev-1pdh.onrender.com/api/v1` | `https://api.uat.elintys.com/api/v1` (domaine Render `api.uat` à rattacher) | `https://api.elintys.com/api/v1` |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | — | `https://dev.elintys.com` | `https://uat.elintys.com` | `https://app.elintys.com` |
 | `NEXT_PUBLIC_PAYPAL_ENV` | `sandbox` | `sandbox` | `sandbox` | `sandbox` | `live` (quand l'API l'est) |
 | `NEXT_PUBLIC_DISABLE_DEVTOOLS` | `false` | `true` | `true` | `true` | `true` |
@@ -41,7 +41,7 @@ Domaines :
 | Environnement | Branche | Frontend (Vercel) | API (Render) |
 | --- | --- | --- | --- |
 | Développement distant | `dev` | `https://dev.elintys.com` | `https://elintys-api-dev-1pdh.onrender.com/api/v1` |
-| Recette (UAT) | `uat` | `https://uat.elintys.com` | `https://elintys-api-uat.onrender.com/api/v1` |
+| Recette (UAT) | `uat` | `https://uat.elintys.com` | `https://api.uat.elintys.com/api/v1` |
 | Production | `main` | `https://app.elintys.com` | `https://api.elintys.com/api/v1` |
 
 Effets de `NEXT_PUBLIC_ELINTYS_ENV` (`src/shared/config/environment.ts`) :
