@@ -45,10 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -64,8 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -82,8 +85,10 @@ jobs:
       NEXT_PUBLIC_API_URL: https://api.ci.invalid/api/v1
       NEXT_PUBLIC_SITE_URL: https://ci.elintys.invalid
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -105,15 +110,17 @@ jobs:
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3999/api/v1
       NEXT_PUBLIC_APP_URL: http://localhost:3000
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -126,7 +133,7 @@ jobs:
       - run: npm run test:e2e:smoke
       - name: Rapport Playwright (échec)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: playwright-smoke-${{ github.run_attempt }}
           path: |
@@ -168,6 +175,9 @@ jobs:
       # Environnement de l'API démarrée par playwright.functional.config.ts.
       ELINTYS_ENV: dev
       NODE_ENV: development
+      # Comptes créés par `qa:provision` de l'API (valeurs par défaut du provisionneur).
+      E2E_TEST_EMAIL: qa-organisateur@demo.elintys.com
+      E2E_TEST_EMAIL_SECONDARY: qa-tiers@demo.elintys.com
       MONGODB_URI: mongodb://127.0.0.1:27017/elintys-dev
       FRONTEND_URL: http://localhost:3000
       EMAIL_DELIVERY_ENABLED: "false"
@@ -176,8 +186,9 @@ jobs:
       PAID_CHECKOUT_ENABLED: "false"
       TEST_PAYMENT_PROVIDER_ENABLED: "false"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          persist-credentials: false
           path: web
           # La nuit, on éprouve la branche d'intégration (dev) plutôt que la
           # branche par défaut sur laquelle GitHub déclenche le cron.
@@ -194,13 +205,14 @@ jobs:
             *) ref=dev ;;
           esac
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          persist-credentials: false
           repository: NoeKen/Elintys-api
           ref: ${{ steps.api-ref.outputs.ref }}
           # playwright.functional.config.ts démarre l'API depuis ../Elintys-api
           path: Elintys-api
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: web/.nvmrc
           cache: npm
@@ -219,7 +231,7 @@ jobs:
       - run: npm ci
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -238,11 +250,13 @@ jobs:
           # s'exécuter en production.
           NODE_ENV: production
         run: |
+          # La batterie fonctionnelle laisse un .next de `next dev` : build propre.
+          rm -rf .next
           npm run build
           npm run test:e2e:smoke
       - name: Rapports Playwright (échec)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: playwright-full-${{ github.run_attempt }}
           path: |
@@ -259,23 +273,24 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: npm audit (dépendances de production)
         run: npm audit --omit=dev --audit-level=high
       - name: Secrets dans l'historique (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
           GITLEAKS_ENABLE_SUMMARY: "true"
       - name: Revue des dépendances (PR)
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
         with:
           fail-on-severity: high
