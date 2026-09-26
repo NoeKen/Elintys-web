@@ -2,6 +2,7 @@ import { ProtectedRoute } from '@/shared/guards/ProtectedRoute';
 import { Sidebar } from '@/shared/layout/Sidebar';
 import { DashboardChrome } from '@/shared/layout/DashboardChrome';
 import { MobileNav } from '@/shared/layout/MobileNav';
+import { EmailVerificationBanner } from '@/features/auth/email-verification/EmailVerificationBanner';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex flex-1 flex-col overflow-hidden">
           <DashboardChrome />
+          <EmailVerificationBanner />
           {/* `tabIndex={0}` : cette zone défile (`overflow-y-auto`). Sans être
               focalisable, elle est inatteignable au clavier dès que son contenu
               ne comporte aucun élément focalisable — un état vide, par exemple.
