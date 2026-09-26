@@ -175,6 +175,13 @@ jobs:
       PAYPAL_PROVIDER_ENABLED: "false"
       PAID_CHECKOUT_ENABLED: "false"
       TEST_PAYMENT_PROVIDER_ENABLED: "false"
+      # Médias : secrets de dépôt OPTIONNELS. Absents → les specs médias échouent
+      # en 503 MEDIA_STORAGE_NOT_CONFIGURED. Présents → envois isolés dans le
+      # dossier Cloudinary `Elintys/ci` (jamais dev / uat / prod).
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      CLOUDINARY_FOLDER: ci
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
