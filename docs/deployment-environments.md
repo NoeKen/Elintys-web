@@ -1,5 +1,11 @@
 # Environnements frontend
 
+> Documentation plateforme (API + web : matrice complète des environnements,
+> déploiement, CI/CD, migrations, recette) : dépôt `NoeKen/Elintys-api`,
+> dossier `docs/` — notamment `docs/operations/environments.md`,
+> `docs/operations/deployment.md`, `docs/operations/ci-cd.md` et
+> `docs/uat/README.md`. Ce fichier ne couvre que le frontend.
+
 `NEXT_PUBLIC_API_URL` est l'unique source de vérité pour joindre l'API. La
 résolution est centralisée dans `src/shared/config/api-url.ts`.
 
@@ -20,6 +26,15 @@ Matrice des variables publiques (aucune n'est secrète) :
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | — | `https://dev.elintys.com` | `https://uat.elintys.com` | `https://app.elintys.com` |
 | `NEXT_PUBLIC_PAYPAL_ENV` | `sandbox` | `sandbox` | `sandbox` | `sandbox` | `live` (quand l'API l'est) |
 | `NEXT_PUBLIC_DISABLE_DEVTOOLS` | `false` | `true` | `true` | `true` | `true` |
+
+`NEXT_PUBLIC_APP_URL` n'est lu que par l'outillage de test (Playwright
+`baseURL`, CI) ; il n'est pas requis sur Vercel.
+
+Actions manuelles Vercel pour la recette (projet `elintys-web`) : rattacher
+le domaine `uat.elintys.com` à la branche `uat`, puis créer les cinq
+variables ci-dessus avec la valeur de la colonne `uat`, restreintes à la
+branche `uat`. Un nouveau déploiement de la branche est nécessaire après
+chaque modification (valeurs figées au build).
 
 Domaines :
 
@@ -51,6 +66,15 @@ privées utilisent une garde de navigation cliente qui restaure la session via
 `GET /auth/me`, tandis que chaque endpoint métier demeure protégé côté NestJS.
 Cette séparation évite de partager les cookies entre sous-domaines sans ajouter
 de BFF.
+
+⚠ Les cookies de l'API sont `SameSite=Lax`. Ils ne sont joints aux appels
+`fetch` que si le frontend et l'API partagent le même site (ex.
+`app.elintys.com` ↔ `api.elintys.com`). Une API `*.onrender.com` appelée
+depuis `dev.elintys.com` ou `uat.elintys.com` est *cross-site* : la session ne
+tient pas. Tant qu'un domaine `api.<env>.elintys.com` n'est pas rattaché aux
+services Render dev/uat, les valeurs `onrender.com` de la matrice ci-dessus
+sont provisoires (voir `docs/operations/environments.md`, section *Anomalies
+connues*, dans `Elintys-api`).
 
 Un build Preview ou Production échoue volontairement si la variable n'est pas
 définie. Cette règle évite qu'un déploiement distant appelle silencieusement
