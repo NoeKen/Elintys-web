@@ -1,8 +1,27 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 import { legacyDashboardRedirects } from "./src/shared/navigation/legacy-dashboard-redirects";
+import { resolveElintysEnvironment, shouldBlockIndexing } from "./src/shared/config/environment";
+
+// Évalué au build : une valeur NEXT_PUBLIC_ELINTYS_ENV invalide fait échouer
+// le déploiement au lieu de produire un site mal étiqueté.
+const elintysEnvironment = resolveElintysEnvironment();
 
 const nextConfig: NextConfig = {
+  /**
+   * dev.elintys.com / uat.elintys.com : en-tête X-Robots-Tag sur TOUTES les
+   * réponses. Contrairement aux métadonnées, une page ne peut pas le
+   * surcharger (les fiches événement déclarent leur propre `robots`).
+   */
+  async headers() {
+    if (!shouldBlockIndexing(elintysEnvironment)) return [];
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
   async redirects() {
     return legacyDashboardRedirects.map((redirect) => ({ ...redirect }));
   },
