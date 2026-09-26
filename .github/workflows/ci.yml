@@ -1,0 +1,281 @@
+# CI — Elintys-web
+#
+# Noms de jobs STABLES : ils servent de « required status checks » dans la
+# protection des branches dev / uat / main. Ne pas les renommer sans mettre à
+# jour la protection.
+#
+#   quality     lint + typecheck + git diff --check (PR)
+#   unit        Vitest
+#   build       next build de production (variables publiques factices)
+#   e2e-smoke   Playwright sans API réelle (API factice locale) — chaque PR
+#   e2e-full    Playwright complet (API NestJS + MongoDB éphémère) —
+#               PR vers uat/main, nuit, déclenchement manuel ; ignoré sinon
+#   security    npm audit (prod), gitleaks, dependency-review (PR)
+#
+# Aucun secret n'est requis : les valeurs sensibles d'e2e-full (JWT, mot de
+# passe QA) sont générées aléatoirement pour chaque exécution et masquées.
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, uat, main]
+  push:
+    branches: [dev, uat, main]
+  workflow_dispatch:
+  schedule:
+    # 07:00 UTC = 03:00 à Montréal (heure d'été) : batterie navigateur complète.
+    - cron: "0 7 * * *"
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+  NEXT_PUBLIC_ELINTYS_ENV: ci
+  NEXT_PUBLIC_DISABLE_DEVTOOLS: "true"
+  NEXT_PUBLIC_PAYPAL_ENV: sandbox
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: git diff --check (espaces et marqueurs de conflit)
+        if: github.event_name == 'pull_request'
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # URL publique factice : `.invalid` échoue immédiatement à la résolution
+      # DNS, le sitemap retombe donc sur ses routes statiques sans attendre.
+      NEXT_PUBLIC_API_URL: https://api.ci.invalid/api/v1
+      NEXT_PUBLIC_SITE_URL: https://ci.elintys.invalid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Aucune source map publique
+        run: |
+          maps=$(find .next/static -name '*.map' | wc -l)
+          echo "Source maps dans .next/static : $maps"
+          test "$maps" -eq 0
+
+  e2e-smoke:
+    name: e2e-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Doit correspondre à SMOKE_API_URL (playwright.smoke.config.ts) : les
+      # NEXT_PUBLIC_* sont figées au build.
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3999/api/v1
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e:smoke
+      - name: Rapport Playwright (échec)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-${{ github.run_attempt }}
+          path: |
+            playwright-report/smoke
+            test-results/smoke
+          retention-days: 14
+          if-no-files-found: ignore
+
+  e2e-full:
+    name: e2e-full
+    # Batterie complète : ~25 min en local (307 tests, 1 worker) — trop longue
+    # pour chaque PR vers dev. Exécutée à la promotion (PR vers uat / main), la
+    # nuit et à la demande. Le job est « skipped » (donc non bloquant) sinon.
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'uat' || github.base_ref == 'main'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    services:
+      # Base ÉPHÉMÈRE du runner — jamais Atlas. Le nom `elintys-dev` est exigé
+      # par le provisionneur QA actuel de l'API (garde anti-production) ; il
+      # désigne ici un conteneur jetable, détruit à la fin du job.
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      # Environnement de l'API démarrée par playwright.functional.config.ts.
+      ELINTYS_ENV: dev
+      NODE_ENV: development
+      MONGODB_URI: mongodb://127.0.0.1:27017/elintys-dev
+      FRONTEND_URL: http://localhost:3000
+      EMAIL_DELIVERY_ENABLED: "false"
+      RESEND_API_KEY: re_ci_disabled
+      PAYPAL_PROVIDER_ENABLED: "false"
+      PAID_CHECKOUT_ENABLED: "false"
+      TEST_PAYMENT_PROVIDER_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: web
+          # La nuit, on éprouve la branche d'intégration (dev) plutôt que la
+          # branche par défaut sur laquelle GitHub déclenche le cron.
+          ref: ${{ github.event_name == 'schedule' && 'dev' || '' }}
+      - name: Branche API correspondante
+        id: api-ref
+        working-directory: .
+        env:
+          TARGET_REF: ${{ github.event_name == 'schedule' && 'dev' || github.base_ref || github.ref_name }}
+        run: |
+          case "$TARGET_REF" in
+            main) ref=master ;;
+            uat) ref=uat ;;
+            *) ref=dev ;;
+          esac
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: NoeKen/Elintys-api
+          ref: ${{ steps.api-ref.outputs.ref }}
+          # playwright.functional.config.ts démarre l'API depuis ../Elintys-api
+          path: Elintys-api
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            Elintys-api/package-lock.json
+      - name: Secrets éphémères (générés, masqués, jamais persistés)
+        run: |
+          for name in JWT_SECRET JWT_REFRESH_SECRET E2E_TEST_PASSWORD; do
+            value="Ci-$(openssl rand -hex 24)"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+      - run: npm ci
+        working-directory: Elintys-api
+      - run: npm ci
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Batterie fonctionnelle (API + MongoDB)
+        run: npm run test:e2e:functional
+      - name: Batterie smoke (API factice)
+        if: success() || failure()
+        env:
+          NEXT_PUBLIC_API_URL: http://127.0.0.1:3999/api/v1
+          # Le job fixe NODE_ENV=development pour l'API ; un build Next doit
+          # s'exécuter en production.
+          NODE_ENV: production
+        run: |
+          npm run build
+          npm run test:e2e:smoke
+      - name: Rapports Playwright (échec)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-full-${{ github.run_attempt }}
+          path: |
+            web/playwright-report
+            web/test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: npm audit (dépendances de production)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Secrets dans l'historique (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+      - name: Revue des dépendances (PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high

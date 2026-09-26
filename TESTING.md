@@ -20,6 +20,26 @@ npm run test:coverage # avec rapport de couverture (v8)
 npm run test:e2e      # suite Playwright (démarre automatiquement `npm run dev`)
 ```
 
+## Batteries Playwright et CI
+
+| Batterie | Config | Dépendances | Où elle tourne |
+| --- | --- | --- | --- |
+| smoke (17 tests, ~20 s + build ~35 s) | `playwright.smoke.config.ts` | aucune : build de prod + API factice `e2e/smoke/stub-api.mjs`, réseau simulé par `page.route()` | chaque PR et push (`e2e-smoke`) |
+| fonctionnelle (309 tests dont 2 skips, ~25 min, 1 worker) | `playwright.functional.config.ts` | API NestJS (`../Elintys-api`) + MongoDB + comptes QA (`qa:provision`) | PR vers `uat`/`main`, nuit, manuel (`e2e-full`, MongoDB éphémère du runner — jamais Atlas) |
+| visuelle | `playwright.visual.config.ts` | API dev déployée + identifiants QA | poste local uniquement |
+
+```bash
+NEXT_PUBLIC_API_URL=http://127.0.0.1:3999/api/v1 npm run build
+npm run test:e2e:smoke
+```
+
+Les deux skips historiques sont `e2e/functional/wizard-capture.spec.ts`
+(capture de QA visuelle, activée par `WIZARD_QA_CAPTURE=1`). Le test de
+défilement clavier `/` (`scroll.spec.ts`) est un flaky historique connu.
+
+Jobs CI (`.github/workflows/ci.yml`, noms stables = required checks) :
+`quality`, `unit`, `build`, `e2e-smoke`, `e2e-full`, `security`.
+
 ## Couverture
 
 `vitest.config.ts` définit :
