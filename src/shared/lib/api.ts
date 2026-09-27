@@ -1,4 +1,8 @@
 import { API_URL } from "@/shared/config/api-url";
+import {
+  isEmailNotVerifiedPayload,
+  notifyEmailNotVerified,
+} from "@/shared/lib/email-verification-signal";
 
 export interface ApiResponse<T> {
   data: T;
@@ -21,6 +25,34 @@ export class ApiClientError extends Error {
     super(`HTTP ${status}`);
     this.name = "ApiClientError";
   }
+}
+
+/**
+ * Refus serveur « courriel non vérifié » (HTTP 403 + `code: EMAIL_NOT_VERIFIED`).
+ * L'interface globale est déjà notifiée par le client ; ce prédicat permet
+ * seulement à un appelant d'adapter son message local.
+ */
+export function isEmailNotVerifiedError(error: unknown): boolean {
+  return (
+    error instanceof ApiClientError &&
+    isEmailNotVerifiedPayload(error.status, error.payload)
+  );
+}
+
+function toApiClientError(response: Response, payload: unknown): ApiClientError {
+  if (isEmailNotVerifiedPayload(response.status, payload)) {
+    notifyEmailNotVerified();
+  }
+  const payloadRequestId =
+    payload && typeof payload === "object" && "requestId" in payload
+      ? (payload as { requestId?: unknown }).requestId
+      : undefined;
+  return new ApiClientError(
+    response.status,
+    payload,
+    response.headers.get("x-request-id") ??
+      (typeof payloadRequestId === "string" ? payloadRequestId : undefined),
+  );
 }
 
 let refreshPromise: Promise<boolean> | null = null;
@@ -71,16 +103,7 @@ export async function apiErrorFromResponse(
   response: Response,
 ): Promise<ApiClientError> {
   const payload = await parsePayload(response);
-  const payloadRequestId =
-    payload && typeof payload === "object" && "requestId" in payload
-      ? (payload as { requestId?: unknown }).requestId
-      : undefined;
-  return new ApiClientError(
-    response.status,
-    payload,
-    response.headers.get("x-request-id") ??
-      (typeof payloadRequestId === "string" ? payloadRequestId : undefined),
-  );
+  return toApiClientError(response, payload);
 }
 
 function shouldRefresh(
@@ -142,16 +165,7 @@ async function request<T>(
   const payload = await parsePayload(response);
 
   if (!response.ok) {
-    const payloadRequestId =
-      payload && typeof payload === "object" && "requestId" in payload
-        ? (payload as { requestId?: unknown }).requestId
-        : undefined;
-    throw new ApiClientError(
-      response.status,
-      payload,
-      response.headers.get("x-request-id") ??
-        (typeof payloadRequestId === "string" ? payloadRequestId : undefined),
-    );
+    throw toApiClientError(response, payload);
   }
 
   return { data: payload as T, status: response.status };

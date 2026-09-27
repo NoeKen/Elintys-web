@@ -367,7 +367,7 @@ export function AccountSettings() {
           <Input id="lastName" name="lastName" label={copy.lastName} defaultValue={user.lastName} minLength={1} maxLength={50} required aria-invalid={Boolean(profileState.error)} aria-describedby={profileState.error ? 'profile-feedback' : undefined} />
           <div className="sm:col-span-2">
             <p className="mb-4 text-sm text-on-surface-variant">{copy.currentEmail} <strong className="text-on-surface">{user.email}</strong></p>
-            <Button type="submit" className="min-h-11" loading={profileState.pending}>{copy.saveProfile}</Button>
+            <Button type="submit" className="min-h-11" loading={profileState.pending} data-testid="account-profile-submit">{copy.saveProfile}</Button>
             {profileState.message && <Feedback type="success">{profileState.message}</Feedback>}
             {profileState.error && <div id="profile-feedback"><Feedback type="error">{profileState.error}</Feedback></div>}
           </div>

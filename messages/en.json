@@ -840,5 +840,27 @@
         "ongoing": "Ongoing"
       }
     }
+  },
+  "emailVerification": {
+    "bannerTitle": "Verify your email address to use all Elintys features.",
+    "bannerDescription": "A confirmation link was sent to {email}. Until the address is confirmed, your account is read-only.",
+    "resend": "Resend email",
+    "resending": "Sending…",
+    "cooldown": "Resend in {seconds} s",
+    "resendSuccess": "Verification email sent. Check your inbox and spam folder.",
+    "resendError": "Unable to resend the email right now. Try again in a moment.",
+    "resendRateLimited": "Too many send requests. Please wait before trying again.",
+    "refresh": "I confirmed my address",
+    "refreshing": "Checking…",
+    "stillUnverified": "Your address is not confirmed yet. Click the link in the email, then try again.",
+    "logout": "Log out",
+    "loggingOut": "Logging out…",
+    "dialogTitle": "Confirm your email address",
+    "dialogDescription": "This action requires a verified email address. Confirm your address with the link you received, then try again.",
+    "actionBlocked": "Verify your email address to perform this action."
+  },
+  "environment": {
+    "badge": "UAT",
+    "badgeLabel": "User acceptance testing environment (UAT) — test data"
   }
 }
