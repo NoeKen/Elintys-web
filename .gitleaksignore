@@ -1,0 +1,4 @@
+# Faux positifs gitleaks (generic-api-key) : SHA de commits Git cités dans des rapports d'audit.
+# Format : <commit>:<fichier>:<règle>:<ligne> — n'ignore que ces occurrences précises.
+cb8c645bfab293426e9f7c333c2cb364bef2c10c:docs/audits/sprint-3-wave-5-paid-ticketing-core-final.md:generic-api-key:18
+631a941a2a448828ec43e72978a53db743e85311:docs/audits/sprint-3-wave-1-dashboard-events.md:generic-api-key:14

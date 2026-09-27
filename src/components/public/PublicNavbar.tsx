@@ -69,7 +69,7 @@ function DesktopAuthActions({
     <AuthStateView
       authState={authState}
       loading={() => (
-      <div className="hidden items-center gap-3 md:flex" aria-hidden="true">
+      <div className="hidden items-center gap-3 lg:flex" aria-hidden="true">
         <Skeleton className="h-9 w-24 rounded-full bg-white/60" />
         <Skeleton className="h-10 w-36 rounded-full bg-white/70 shadow-[var(--shadow-soft-line)]" />
       </div>
@@ -80,7 +80,7 @@ function DesktopAuthActions({
         return (
           <Link
             href="/tableau-de-bord/profil"
-            className="navbar-profile hidden md:flex"
+            className="navbar-profile hidden lg:flex"
             aria-label="Ouvrir le profil utilisateur"
           >
             <span className="navbar-profile-copy">
@@ -98,7 +98,7 @@ function DesktopAuthActions({
         );
       }}
       anonymous={() => (
-        <div className="navbar-actions hidden md:flex">
+        <div className="navbar-actions hidden lg:flex">
           <Link href="/connexion" className="navbar-link-tertiary">
             Se connecter
           </Link>
@@ -230,7 +230,7 @@ export function PublicNavbar({ showWaitlistCta = false, fixed = false }: PublicN
           Elintys
         </Link>
 
-        <div className="navbar-links hidden md:flex">
+        <div className="navbar-links hidden lg:flex">
           {NAV_LINKS.map((l) => (
             <NavLink key={l.href} href={l.href} label={l.label} />
           ))}
@@ -239,7 +239,7 @@ export function PublicNavbar({ showWaitlistCta = false, fixed = false }: PublicN
         <DesktopAuthActions authState={authState} showWaitlistCta={showWaitlistCta} />
 
         <button
-          className="navbar-hamburger md:hidden"
+          className="navbar-hamburger lg:hidden"
           onClick={() => setMenuOpen((o) => !o)}
           aria-label="Menu"
           aria-expanded={menuOpen}

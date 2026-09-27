@@ -41,3 +41,48 @@ describe("resolveApiUrl", () => {
     ).toThrow("URL HTTP(S)");
   });
 });
+
+describe("resolveApiUrl — environnements déployés", () => {
+  it("devrait refuser une API locale pour un déploiement uat", () => {
+    expect(() =>
+      resolveApiUrl({
+        NODE_ENV: "production",
+        ELINTYS_ENV: "uat",
+        NEXT_PUBLIC_API_URL: "http://localhost:3001/api/v1",
+      }),
+    ).toThrow(/HTTPS publique/);
+  });
+
+  it("devrait refuser une API en clair pour la production", () => {
+    expect(() =>
+      resolveApiUrl({
+        NODE_ENV: "production",
+        ELINTYS_ENV: "prod",
+        NEXT_PUBLIC_API_URL: "http://api.elintys.com/api/v1",
+      }),
+    ).toThrow(/HTTPS publique/);
+  });
+
+  it("devrait accepter une API HTTPS publique ou un proxy relatif en uat", () => {
+    expect(
+      resolveApiUrl({
+        NODE_ENV: "production",
+        ELINTYS_ENV: "uat",
+        NEXT_PUBLIC_API_URL: "https://elintys-api-uat.onrender.com/api/v1",
+      }),
+    ).toBe("https://elintys-api-uat.onrender.com/api/v1");
+    expect(
+      resolveApiUrl({ NODE_ENV: "production", ELINTYS_ENV: "dev", NEXT_PUBLIC_API_URL: "/api" }),
+    ).toBe("/api");
+  });
+
+  it("devrait laisser la CI viser une API factice locale", () => {
+    expect(
+      resolveApiUrl({
+        NODE_ENV: "production",
+        ELINTYS_ENV: "ci",
+        NEXT_PUBLIC_API_URL: "http://127.0.0.1:3999/api/v1",
+      }),
+    ).toBe("http://127.0.0.1:3999/api/v1");
+  });
+});

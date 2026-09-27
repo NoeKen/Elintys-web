@@ -1,8 +1,33 @@
+import {
+  isDeployedEnvironment,
+  resolveElintysEnvironment,
+  type ElintysEnvironment,
+} from "./environment";
+
 const LOCAL_API_URL = "http://localhost:3001/api/v1";
 
 export interface ApiEnvironment {
   NEXT_PUBLIC_API_URL?: string;
   NODE_ENV?: string;
+  /** Environnement Elintys du build ; `dev`, `uat` et `prod` imposent une API HTTPS publique. */
+  ELINTYS_ENV?: ElintysEnvironment;
+}
+
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "0.0.0.0"]);
+
+/**
+ * Un déploiement (dev/uat/prod) ne doit jamais viser une API locale ni en
+ * clair : l'erreur survient au build plutôt qu'en production, dans le
+ * navigateur des utilisateurs.
+ */
+function assertDeployableApiUrl(url: string, environment: ElintysEnvironment): void {
+  if (url.startsWith("/")) return;
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:" || LOOPBACK_HOSTS.has(parsed.hostname)) {
+    throw new Error(
+      `NEXT_PUBLIC_API_URL doit être une URL HTTPS publique pour l'environnement « ${environment} ».`,
+    );
+  }
 }
 
 function normalizeApiUrl(value: string): string {
@@ -25,12 +50,17 @@ export function resolveApiUrl(
   environment: ApiEnvironment = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NODE_ENV: process.env.NODE_ENV,
+    ELINTYS_ENV: resolveElintysEnvironment(),
   },
 ): string {
   const configuredUrl = environment.NEXT_PUBLIC_API_URL;
 
   if (configuredUrl?.trim()) {
-    return normalizeApiUrl(configuredUrl);
+    const normalized = normalizeApiUrl(configuredUrl);
+    if (environment.ELINTYS_ENV && isDeployedEnvironment(environment.ELINTYS_ENV)) {
+      assertDeployableApiUrl(normalized, environment.ELINTYS_ENV);
+    }
+    return normalized;
   }
 
   if (environment.NODE_ENV === "production") {

@@ -112,7 +112,7 @@ describe('OrganizerEventsExperience', () => {
     allTab.focus();
     await user.keyboard('{ArrowRight}');
 
-    expect(screen.getByRole('tab', { name: 'Brouillons' })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Brouillons' })).toHaveFocus());
     await waitFor(() => expect(eventsService.getMyEvents).toHaveBeenLastCalledWith(expect.objectContaining({ view: 'draft', page: 1 })));
   });
 

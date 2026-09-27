@@ -3,6 +3,14 @@ import { API_URL } from '@/shared/config/api-url';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.elintys.com';
 
+/**
+ * Le sitemap est prérendu AU BUILD. Sans délai, une API en veille (instance
+ * Render endormie, environnement UAT pas encore créé) bloquait l'export au-delà
+ * de 60 s et faisait échouer tout le déploiement Vercel. Passé ce délai, on
+ * publie les routes statiques ; la revalidation horaire complétera la liste.
+ */
+const SITEMAP_FETCH_TIMEOUT_MS = 8_000;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: 'weekly', priority: 1 },
@@ -11,7 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/lieux`, changeFrequency: 'daily', priority: 0.8 },
   ];
   try {
-    const response = await fetch(`${API_URL}/events?limit=100`, { next: { revalidate: 3600 } });
+    const response = await fetch(`${API_URL}/events?limit=100`, {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(SITEMAP_FETCH_TIMEOUT_MS),
+    });
     if (!response.ok) return staticRoutes;
     const payload = await response.json() as {
       data?: Array<{

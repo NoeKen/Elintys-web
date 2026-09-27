@@ -19,6 +19,9 @@ const OWNER_STATE = path.join(".e2e", "owner.json");
 
 export default defineConfig({
   testDir: "./e2e",
+  // `e2e/smoke/` suppose l'API factice et un build dédié :
+  // voir playwright.smoke.config.ts (`npm run test:e2e:smoke`).
+  testIgnore: ["smoke/**"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

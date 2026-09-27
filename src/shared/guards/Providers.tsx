@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { EmailVerificationProvider } from "@/features/auth/email-verification/EmailVerificationProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -25,7 +26,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
-            {children}
+            {/* Un seul point d'écoute des refus EMAIL_NOT_VERIFIED du client API. */}
+            <EmailVerificationProvider>{children}</EmailVerificationProvider>
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>

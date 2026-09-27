@@ -9,3 +9,12 @@ export const APP_CONFIG = {
 } as const;
 
 export { API_URL, resolveApiUrl } from "./api-url";
+export {
+  ELINTYS_ENV,
+  ELINTYS_ENVIRONMENTS,
+  isAnalyticsEnabled,
+  isDeployedEnvironment,
+  resolveElintysEnvironment,
+  shouldBlockIndexing,
+  type ElintysEnvironment,
+} from "./environment";

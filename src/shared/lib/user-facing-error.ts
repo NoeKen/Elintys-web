@@ -1,4 +1,5 @@
-import { ApiClientError } from "@/shared/lib/api";
+import { ApiClientError, isEmailNotVerifiedError } from "@/shared/lib/api";
+import messages from "../../../messages/fr.json";
 
 export interface UserFacingError {
   message: string;
@@ -144,6 +145,16 @@ export function getUserFacingError(
 ): UserFacingError {
   const fallback = options.fallback ?? DEFAULT_FALLBACK;
   const requestId = requestIdFrom(error);
+
+  // Avant le 403 générique : ce refus n'est pas un manque de droits mais une
+  // adresse à confirmer. Le dialogue global propose déjà le renvoi du lien.
+  if (isEmailNotVerifiedError(error)) {
+    return {
+      message: messages.emailVerification.actionBlocked,
+      details: [],
+      requestId,
+    };
+  }
 
   if (error instanceof ApiClientError) {
     const details = extractMessages(error.payload)

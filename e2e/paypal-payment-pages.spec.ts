@@ -55,10 +55,18 @@ test.describe('Pages de retour de paiement', () => {
       for (const viewport of VIEWPORTS) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         await page.goto(route);
-        const overflow = await page.evaluate(
-          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        );
-        expect(overflow, `débordement à ${viewport.name}`).toBeLessThanOrEqual(1);
+        await page.evaluate(() => document.fonts.ready);
+        // Mise en page stabilisée (polices, hydratation, animations d'entrée) :
+        // le seuil reste 1 px, seule la mesure attend la fin des transitions.
+        await expect
+          .poll(
+            () =>
+              page.evaluate(
+                () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              ),
+            { message: `débordement à ${viewport.name}`, timeout: 5_000 },
+          )
+          .toBeLessThanOrEqual(1);
       }
     });
 

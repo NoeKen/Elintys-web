@@ -841,5 +841,27 @@
         "ongoing": "En cours"
       }
     }
+  },
+  "emailVerification": {
+    "bannerTitle": "Vérifiez votre adresse courriel pour utiliser toutes les fonctionnalités d'Elintys.",
+    "bannerDescription": "Un lien de confirmation a été envoyé à {email}. Tant que l'adresse n'est pas confirmée, votre compte reste en lecture seule.",
+    "resend": "Renvoyer le courriel",
+    "resending": "Envoi en cours…",
+    "cooldown": "Renvoyer dans {seconds} s",
+    "resendSuccess": "Courriel de vérification envoyé. Consultez votre boîte de réception et vos indésirables.",
+    "resendError": "Impossible de renvoyer le courriel pour le moment. Réessayez dans quelques instants.",
+    "resendRateLimited": "Trop de demandes d'envoi. Patientez avant de réessayer.",
+    "refresh": "J'ai confirmé mon adresse",
+    "refreshing": "Vérification…",
+    "stillUnverified": "Votre adresse n'est pas encore confirmée. Cliquez sur le lien reçu par courriel, puis réessayez.",
+    "logout": "Se déconnecter",
+    "loggingOut": "Déconnexion…",
+    "dialogTitle": "Confirmez votre adresse courriel",
+    "dialogDescription": "Cette action nécessite une adresse courriel vérifiée. Confirmez votre adresse à l'aide du lien reçu, puis réessayez.",
+    "actionBlocked": "Vérifiez votre adresse courriel pour effectuer cette action."
+  },
+  "environment": {
+    "badge": "UAT",
+    "badgeLabel": "Environnement de recette (UAT) — données de test"
   }
 }
